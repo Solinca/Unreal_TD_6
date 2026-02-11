@@ -57,12 +57,12 @@ void AMyMenuPlayerController::OnQuitButtonClicked()
 
 void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 {
-
+	ClientTravel("/Game/Levels/LobbyManagement", ETravelType::TRAVEL_Absolute);
 }
 
 void AMyMenuPlayerController::OnJoinLobbyButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Trying to join lobby " + FString::FromInt(CurrentlySelectedLobbyID));
+	ClientTravel("/Game/Levels/LobbyManagement", ETravelType::TRAVEL_Absolute);
 }
 
 void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()

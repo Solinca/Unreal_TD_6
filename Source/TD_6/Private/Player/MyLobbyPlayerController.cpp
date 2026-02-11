@@ -32,7 +32,7 @@ void AMyLobbyPlayerController::BeginPlay()
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
-
+	ClientTravel("/Game/Levels/BaseLevel", ETravelType::TRAVEL_Absolute);
 }
 
 void AMyLobbyPlayerController::OnGoToMonsterButtonClicked()
