@@ -46,7 +46,7 @@ void AMyMenuPlayerController::OnPlayButtonClicked()
 
 	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
 
-	// TODO: Get Lobby List and pass it to SetLobbyList
+	// TODO: Get Lobby List with FindSessions, format it and pass it to SetLobbyList
 	LobbySelectionWidget->SetLobbyList();
 }
 
