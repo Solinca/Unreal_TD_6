@@ -35,9 +35,9 @@ void AMyPlayerController::BeginPlay()
 		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
 	}
 
-	PlayerCameraManager->ViewPitchMin = -45;
+	PlayerCameraManager->ViewPitchMin = 0;
 
-	PlayerCameraManager->ViewPitchMax = 45;
+	PlayerCameraManager->ViewPitchMax = 0;
 
 	PauseWidget = CreateWidget<UPauseMenuWidget>(this, PauseWidgetClass);
 
