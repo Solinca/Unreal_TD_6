@@ -1,9 +1,9 @@
 #include "Network/OnlineSessionSubsystem.h"
+#include "Network/MyOnlineBeaconHostObject.h"
+#include "Network/MyOnlineBeaconClient.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineBeaconHost.h"
-#include "Network/MyOnlineBeaconHostObject.h"
-#include "Network/MyOnlineBeaconClient.h"
 
 void UOnlineSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {

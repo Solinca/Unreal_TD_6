@@ -1,8 +1,7 @@
 #include "Global/MyGameMode.h"
 #include "Global/MyGameState.h"
 #include "Network/OnlineSessionSubsystem.h"
-#include "Player/MyPlayerController.h"
-#include "Kismet/GameplayStatics.h"
+#include "Player/MyMenuPlayerController.h"
 #include "GameFramework/GameSession.h"
 
 void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
@@ -42,14 +41,9 @@ void AMyGameMode::DestroyGame()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
-		if (AMyPlayerController* PC = Cast<AMyPlayerController>(It->Get()))
+		if (AMyMenuPlayerController* PC = Cast<AMyMenuPlayerController>(It->Get()))
 		{
-			// TODO: Create a new PlayerController for menu only
-
-			// DestroySessionOnClient will bounce every player from
-			// LobbyManagement level to  MainMenu level
-
-			// PC->DestroySessionOnClient();
+			PC->DestroySessionOnClient();
 		}
 	}
 }
