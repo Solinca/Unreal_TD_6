@@ -127,5 +127,5 @@ void AMyPlayerController::OnContinueButtonClicked()
 
 void AMyPlayerController::OnQuitButtonClicked()
 {
-	UKismetSystemLibrary::QuitGame(GetWorld(), this, EQuitPreference::Quit, true);
+	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 }

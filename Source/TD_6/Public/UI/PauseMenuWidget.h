@@ -4,7 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "PauseMenuWidget.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnButtonClickedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPauseMenuButtonClickedSignature);
 
 UCLASS()
 class TD_6_API UPauseMenuWidget : public UUserWidget
@@ -28,7 +28,7 @@ protected:
 	TObjectPtr<class UButton> QuitButton = nullptr;
 
 public:
-	FOnButtonClickedSignature OnContinueButtonClicked;
+	FOnPauseMenuButtonClickedSignature OnContinueButtonClicked;
 
-	FOnButtonClickedSignature OnQuitButtonClicked;
+	FOnPauseMenuButtonClickedSignature OnQuitButtonClicked;
 };

@@ -58,13 +58,13 @@ protected:
 	TArray<FInputData> InputDataList;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
-	TSubclassOf<UUserWidget> PauseWidgetClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
 	float CameraSensitivity = 50.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
 	float PlayerSprintFactor = 2.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseWidgetClass = nullptr;
 
 #if WITH_EDITOR
 	UFUNCTION(BlueprintInternalUseOnly)
