@@ -16,7 +16,7 @@ void ULobbyItemWidget::OnSelectLobbyClickedEvent()
 	LobbySelectionWidget->OnLobbyButtonClicked(this);
 }
 
-void ULobbyItemWidget::SetData(class ULobbySelectionWidget* Parent, int LobbyID, FString LobbyName, int MaxPlayerCount, int CurrentPlayerCount)
+void ULobbyItemWidget::SetData(class ULobbySelectionWidget* Parent, int LobbyID, FString LobbyName, int CurrentPlayerCount, int MaxPlayerCount)
 {
 	LobbySelectionWidget = Parent;
 

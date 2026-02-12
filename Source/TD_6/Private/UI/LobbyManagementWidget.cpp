@@ -1,5 +1,6 @@
 #include "UI/LobbyManagementWidget.h"
 #include "UI/LobbyPlayerItemWidget.h"
+#include "Global/MyPlayerState.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -31,47 +32,48 @@ void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 	OnGoToPlayerButtonClicked.Broadcast();
 }
 
-void ULobbyManagementWidget::SetupLobby(bool IsHost)
+void ULobbyManagementWidget::SetupLobby(const TArray<class AMyPlayerState*>& PlayerList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
 {
-	// Set a TArray parameter with a special struct containing:
+	int PlayerCount = 0;
 
-	// Lobby Name
-	// Lobby Max Player Count
-	// Lobby Max Monster Count
-	// Either a list for Player and Monster, either a NetworkPlayer List like this:
-	// Network Player List = TArray of FPlayer struct
-		// Player Name
-		// Player Team (special enum ETeam::Player and ETeam::Monster)
+	int MonsterCount = 0;
 
-	ULobbyPlayerItemWidget* Player1 = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
+	PlayerListContainer->ClearChildren();
 
-	Player1->SetPlayerName("Player 1");
+	MonsterListContainer->ClearChildren();
 
-	PlayerListContainer->AddChild(Player1);
+	for (AMyPlayerState* PlayerState : PlayerList)
+	{
+		if (!PlayerState)
+		{
+			continue;
+		}
 
-	ULobbyPlayerItemWidget* Player2 = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
+		ULobbyPlayerItemWidget* PlayerItem = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
 
-	Player2->SetPlayerName("Player 2");
+		PlayerItem->SetPlayerName(PlayerState->GetPlayerName());
 
-	PlayerListContainer->AddChild(Player2);
+		PlayerListContainer->AddChild(PlayerItem);
 
-	ULobbyPlayerItemWidget* Player3 = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
+		if (PlayerState->GetCurrentTeam() == ETeam::PLAYER)
+		{
+			PlayerListContainer->AddChild(PlayerItem);
 
-	Player3->SetPlayerName("Player 3");
+			PlayerCount++;
+		}
+		else if (PlayerState->GetCurrentTeam() == ETeam::MONSTER)
+		{
+			MonsterListContainer->AddChild(PlayerItem);
 
-	PlayerListContainer->AddChild(Player3);
+			MonsterCount++;
+		}
+	}
 
-	ULobbyPlayerItemWidget* Monster = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
+	LobbyNameText->SetText(FText::FromString(SessionName));
 
-	Monster->SetPlayerName("Big Bad Monster Player");
+	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
 
-	MonsterListContainer->AddChild(Monster);
-
-	LobbyNameText->SetText(FText::FromString("I'm a test Lobby Name !!!!"));
-
-	LobbyPlayerCountText->SetText(FText::FromString("3 / 4"));
-
-	LobbyMonsterCountText->SetText(FText::FromString("1 / 1"));
+	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
 
 	if (!IsHost)
 	{

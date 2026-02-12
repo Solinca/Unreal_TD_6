@@ -15,13 +15,13 @@ struct FCustomSessionInfo
 	FString SessionName = "";
 
 	UPROPERTY(BlueprintReadOnly)
-	int32 CurrentPlayers = 0;
+	int32 MaxPlayerConnectionAmount = 0;
 
 	UPROPERTY(BlueprintReadOnly)
-	int32 MaxPlayers = 0;
+	int32 CurrentPlayerCount = 0;
 
 	UPROPERTY(BlueprintReadOnly)
-	int32 Ping = 0;
+	int32 MaxMonsterCharacterAmount = 0;
 
 	int32 SessionSearchResultIndex = 0;
 };
@@ -64,14 +64,12 @@ private:
 
 	void JoinGameSession(const FOnlineSessionSearchResult& SessionResult);
 
-	void CreateHostBeacon(int32 ListenPort, bool bOverridePort);
-
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Session")
-	void CreateSession(const FString& SessionName, int32 NumPublicConnections, bool IsLanMatch);
+	void CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 MaxMonsterCount, bool IsLanMatch);
 
 	UFUNCTION(BlueprintCallable, Category = "Session")
 	void FindSession(int32 MaxSearchResults, bool IsLanQuery);
@@ -88,5 +86,5 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Session")
 	FOnFindGameSessionCompleteSignature OnFindGameSessionComplete;
 
-	int32 MaxPlayers = 0;
+	int32 MaxPlayerCount = 0;
 };

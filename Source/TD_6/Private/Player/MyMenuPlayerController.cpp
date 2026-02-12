@@ -68,7 +68,7 @@ void AMyMenuPlayerController::OnQuitButtonClicked()
 
 void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 {
-	OnlineSessionSubsystem->CreateSession("Nico Session", 4, true);
+	OnlineSessionSubsystem->CreateSession("Nico Session", 5, 1, true);
 }
 
 void AMyMenuPlayerController::OnJoinLobbyButtonClicked()

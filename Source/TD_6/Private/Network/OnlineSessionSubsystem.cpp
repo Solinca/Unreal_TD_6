@@ -1,9 +1,7 @@
 #include "Network/OnlineSessionSubsystem.h"
-#include "Network/MyOnlineBeaconHostObject.h"
 #include "Network/MyOnlineBeaconClient.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSubsystemUtils.h"
-#include "OnlineBeaconHost.h"
 
 void UOnlineSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -25,18 +23,6 @@ void UOnlineSessionSubsystem::OnCreateSessionCompleted(FName SessionName, bool I
 	}
 
 	GetWorld()->ServerTravel("/Game/Levels/LobbyManagement?Listen");
-
-	/*
-	* UPDATE SESSION SETTINGS AFTER 10 SECONDS
-	* 
-	FTimerHandle UpdateSessionSettingsHandle;
-
-	GetWorld()->GetTimerManager().SetTimer(UpdateSessionSettingsHandle, [this] { UpdateCustomSessionSettings("SESSION_STATE", 1, EOnlineDataAdvertisementType::ViaOnlineService); }, 10, false);
-	*/
-
-	FTimerHandle CreateHostBeaconHandle;
-
-	GetWorld()->GetTimerManager().SetTimer(CreateHostBeaconHandle, [this] { CreateHostBeacon(7787, true); }, 0.1f, false);
 }
 
 void UOnlineSessionSubsystem::OnFindSessionCompleted(bool IsSuccessful)
@@ -65,26 +51,15 @@ void UOnlineSessionSubsystem::OnFindSessionCompleted(bool IsSuccessful)
 
 		FString SessionName;
 
-		Result.Session.SessionSettings.Get("SETTING_SESSIONNAME", SessionName);
-
-		int SessionState;
-
-		Result.Session.SessionSettings.Get("SESSION_STATE", SessionState);
-
-		if (SessionState > 0)
-		{
-			continue;
-		}
+		Result.Session.SessionSettings.Get("SETTING_SESSION_NAME", SessionName);
 
 		SessionInfo.SessionName = SessionName;
 
-		SessionInfo.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
-
-		SessionInfo.CurrentPlayers = Result.Session.SessionSettings.NumPublicConnections - Result.Session.NumOpenPublicConnections;
-
-		SessionInfo.Ping = Result.PingInMs;
+		SessionInfo.MaxPlayerConnectionAmount = Result.Session.SessionSettings.NumPublicConnections;
 
 		SessionInfo.SessionSearchResultIndex = i;
+
+		SessionInfo.CurrentPlayerCount = Result.Session.SessionSettings.NumPublicConnections - Result.Session.NumOpenPublicConnections;
 
 		SessionsInfo.Add(SessionInfo);
 	}
@@ -148,14 +123,14 @@ void UOnlineSessionSubsystem::JoinGameSession(const FOnlineSessionSearchResult& 
 	}
 }
 
-void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 NumPublicConnections, bool IsLanMatch)
+void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 MaxMonsterCount, bool IsLanMatch)
 {
 	if (!Session.IsValid())
 	{
 		return;
 	}
 
-	MaxPlayers = NumPublicConnections;
+	MaxPlayerCount = NumPublicConnections;
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 
@@ -173,9 +148,9 @@ void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 Nu
 
 	LastSessionSettings->bShouldAdvertise = true;
 
-	LastSessionSettings->Set("SETTING_SESSIONNAME", SessionName, EOnlineDataAdvertisementType::ViaOnlineService);
+	LastSessionSettings->Set("SETTING_SESSION_NAME", SessionName, EOnlineDataAdvertisementType::ViaOnlineService);
 
-	LastSessionSettings->Set("SESSION_STATE", 0, EOnlineDataAdvertisementType::ViaOnlineService);
+	LastSessionSettings->Set("SETTING_SESSION_MAX_MONSTER_AMOUNT", MaxMonsterCount, EOnlineDataAdvertisementType::ViaOnlineService);
 
 	CreateHandle = Session->AddOnCreateSessionCompleteDelegate_Handle(FOnCreateSessionCompleteDelegate::CreateUObject(this, &UOnlineSessionSubsystem::OnCreateSessionCompleted));
 
@@ -184,8 +159,6 @@ void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 Nu
 	if (!Session->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
 	{
 		Session->ClearOnCreateSessionCompleteDelegate_Handle(CreateHandle);
-
-		return;
 	}
 }
 
@@ -211,8 +184,6 @@ void UOnlineSessionSubsystem::FindSession(int32 MaxSearchResults, bool IsLanQuer
 	if (!Session->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
 		Session->ClearOnFindSessionsCompleteDelegate_Handle(FindHandle);
-
-		return;
 	}
 }
 
@@ -262,8 +233,6 @@ void UOnlineSessionSubsystem::DestroySession()
 	if (!Session->DestroySession(NAME_GameSession))
 	{
 		Session->ClearOnDestroySessionCompleteDelegate_Handle(DestroyHandle);
-
-		return;
 	}
 }
 
@@ -291,25 +260,4 @@ inline void UOnlineSessionSubsystem::UpdateCustomSessionSettings(const FName& Ke
 	LastSessionSettings = UpdatedSessionSettings;
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "SESSION SETTINGS UPDATED");
-}
-
-void UOnlineSessionSubsystem::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
-{
-	AOnlineBeaconHost* BeaconHost = GetWorld()->SpawnActor<AOnlineBeaconHost>();
-
-	if (BeaconHost->InitHost())
-	{
-		BeaconHost->PauseBeaconRequests(false);
-
-		if (AMyOnlineBeaconHostObject* HostObject = GetWorld()->SpawnActor<AMyOnlineBeaconHostObject>())
-		{
-			HostObject->ReservedSlots++;
-
-			HostObject->MaxSlots = MaxPlayers;
-
-			BeaconHost->RegisterHost(HostObject);
-
-			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "HOST BEACON CREATED");
-		}
-	}
 }

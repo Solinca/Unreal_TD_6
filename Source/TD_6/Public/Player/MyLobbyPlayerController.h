@@ -22,9 +22,6 @@ private:
 
 	UFUNCTION()
 	void OnGoToPlayerButtonClicked();
-
-	UFUNCTION(Client, Reliable)
-	void CreateLobbyManagementWidget();
 	
 protected:
 	AMyLobbyPlayerController();
@@ -37,4 +34,7 @@ protected:
 public:
 	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();
+
+	UFUNCTION(Client, Reliable)
+	void DisplayLobbyInfoOnClient(const TArray<class AMyPlayerState*>& PlayerList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
 };

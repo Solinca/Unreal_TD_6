@@ -52,7 +52,7 @@ protected:
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
 public:
-	void SetupLobby(bool IsHost);
+	void SetupLobby(const TArray<class AMyPlayerState*>& PlayerList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 
 	FOnLobbyManagementButtonClickedSignature OnStartButtonClicked;
 

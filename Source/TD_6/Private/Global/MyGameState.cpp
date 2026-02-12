@@ -1,21 +1,32 @@
 #include "Global/MyGameState.h"
+#include "Global/MyPlayerState.h"
+#include "Player/MyLobbyPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
-void AMyGameState::PlayerJoined_Implementation(const FString& PlayerName)
+// TODO: Comprendre pourquoi DisplayEveryPlayer n'est pas call / répliqué à l'ajout / retrait
+
+void AMyGameState::PlayerJoined_Implementation(AController* Controller)
 {
-	PlayerNameList.Add(PlayerName);
+	PlayerList.Add(Controller->GetPlayerState<AMyPlayerState>());
+
+	DisplayEveryPlayer();
 }
 
-void AMyGameState::PlayerLeft_Implementation(const FString& PlayerName)
+void AMyGameState::PlayerLeft_Implementation(AController* Controller)
 {
-	PlayerNameList.Remove(PlayerName);
+	PlayerList.Remove(Controller->GetPlayerState<AMyPlayerState>());
+
+	DisplayEveryPlayer();
 }
 
-void AMyGameState::DisplayEveryPlayer()
+void AMyGameState::DisplayEveryPlayer_Implementation()
 {
-	for (FString Name : PlayerNameList)
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, Name);
+		if (AMyLobbyPlayerController* PC = Cast<AMyLobbyPlayerController>(It->Get()))
+		{
+			PC->DisplayLobbyInfoOnClient(PlayerList, CurrentSessionName, CurrentMaxPlayerConnectionAmount, CurrentMaxMonsterAmount);
+		}
 	}
 }
 
@@ -23,5 +34,14 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AMyGameState, PlayerNameList);
+	DOREPLIFETIME(AMyGameState, PlayerList);
+}
+
+void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
+{
+	CurrentSessionName = SessionName;
+
+	CurrentMaxPlayerConnectionAmount = MaxConnectionAmount;
+
+	CurrentMaxMonsterAmount = MaxMonsterAmount;
 }

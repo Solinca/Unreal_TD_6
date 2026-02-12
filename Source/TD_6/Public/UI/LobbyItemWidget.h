@@ -39,7 +39,7 @@ protected:
 	FColor SelectedColor;
 
 public:
-	void SetData(class ULobbySelectionWidget* Parent, int LobbyID, FString LobbyName, int MaxPlayerCount, int CurrentPlayerCount);
+	void SetData(class ULobbySelectionWidget* Parent, int LobbyID, FString LobbyName, int CurrentPlayerCount, int MaxPlayerCount);
 
 	void SetHighlight(bool IsSelected);
 

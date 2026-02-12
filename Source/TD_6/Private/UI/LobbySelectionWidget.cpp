@@ -39,7 +39,7 @@ void ULobbySelectionWidget::SetLobbyList(const TArray<FCustomSessionInfo>& Sessi
 	{
 		ULobbyItemWidget* LobbyItem = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
 
-		LobbyItem->SetData(this, SessionInfo.SessionSearchResultIndex, SessionInfo.SessionName, SessionInfo.MaxPlayers, SessionInfo.CurrentPlayers);
+		LobbyItem->SetData(this, SessionInfo.SessionSearchResultIndex, SessionInfo.SessionName, SessionInfo.CurrentPlayerCount, SessionInfo.MaxPlayerConnectionAmount);
 
 		LobbyContainer->AddChildToVerticalBox(LobbyItem);
 	}

@@ -9,7 +9,12 @@ class TD_6_API AMyGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+private:
+	void CreateHostBeacon(int32 ListenPort, bool bOverridePort);
+
 protected:
+	virtual void BeginPlay() override;
+
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 
 	virtual void OnPostLogin(AController* Controller) override;
