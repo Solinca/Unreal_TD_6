@@ -52,7 +52,7 @@ protected:
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
 public:
-	void SetupLobby();
+	void SetupLobby(bool IsHost);
 
 	FOnLobbyManagementButtonClickedSignature OnStartButtonClicked;
 

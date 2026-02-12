@@ -22,6 +22,9 @@ private:
 
 	UFUNCTION()
 	void OnGoToPlayerButtonClicked();
+
+	UFUNCTION(Client, Reliable)
+	void CreateLobbyManagementWidget();
 	
 protected:
 	AMyLobbyPlayerController();
@@ -30,4 +33,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyManagementWidgetClass = nullptr;
+
+public:
+	UFUNCTION(Client, Reliable)
+	void DestroySessionOnClient();
 };

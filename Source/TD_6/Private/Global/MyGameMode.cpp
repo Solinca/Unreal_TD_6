@@ -1,7 +1,7 @@
 #include "Global/MyGameMode.h"
 #include "Global/MyGameState.h"
 #include "Network/OnlineSessionSubsystem.h"
-#include "Player/MyMenuPlayerController.h"
+#include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/GameSession.h"
 
 void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
@@ -41,7 +41,7 @@ void AMyGameMode::DestroyGame()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
-		if (AMyMenuPlayerController* PC = Cast<AMyMenuPlayerController>(It->Get()))
+		if (AMyLobbyPlayerController* PC = Cast<AMyLobbyPlayerController>(It->Get()))
 		{
 			PC->DestroySessionOnClient();
 		}

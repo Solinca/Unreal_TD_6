@@ -4,6 +4,15 @@
 #include "GameFramework/GameState.h"
 #include "MyGameState.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPlayerInfo
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FString PlayerName = "";
+};
+
 UCLASS()
 class TD_6_API AMyGameState : public AGameState
 {

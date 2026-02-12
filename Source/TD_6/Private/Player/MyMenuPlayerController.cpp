@@ -13,6 +13,10 @@ void AMyMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OnlineSessionSubsystem = GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>();
+
+	OnlineSessionSubsystem->OnFindGameSessionComplete.AddDynamic(this, &AMyMenuPlayerController::OnFindGameSessionComplete);
+
 	MainMenuWidget = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
 
 	MainMenuWidget->AddToViewport();
@@ -46,8 +50,15 @@ void AMyMenuPlayerController::OnPlayButtonClicked()
 
 	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
 
-	// TODO: Get Lobby List with FindSessions, format it and pass it to SetLobbyList
-	LobbySelectionWidget->SetLobbyList();
+	OnlineSessionSubsystem->FindSession(10, true);
+}
+
+void AMyMenuPlayerController::OnFindGameSessionComplete(const TArray<FCustomSessionInfo>& SessionResults, bool HasSuccess)
+{
+	if (HasSuccess)
+	{
+		LobbySelectionWidget->SetLobbyList(SessionResults);
+	}
 }
 
 void AMyMenuPlayerController::OnQuitButtonClicked()
@@ -57,27 +68,20 @@ void AMyMenuPlayerController::OnQuitButtonClicked()
 
 void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 {
-	ClientTravel("/Game/Levels/LobbyManagement", ETravelType::TRAVEL_Absolute);
+	OnlineSessionSubsystem->CreateSession("Nico Session", 4, true);
 }
 
 void AMyMenuPlayerController::OnJoinLobbyButtonClicked()
 {
-	ClientTravel("/Game/Levels/LobbyManagement", ETravelType::TRAVEL_Absolute);
+	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
 }
 
 void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()
 {
-
+	OnlineSessionSubsystem->FindSession(10, true);
 }
 
 void AMyMenuPlayerController::OnLobbySelected(int LobbyID)
 {
 	CurrentlySelectedLobbyID = LobbyID;
-}
-
-void AMyMenuPlayerController::DestroySessionOnClient_Implementation()
-{
-	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();
-
-	ClientTravel("/Game/Levels/MainMenu", ETravelType::TRAVEL_Absolute);
 }

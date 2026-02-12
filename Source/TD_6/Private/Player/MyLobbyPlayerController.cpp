@@ -1,5 +1,7 @@
 #include "Player/MyLobbyPlayerController.h"
+#include "Network/OnlineSessionSubsystem.h"
 #include "UI/LobbyManagementWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 AMyLobbyPlayerController::AMyLobbyPlayerController()
 {
@@ -10,6 +12,11 @@ void AMyLobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CreateLobbyManagementWidget();
+}
+
+void AMyLobbyPlayerController::CreateLobbyManagementWidget_Implementation()
+{
 	LobbyManagementWidget = CreateWidget<ULobbyManagementWidget>(this, LobbyManagementWidgetClass);
 
 	LobbyManagementWidget->AddToViewport();
@@ -20,14 +27,13 @@ void AMyLobbyPlayerController::BeginPlay()
 
 	LobbyManagementWidget->OnGoToPlayerButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnGoToPlayerButtonClicked);
 
+
+
+	LobbyManagementWidget->SetupLobby(HasAuthority());
+
 	SetShowMouseCursor(true);
 
 	SetInputMode(UIOnly);
-
-	// Testing purpose only
-	// TODO: Get Lobby Name, Player Count and Player List from Current Session
-
-	LobbyManagementWidget->SetupLobby();
 }
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
@@ -43,4 +49,11 @@ void AMyLobbyPlayerController::OnGoToMonsterButtonClicked()
 void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 {
 
+}
+
+void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
+{
+	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();
+
+	ClientTravel("/Game/Levels/MainMenu", ETravelType::TRAVEL_Absolute);
 }

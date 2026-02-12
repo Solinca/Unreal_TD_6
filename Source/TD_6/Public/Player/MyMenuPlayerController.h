@@ -10,6 +10,8 @@ class TD_6_API AMyMenuPlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
+	TObjectPtr<class UOnlineSessionSubsystem> OnlineSessionSubsystem = nullptr;
+
 	TObjectPtr<class UMainMenuWidget> MainMenuWidget = nullptr;
 
 	TObjectPtr<class ULobbySelectionWidget> LobbySelectionWidget = nullptr;
@@ -20,6 +22,9 @@ private:
 
 	UFUNCTION()
 	void OnPlayButtonClicked();
+
+	UFUNCTION()
+	void OnFindGameSessionComplete(const TArray<FCustomSessionInfo>& SessionResults, bool HasSuccess);
 
 	UFUNCTION()
 	void OnQuitButtonClicked();
@@ -46,8 +51,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbySelectionWidgetClass = nullptr;
-	
-public:
-	UFUNCTION(Client, Reliable)
-	void DestroySessionOnClient();
 };

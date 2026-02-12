@@ -36,7 +36,7 @@ void UOnlineSessionSubsystem::OnCreateSessionCompleted(FName SessionName, bool I
 
 	FTimerHandle CreateHostBeaconHandle;
 
-	GetWorld()->GetTimerManager().SetTimer(CreateHostBeaconHandle, [this] { CreateHostBeacon(7787, true); }, 2, false);
+	GetWorld()->GetTimerManager().SetTimer(CreateHostBeaconHandle, [this] { CreateHostBeacon(7787, true); }, 0.1f, false);
 }
 
 void UOnlineSessionSubsystem::OnFindSessionCompleted(bool IsSuccessful)

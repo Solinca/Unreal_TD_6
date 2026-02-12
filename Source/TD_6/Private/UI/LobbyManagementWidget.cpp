@@ -31,7 +31,7 @@ void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 	OnGoToPlayerButtonClicked.Broadcast();
 }
 
-void ULobbyManagementWidget::SetupLobby()
+void ULobbyManagementWidget::SetupLobby(bool IsHost)
 {
 	// Set a TArray parameter with a special struct containing:
 
@@ -72,4 +72,9 @@ void ULobbyManagementWidget::SetupLobby()
 	LobbyPlayerCountText->SetText(FText::FromString("3 / 4"));
 
 	LobbyMonsterCountText->SetText(FText::FromString("1 / 1"));
+
+	if (!IsHost)
+	{
+		StartButton->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

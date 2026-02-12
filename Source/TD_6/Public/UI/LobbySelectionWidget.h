@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Network/OnlineSessionSubsystem.h"
 #include "LobbySelectionWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbySelectionButtonClickedSignature);
@@ -44,7 +45,7 @@ protected:
 	TSubclassOf<UUserWidget> LobbyItemWidgetClass = nullptr;
 
 public:
-	void SetLobbyList();
+	void SetLobbyList(const TArray<FCustomSessionInfo>& SessionResults);
 
 	void OnLobbyButtonClicked(class ULobbyItemWidget* SelectedLobbyItem);
 

@@ -29,34 +29,22 @@ void ULobbySelectionWidget::OnRefreshButtonClickedEvent()
 	OnRefreshButtonClicked.Broadcast();
 
 	LobbyContainer->ClearChildren();
+
+	RefreshButton->SetIsEnabled(false);
 }
 
-void ULobbySelectionWidget::SetLobbyList()
+void ULobbySelectionWidget::SetLobbyList(const TArray<FCustomSessionInfo>& SessionResults)
 {
-	// Set a TArray parameter with a special struct containing:
+	for (FCustomSessionInfo SessionInfo : SessionResults)
+	{
+		ULobbyItemWidget* LobbyItem = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
 
-	// Lobby Name
-	// Lobby ID
-	// Lobby CurrentPlayerCount
-	// Lobby MaxPlayerCount
+		LobbyItem->SetData(this, SessionInfo.SessionSearchResultIndex, SessionInfo.SessionName, SessionInfo.MaxPlayers, SessionInfo.CurrentPlayers);
 
-	ULobbyItemWidget* Test = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
+		LobbyContainer->AddChildToVerticalBox(LobbyItem);
+	}
 
-	Test->SetData(this, 0, "First Lobby", 3, 1);
-
-	LobbyContainer->AddChildToVerticalBox(Test);
-
-	ULobbyItemWidget* Test2 = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
-
-	Test2->SetData(this, 1, "Second Lobby", 3, 2);
-
-	LobbyContainer->AddChildToVerticalBox(Test2);
-
-	ULobbyItemWidget* Test3 = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
-
-	Test3->SetData(this, 2, "Third Lobby", 3, 3);
-
-	LobbyContainer->AddChildToVerticalBox(Test3);
+	RefreshButton->SetIsEnabled(true);
 }
 
 void ULobbySelectionWidget::OnLobbyButtonClicked(ULobbyItemWidget* SelectedLobbyItem)
