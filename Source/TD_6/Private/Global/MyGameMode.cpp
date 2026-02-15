@@ -2,11 +2,9 @@
 #include "Global/MyGameState.h"
 #include "Network/MyGameSession.h"
 #include "Network/MyOnlineBeaconHostObject.h"
+#include "Network/OnlineSessionSubsystem.h"
 #include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/GameSession.h"
-#include "Interfaces/OnlineSessionInterface.h"
-#include "OnlineSessionSettings.h"
-#include "OnlineSubsystemUtils.h"
 #include "OnlineBeaconHost.h"
 
 void AMyGameMode::BeginPlay()
@@ -79,20 +77,28 @@ void AMyGameMode::InitGame(const FString& MapName, const FString& Options, FStri
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
-	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
-
-	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
-
 	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
 
-	if (CurrentSession && MyGameSession)
+	if (!MyGameSession)
 	{
-		MyGameSession->MaxPlayerConnectionAmount = CurrentSession->SessionSettings.NumPublicConnections;
-
-		CurrentSession->SessionSettings.Get("SETTING_SESSION_NAME", MyGameSession->SessionName);
-
-		CurrentSession->SessionSettings.Get("SETTING_SESSION_MAX_MONSTER_AMOUNT", MyGameSession->MaxMonsterAmount);
+		return;
 	}
+
+	const UOnlineSessionSubsystem* OnlineSessionSubsystem = GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>();
+
+	if (OnlineSessionSubsystem)
+	{
+		MyGameSession->MaxPlayerConnectionAmount = OnlineSessionSubsystem->MaxPlayerCount;
+		MyGameSession->SessionName = OnlineSessionSubsystem->DesiredSessionName;
+		MyGameSession->MaxMonsterAmount = OnlineSessionSubsystem->MaxMonsterCount;
+	}
+}
+
+void AMyGameMode::ChangeName(AController* Controller, const FString& NewName, bool bNameChange)
+{
+	Super::ChangeName(Controller, NewName, bNameChange);
+
+	GetGameState<AMyGameState>()->DisplayEveryPlayer();
 }
 
 void AMyGameMode::DestroyGame()

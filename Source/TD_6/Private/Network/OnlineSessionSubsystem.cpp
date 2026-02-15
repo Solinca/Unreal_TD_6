@@ -123,7 +123,7 @@ void UOnlineSessionSubsystem::JoinGameSession(const FOnlineSessionSearchResult& 
 	}
 }
 
-void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 MaxMonsterCount, bool IsLanMatch)
+void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 InMaxMonsterCount, bool IsLanMatch)
 {
 	if (!Session.IsValid())
 	{
@@ -131,6 +131,8 @@ void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 Nu
 	}
 
 	MaxPlayerCount = NumPublicConnections;
+	MaxMonsterCount = InMaxMonsterCount;
+	DesiredSessionName = SessionName;
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 

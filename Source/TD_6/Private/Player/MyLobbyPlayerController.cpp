@@ -7,13 +7,23 @@ AMyLobbyPlayerController::AMyLobbyPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-// TODO: Faire un RPC serveur pour faire le Client Travel 
+void AMyLobbyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	const UOnlineSessionSubsystem* OnlineSessionSubsystem = GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>();
+
+	if (!OnlineSessionSubsystem->DesiredPlayerName.IsEmpty())
+	{
+		ServerChangeName(OnlineSessionSubsystem->DesiredPlayerName);
+	}
+}
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
 	if (HasAuthority())
 	{
-		ClientTravel("/Game/Levels/BaseLevel", ETravelType::TRAVEL_Absolute);
+		GetWorld()->ServerTravel("/Game/Levels/BaseLevel?Listen");
 	}
 }
 
@@ -27,7 +37,7 @@ void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 
 }
 
-// TODO: Il me semble que le Destroy Session est mal fait et empêche la future création d'un nouveau Lobby
+// TODO: Il me semble que le Destroy Session est mal fait et empï¿½che la future crï¿½ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 {
@@ -38,6 +48,11 @@ void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 
 void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount)
 {
+	if (GetWorld()->bIsTearingDown)
+	{
+		return;
+	}
+
 	if (!LobbyManagementWidget)
 	{
 		LobbyManagementWidget = CreateWidget<ULobbyManagementWidget>(this, LobbyManagementWidgetClass);

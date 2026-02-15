@@ -10,11 +10,17 @@ class TD_6_API AMyMenuPlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
+	UPROPERTY()
 	TObjectPtr<class UOnlineSessionSubsystem> OnlineSessionSubsystem = nullptr;
 
+	UPROPERTY()
 	TObjectPtr<class UMainMenuWidget> MainMenuWidget = nullptr;
 
+	UPROPERTY()
 	TObjectPtr<class ULobbySelectionWidget> LobbySelectionWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<class USessionCreationWidget> SessionCreationWidget = nullptr;
 
 	FInputModeUIOnly UIOnly;
 
@@ -41,6 +47,12 @@ private:
 	UFUNCTION()
 	void OnLobbySelected(int LobbyID);
 
+	UFUNCTION()
+	void OnSessionCreationConfirmed(const FString& SessionName, const FString& Username, int32 MaxPlayers, int32 MaxMonsters, bool IsLan);
+
+	UFUNCTION()
+	void OnSessionCreationCancelled();
+
 protected:
 	AMyMenuPlayerController();
 
@@ -51,4 +63,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbySelectionWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> SessionCreationWidgetClass = nullptr;
 };

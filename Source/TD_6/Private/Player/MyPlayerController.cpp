@@ -39,15 +39,18 @@ void AMyPlayerController::BeginPlay()
 
 	PlayerCameraManager->ViewPitchMax = 0;
 
-	PauseWidget = CreateWidget<UPauseMenuWidget>(this, PauseWidgetClass);
+	if (IsLocalController() && PauseWidgetClass)
+	{
+		PauseWidget = CreateWidget<UPauseMenuWidget>(this, PauseWidgetClass);
 
-	PauseWidget->SetVisibility(ESlateVisibility::Hidden);
+		PauseWidget->SetVisibility(ESlateVisibility::Hidden);
 
-	PauseWidget->AddToViewport();
+		PauseWidget->AddToViewport();
 
-	PauseWidget->OnContinueButtonClicked.AddDynamic(this, &AMyPlayerController::OnContinueButtonClicked);
+		PauseWidget->OnContinueButtonClicked.AddDynamic(this, &AMyPlayerController::OnContinueButtonClicked);
 
-	PauseWidget->OnQuitButtonClicked.AddDynamic(this, &AMyPlayerController::OnQuitButtonClicked);
+		PauseWidget->OnQuitButtonClicked.AddDynamic(this, &AMyPlayerController::OnQuitButtonClicked);
+	}
 
 	SetShowMouseCursor(false);
 
@@ -102,6 +105,11 @@ void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 
 void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 {
+	if (!PauseWidget)
+	{
+		return;
+	}
+
 	IsPauseMenuOpened = !IsPauseMenuOpened;
 
 	if (IsPauseMenuOpened)

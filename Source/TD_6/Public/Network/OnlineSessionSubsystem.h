@@ -69,7 +69,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Session")
-	void CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 MaxMonsterCount, bool IsLanMatch);
+	void CreateSession(const FString& SessionName, int32 NumPublicConnections, int32 InMaxMonsterCount, bool IsLanMatch);
 
 	UFUNCTION(BlueprintCallable, Category = "Session")
 	void FindSession(int32 MaxSearchResults, bool IsLanQuery);
@@ -87,4 +87,10 @@ public:
 	FOnFindGameSessionCompleteSignature OnFindGameSessionComplete;
 
 	int32 MaxPlayerCount = 0;
+
+	int32 MaxMonsterCount = 0;
+
+	FString DesiredSessionName;
+
+	FString DesiredPlayerName;
 };
