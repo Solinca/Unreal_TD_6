@@ -7,11 +7,6 @@ AMyLobbyPlayerController::AMyLobbyPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AMyLobbyPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 // TODO: Faire un RPC serveur pour faire le Client Travel 
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
@@ -41,7 +36,7 @@ void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 	ClientTravel("/Game/Levels/MainMenu", ETravelType::TRAVEL_Absolute);
 }
 
-void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TArray<class AMyPlayerState*>& PlayerList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount)
+void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount)
 {
 	if (!LobbyManagementWidget)
 	{
@@ -60,5 +55,5 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 		SetInputMode(UIOnly);
 	}
 
-	LobbyManagementWidget->SetupLobby(PlayerList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
+	LobbyManagementWidget->SetupLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
 }

@@ -12,6 +12,8 @@ class TD_6_API AMyGameMode : public AGameMode
 private:
 	void CreateHostBeacon(int32 ListenPort, bool bOverridePort);
 
+	void SetupGameSession();
+
 protected:
 	virtual void BeginPlay() override;
 

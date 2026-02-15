@@ -14,6 +14,8 @@ void AMyGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	CreateHostBeacon(7787, true);
+
+	SetupGameSession();
 }
 
 void AMyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
@@ -35,6 +37,20 @@ void AMyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 	}
 }
 
+void AMyGameMode::SetupGameSession()
+{
+	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+
+	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+
+	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
+
+	if (MyGameSession && GetGameState<AMyGameState>())
+	{
+		GetGameState<AMyGameState>()->SetupCurrentSession(MyGameSession->SessionName, MyGameSession->MaxPlayerConnectionAmount, MyGameSession->MaxMonsterAmount);
+	}
+}
+
 void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
@@ -49,14 +65,7 @@ void AMyGameMode::OnPostLogin(AController* Controller)
 {
 	Super::OnPostLogin(Controller);
 
-	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
-
-	if (MyGameSession)
-	{
-		GetGameState<AMyGameState>()->SetupCurrentSession(MyGameSession->SessionName, MyGameSession->MaxPlayerConnectionAmount, MyGameSession->MaxMonsterAmount);
-
-		GetGameState<AMyGameState>()->PlayerJoined(Controller);
-	}
+	GetGameState<AMyGameState>()->PlayerJoined(Controller);
 }
 
 void AMyGameMode::Logout(AController* Controller)

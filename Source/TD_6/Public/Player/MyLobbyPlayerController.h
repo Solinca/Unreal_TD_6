@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Global/MyPlayerState.h"
 #include "MyLobbyPlayerController.generated.h"
 
 UCLASS()
@@ -26,8 +27,6 @@ private:
 protected:
 	AMyLobbyPlayerController();
 
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyManagementWidgetClass = nullptr;
 
@@ -36,5 +35,5 @@ public:
 	void DestroySessionOnClient();
 
 	UFUNCTION(Client, Reliable)
-	void DisplayLobbyInfoOnClient(const TArray<class AMyPlayerState*>& PlayerList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
+	void DisplayLobbyInfoOnClient(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
 };

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Global/MyPlayerState.h"
 #include "LobbyManagementWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyManagementButtonClickedSignature);
@@ -52,7 +53,7 @@ protected:
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
 public:
-	void SetupLobby(const TArray<class AMyPlayerState*>& PlayerList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
+	void SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 
 	FOnLobbyManagementButtonClickedSignature OnStartButtonClicked;
 

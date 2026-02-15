@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Global/MyPlayerState.h"
 #include "MyGameState.generated.h"
 
 UCLASS()
@@ -19,12 +20,15 @@ private:
 	UPROPERTY(Replicated)
 	int32 CurrentMaxMonsterAmount;
 
-	UPROPERTY(ReplicatedUsing = DisplayEveryPlayer)
-	TArray<class AMyPlayerState*> PlayerList;
+	UPROPERTY(ReplicatedUsing = DisplayEveryPlayerInLobby)
+	TArray<FCustomPlayerData> PlayerDataList;
 
-	UFUNCTION(Client, Reliable)
-	void DisplayEveryPlayer();
+	TArray<AMyPlayerState*> PlayerList;
 
+	UFUNCTION()
+	void DisplayEveryPlayerInLobby();
+
+protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:

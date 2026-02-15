@@ -1,6 +1,5 @@
 #include "UI/LobbyManagementWidget.h"
 #include "UI/LobbyPlayerItemWidget.h"
-#include "Global/MyPlayerState.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -32,7 +31,7 @@ void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 	OnGoToPlayerButtonClicked.Broadcast();
 }
 
-void ULobbyManagementWidget::SetupLobby(const TArray<class AMyPlayerState*>& PlayerList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
+void ULobbyManagementWidget::SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
 {
 	int PlayerCount = 0;
 
@@ -42,26 +41,21 @@ void ULobbyManagementWidget::SetupLobby(const TArray<class AMyPlayerState*>& Pla
 
 	MonsterListContainer->ClearChildren();
 
-	for (AMyPlayerState* PlayerState : PlayerList)
+	for (FCustomPlayerData PlayerData : PlayerDataList)
 	{
-		if (!PlayerState)
-		{
-			continue;
-		}
-
 		ULobbyPlayerItemWidget* PlayerItem = CreateWidget<ULobbyPlayerItemWidget>(this, LobbyPlayerItemWidgetClass);
 
-		PlayerItem->SetPlayerName(PlayerState->GetPlayerName());
+		PlayerItem->SetPlayerName(PlayerData.CustomPlayerName);
 
 		PlayerListContainer->AddChild(PlayerItem);
 
-		if (PlayerState->GetCurrentTeam() == ETeam::PLAYER)
+		if (PlayerData.CurrentTeam == ETeam::PLAYER)
 		{
 			PlayerListContainer->AddChild(PlayerItem);
 
 			PlayerCount++;
 		}
-		else if (PlayerState->GetCurrentTeam() == ETeam::MONSTER)
+		else if (PlayerData.CurrentTeam == ETeam::MONSTER)
 		{
 			MonsterListContainer->AddChild(PlayerItem);
 
