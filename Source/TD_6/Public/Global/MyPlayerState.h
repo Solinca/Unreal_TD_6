@@ -45,7 +45,6 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
-	UFUNCTION(Server, Reliable)
 	void SetCustomPlayerName(const FString& NewPlayerName);
 
 	UFUNCTION(Server, Reliable)

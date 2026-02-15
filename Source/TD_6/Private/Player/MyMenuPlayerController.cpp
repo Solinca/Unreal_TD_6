@@ -1,8 +1,11 @@
 #include "Player/MyMenuPlayerController.h"
 #include "Network/OnlineSessionSubsystem.h"
+#include "Global/MyPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/LobbySelectionWidget.h"
+#include "UI/SessionCreationWidget.h"
+#include "UI/JoinSessionWidget.h"
 
 AMyMenuPlayerController::AMyMenuPlayerController()
 {
@@ -39,6 +42,26 @@ void AMyMenuPlayerController::BeginPlay()
 
 	LobbySelectionWidget->OnLobbySelected.AddDynamic(this, &AMyMenuPlayerController::OnLobbySelected);
 
+	SessionCreationWidget = CreateWidget<USessionCreationWidget>(this, SessionCreationWidgetClass);
+
+	SessionCreationWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	SessionCreationWidget->AddToViewport();
+
+	SessionCreationWidget->OnSessionCreationConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationConfirmed);
+
+	SessionCreationWidget->OnSessionCreationCancelled.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationCancelled);
+
+	JoinSessionWidget = CreateWidget<UJoinSessionWidget>(this, JoinSessionWidgetClass);
+
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	JoinSessionWidget->AddToViewport();
+
+	JoinSessionWidget->OnJoinSessionConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionConfirmed);
+
+	JoinSessionWidget->OnJoinSessionCancelled.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionCancelled);
+
 	SetShowMouseCursor(true);
 
 	SetInputMode(UIOnly);
@@ -68,12 +91,20 @@ void AMyMenuPlayerController::OnQuitButtonClicked()
 
 void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 {
-	OnlineSessionSubsystem->CreateSession("Nico Session", 5, 1, true);
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	SessionCreationWidget->SetVisibility(ESlateVisibility::Visible);
+
+	SessionCreationWidget->ResetToDefaults();
 }
 
 void AMyMenuPlayerController::OnJoinLobbyButtonClicked()
 {
-	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Visible);
+
+	JoinSessionWidget->ResetToDefaults();
 }
 
 void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()
@@ -84,4 +115,32 @@ void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()
 void AMyMenuPlayerController::OnLobbySelected(int LobbyID)
 {
 	CurrentlySelectedLobbyID = LobbyID;
+}
+
+void AMyMenuPlayerController::OnSessionCreationConfirmed(const FString& SessionName, const FString& Username, int32 MaxPlayers, int32 MaxMonsters, bool IsLan)
+{
+	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
+
+	OnlineSessionSubsystem->CreateSession(SessionName, MaxPlayers, MaxMonsters, IsLan);
+}
+
+void AMyMenuPlayerController::OnSessionCreationCancelled()
+{
+	SessionCreationWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
+{
+	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
+
+	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
+}
+
+void AMyMenuPlayerController::OnJoinSessionCancelled()
+{
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
 }

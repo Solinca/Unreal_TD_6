@@ -130,8 +130,6 @@ void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 Nu
 		return;
 	}
 
-	MaxPlayerCount = NumPublicConnections;
-
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 
 	LastSessionSettings->NumPublicConnections = NumPublicConnections;

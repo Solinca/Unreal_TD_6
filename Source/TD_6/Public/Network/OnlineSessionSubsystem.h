@@ -85,6 +85,4 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Session")
 	FOnFindGameSessionCompleteSignature OnFindGameSessionComplete;
-
-	int32 MaxPlayerCount = 0;
 };
