@@ -8,9 +8,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoinSessionConfirmedSignature, co
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinSessionCancelledSignature);
 
-class UEditableText;
-class UButton;
-
 UCLASS()
 class TD_6_API UJoinSessionWidget : public UUserWidget
 {
@@ -27,13 +24,13 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEditableText> UsernameInput = nullptr;
+	TObjectPtr<class UEditableText> UsernameInput = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> JoinButton = nullptr;
+	TObjectPtr<class UButton> JoinButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> BackButton = nullptr;
+	TObjectPtr<class UButton> BackButton = nullptr;
 
 public:
 	void ResetToDefaults() const;

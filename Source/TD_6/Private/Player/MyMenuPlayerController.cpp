@@ -1,5 +1,6 @@
 #include "Player/MyMenuPlayerController.h"
 #include "Network/OnlineSessionSubsystem.h"
+#include "Global/MyPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/LobbySelectionWidget.h"
@@ -42,15 +43,23 @@ void AMyMenuPlayerController::BeginPlay()
 	LobbySelectionWidget->OnLobbySelected.AddDynamic(this, &AMyMenuPlayerController::OnLobbySelected);
 
 	SessionCreationWidget = CreateWidget<USessionCreationWidget>(this, SessionCreationWidgetClass);
+
 	SessionCreationWidget->SetVisibility(ESlateVisibility::Hidden);
+
 	SessionCreationWidget->AddToViewport();
+
 	SessionCreationWidget->OnSessionCreationConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationConfirmed);
+
 	SessionCreationWidget->OnSessionCreationCancelled.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationCancelled);
 
 	JoinSessionWidget = CreateWidget<UJoinSessionWidget>(this, JoinSessionWidgetClass);
+
 	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
+
 	JoinSessionWidget->AddToViewport();
+
 	JoinSessionWidget->OnJoinSessionConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionConfirmed);
+
 	JoinSessionWidget->OnJoinSessionCancelled.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionCancelled);
 
 	SetShowMouseCursor(true);
@@ -85,6 +94,7 @@ void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 	LobbySelectionWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	SessionCreationWidget->SetVisibility(ESlateVisibility::Visible);
+
 	SessionCreationWidget->ResetToDefaults();
 }
 
@@ -109,7 +119,7 @@ void AMyMenuPlayerController::OnLobbySelected(int LobbyID)
 
 void AMyMenuPlayerController::OnSessionCreationConfirmed(const FString& SessionName, const FString& Username, int32 MaxPlayers, int32 MaxMonsters, bool IsLan)
 {
-	OnlineSessionSubsystem->DesiredPlayerName = Username;
+	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
 
 	OnlineSessionSubsystem->CreateSession(SessionName, MaxPlayers, MaxMonsters, IsLan);
 }
@@ -123,7 +133,7 @@ void AMyMenuPlayerController::OnSessionCreationCancelled()
 
 void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
 {
-	OnlineSessionSubsystem->DesiredPlayerName = Username;
+	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
 
 	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
 }

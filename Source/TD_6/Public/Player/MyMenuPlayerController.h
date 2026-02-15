@@ -10,19 +10,14 @@ class TD_6_API AMyMenuPlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
 	TObjectPtr<class UOnlineSessionSubsystem> OnlineSessionSubsystem = nullptr;
 
-	UPROPERTY()
 	TObjectPtr<class UMainMenuWidget> MainMenuWidget = nullptr;
 
-	UPROPERTY()
 	TObjectPtr<class ULobbySelectionWidget> LobbySelectionWidget = nullptr;
 
-	UPROPERTY()
 	TObjectPtr<class USessionCreationWidget> SessionCreationWidget = nullptr;
 
-	UPROPERTY()
 	TObjectPtr<class UJoinSessionWidget> JoinSessionWidget = nullptr;
 
 	FInputModeUIOnly UIOnly;

@@ -25,8 +25,6 @@ protected:
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
-	virtual void ChangeName(AController* Controller, const FString& NewName, bool bNameChange) override;
-
 public:
 	UFUNCTION(BlueprintCallable)
 	void DestroyGame();

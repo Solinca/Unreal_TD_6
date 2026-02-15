@@ -1,4 +1,6 @@
 #include "UI/SessionCreationWidget.h"
+#include "Global/MyPlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/EditableText.h"
 #include "Components/SpinBox.h"
 #include "Components/CheckBox.h"
@@ -13,15 +15,23 @@ void USessionCreationWidget::NativeConstruct()
 	BackButton->OnClicked.AddDynamic(this, &USessionCreationWidget::OnBackButtonClickedEvent);
 
 	MaxPlayersSpinBox->SetMinValue(2);
+
 	MaxPlayersSpinBox->SetMinSliderValue(2);
+
 	MaxPlayersSpinBox->SetMaxValue(10);
+
 	MaxPlayersSpinBox->SetMaxSliderValue(10);
+
 	MaxPlayersSpinBox->SetDelta(1);
 
 	MaxMonstersSpinBox->SetMinValue(1);
+
 	MaxMonstersSpinBox->SetMinSliderValue(1);
+
 	MaxMonstersSpinBox->SetMaxValue(3);
+
 	MaxMonstersSpinBox->SetMaxSliderValue(3);
+
 	MaxMonstersSpinBox->SetDelta(1);
 
 	ResetToDefaults();
@@ -30,6 +40,7 @@ void USessionCreationWidget::NativeConstruct()
 void USessionCreationWidget::OnCreateButtonClickedEvent() 
 {
 	const FString SessionName = SessionNameInput->GetText().ToString().TrimStartAndEnd();
+
 	const FString Username = UsernameInput->GetText().ToString().TrimStartAndEnd();
 
 	if (SessionName.Len() < 2 || Username.Len() < 1)
@@ -38,7 +49,9 @@ void USessionCreationWidget::OnCreateButtonClickedEvent()
 	}
 
 	const int32 MaxPlayers = FMath::RoundToInt32(MaxPlayersSpinBox->GetValue());
+
 	const int32 MaxMonsters = FMath::RoundToInt32(MaxMonstersSpinBox->GetValue());
+
 	const bool IsLan = LanMatchCheckBox->IsChecked();
 
 	OnSessionCreationConfirmed.Broadcast(SessionName, Username, MaxPlayers, MaxMonsters, IsLan);
@@ -51,9 +64,13 @@ void USessionCreationWidget::OnBackButtonClickedEvent()
 
 void USessionCreationWidget::ResetToDefaults() const
 {
-	SessionNameInput->SetHintText(FText::FromString("Session Name"));
-	UsernameInput->SetHintText(FText::FromString("Session Name"));
+	SessionNameInput->SetText(FText::FromString("Default Session Name"));
+
+	UsernameInput->SetText(FText::FromString(Cast<AMyPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0))->GetCustomPlayerData().CustomPlayerName));
+
 	MaxPlayersSpinBox->SetValue(5);
+
 	MaxMonstersSpinBox->SetValue(1);
+
 	LanMatchCheckBox->SetIsChecked(true);
 }

@@ -42,14 +42,10 @@ void AMyOnlineBeaconClient::Server_RequestReservation_Implementation(const FUniq
 
 void AMyOnlineBeaconClient::Client_ReservationAccepted_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "RESERVATION ACCEPTED");
-
 	OnRequestValidate.Execute(true);
 }
 
 void AMyOnlineBeaconClient::Client_ReservationRejected_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "RESERVATION REJECTED");
-
 	OnRequestValidate.Execute(false);
 }

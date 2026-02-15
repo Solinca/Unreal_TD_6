@@ -39,19 +39,6 @@ void AMyPlayerController::BeginPlay()
 
 	PlayerCameraManager->ViewPitchMax = 0;
 
-	if (IsLocalController() && PauseWidgetClass)
-	{
-		PauseWidget = CreateWidget<UPauseMenuWidget>(this, PauseWidgetClass);
-
-		PauseWidget->SetVisibility(ESlateVisibility::Hidden);
-
-		PauseWidget->AddToViewport();
-
-		PauseWidget->OnContinueButtonClicked.AddDynamic(this, &AMyPlayerController::OnContinueButtonClicked);
-
-		PauseWidget->OnQuitButtonClicked.AddDynamic(this, &AMyPlayerController::OnQuitButtonClicked);
-	}
-
 	SetShowMouseCursor(false);
 
 	SetInputMode(GameOnly);
@@ -105,11 +92,6 @@ void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 
 void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 {
-	if (!PauseWidget)
-	{
-		return;
-	}
-
 	IsPauseMenuOpened = !IsPauseMenuOpened;
 
 	if (IsPauseMenuOpened)
@@ -119,6 +101,19 @@ void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 	else
 	{
 		SetInputMode(GameOnly);
+	}
+
+	if (!PauseWidget)
+	{
+		PauseWidget = CreateWidget<UPauseMenuWidget>(this, PauseWidgetClass);
+
+		PauseWidget->SetVisibility(ESlateVisibility::Hidden);
+
+		PauseWidget->AddToViewport();
+
+		PauseWidget->OnContinueButtonClicked.AddDynamic(this, &AMyPlayerController::OnContinueButtonClicked);
+
+		PauseWidget->OnQuitButtonClicked.AddDynamic(this, &AMyPlayerController::OnQuitButtonClicked);
 	}
 
 	PauseWidget->SetVisibility(IsPauseMenuOpened ? ESlateVisibility::Visible : ESlateVisibility::Hidden);

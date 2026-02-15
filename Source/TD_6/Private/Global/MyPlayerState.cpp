@@ -1,7 +1,7 @@
 #include "Global/MyPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
-void AMyPlayerState::SetCustomPlayerName_Implementation(const FString& NewPlayerName)
+void AMyPlayerState::SetCustomPlayerName(const FString& NewPlayerName)
 {
 	CustomPlayerData.CustomPlayerName = NewPlayerName;
 }

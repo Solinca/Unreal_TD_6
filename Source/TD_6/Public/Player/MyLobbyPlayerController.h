@@ -11,7 +11,6 @@ class TD_6_API AMyLobbyPlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
 	TObjectPtr<class ULobbyManagementWidget> LobbyManagementWidget = nullptr;
 
 	FInputModeUIOnly UIOnly;

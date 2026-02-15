@@ -8,11 +8,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnSessionCreationConfirmedSignatu
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionCreationCancelledSignature);
 
-class UEditableText;
-class USpinBox;
-class UCheckBox;
-class UButton;
-
 UCLASS()
 class TD_6_API USessionCreationWidget : public UUserWidget
 {
@@ -29,25 +24,25 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEditableText> SessionNameInput = nullptr;
+	TObjectPtr<class UEditableText> SessionNameInput = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEditableText> UsernameInput = nullptr;
+	TObjectPtr<class UEditableText> UsernameInput = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<USpinBox> MaxPlayersSpinBox = nullptr;
+	TObjectPtr<class USpinBox> MaxPlayersSpinBox = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<USpinBox> MaxMonstersSpinBox = nullptr;
+	TObjectPtr<class USpinBox> MaxMonstersSpinBox = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UCheckBox> LanMatchCheckBox = nullptr;
+	TObjectPtr<class UCheckBox> LanMatchCheckBox = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> CreateButton = nullptr;
+	TObjectPtr<class UButton> CreateButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> BackButton = nullptr;
+	TObjectPtr<class UButton> BackButton = nullptr;
 
 public:
 	void ResetToDefaults() const;
