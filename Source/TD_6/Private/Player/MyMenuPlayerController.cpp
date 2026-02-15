@@ -4,6 +4,7 @@
 #include "UI/MainMenuWidget.h"
 #include "UI/LobbySelectionWidget.h"
 #include "UI/SessionCreationWidget.h"
+#include "UI/JoinSessionWidget.h"
 
 AMyMenuPlayerController::AMyMenuPlayerController()
 {
@@ -46,6 +47,12 @@ void AMyMenuPlayerController::BeginPlay()
 	SessionCreationWidget->OnSessionCreationConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationConfirmed);
 	SessionCreationWidget->OnSessionCreationCancelled.AddDynamic(this, &AMyMenuPlayerController::OnSessionCreationCancelled);
 
+	JoinSessionWidget = CreateWidget<UJoinSessionWidget>(this, JoinSessionWidgetClass);
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
+	JoinSessionWidget->AddToViewport();
+	JoinSessionWidget->OnJoinSessionConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionConfirmed);
+	JoinSessionWidget->OnJoinSessionCancelled.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionCancelled);
+
 	SetShowMouseCursor(true);
 
 	SetInputMode(UIOnly);
@@ -83,7 +90,11 @@ void AMyMenuPlayerController::OnCreateLobbyButtonClicked()
 
 void AMyMenuPlayerController::OnJoinLobbyButtonClicked()
 {
-	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Visible);
+
+	JoinSessionWidget->ResetToDefaults();
 }
 
 void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()
@@ -106,6 +117,20 @@ void AMyMenuPlayerController::OnSessionCreationConfirmed(const FString& SessionN
 void AMyMenuPlayerController::OnSessionCreationCancelled()
 {
 	SessionCreationWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
+{
+	OnlineSessionSubsystem->DesiredPlayerName = Username;
+
+	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
+}
+
+void AMyMenuPlayerController::OnJoinSessionCancelled()
+{
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
 }

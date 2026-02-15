@@ -22,6 +22,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<class USessionCreationWidget> SessionCreationWidget = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<class UJoinSessionWidget> JoinSessionWidget = nullptr;
+
 	FInputModeUIOnly UIOnly;
 
 	int CurrentlySelectedLobbyID = -1;
@@ -53,6 +56,12 @@ private:
 	UFUNCTION()
 	void OnSessionCreationCancelled();
 
+	UFUNCTION()
+	void OnJoinSessionConfirmed(const FString& Username);
+
+	UFUNCTION()
+	void OnJoinSessionCancelled();
+
 protected:
 	AMyMenuPlayerController();
 
@@ -66,4 +75,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> SessionCreationWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> JoinSessionWidgetClass = nullptr;
 };

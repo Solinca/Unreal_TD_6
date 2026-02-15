@@ -1,4 +1,6 @@
 #include "Player/MyLobbyPlayerController.h"
+
+#include "Global/MyPlayerState.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "UI/LobbyManagementWidget.h"
 
@@ -52,6 +54,22 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 	{
 		return;
 	}
+
+	const UOnlineSessionSubsystem* OnlineSessionSubsystem = GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>();
+
+	// if (!OnlineSessionSubsystem->DesiredPlayerName.IsEmpty())
+	// {
+	// 	AMyPlayerState* LocalMyPlayerState = GetPlayerState<AMyPlayerState>();
+	//
+	// 	for (AMyPlayerState* MyPlayerState : PlayerList)
+	// 	{
+	// 		if (MyPlayerState && MyPlayerState == LocalMyPlayerState)
+	// 		{
+	// 			MyPlayerState->SetPlayerName(OnlineSessionSubsystem->DesiredPlayerName);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 	if (!LobbyManagementWidget)
 	{
