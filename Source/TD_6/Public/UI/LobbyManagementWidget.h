@@ -14,6 +14,9 @@ class TD_6_API ULobbyManagementWidget : public UUserWidget
 
 private:
 	UFUNCTION()
+	void OnGameStartFromNetwork();
+	
+	UFUNCTION()
 	void OnStartButtonClickedEvent();
 
 	UFUNCTION()
@@ -24,6 +27,9 @@ private:
 	
 	UFUNCTION()
 	void OnBackButtonClickedEvent();
+	
+	UFUNCTION()
+	void OnFadeOutFinished();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -54,6 +60,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> LobbyMonsterCountText = nullptr;
+	
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> FadeOutAnimation = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;

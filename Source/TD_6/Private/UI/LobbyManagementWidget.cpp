@@ -1,9 +1,13 @@
 #include "UI/LobbyManagementWidget.h"
+
+#include "Animation/WidgetAnimation.h"
 #include "UI/LobbyPlayerItemWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Blueprint/WidgetTree.h"
+#include "Global/MyGameState.h"
+#include "Player/MyLobbyPlayerController.h"
 
 void ULobbyManagementWidget::NativeConstruct()
 {
@@ -16,11 +20,32 @@ void ULobbyManagementWidget::NativeConstruct()
 	GoToPlayerButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent);
 
 	BackButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnBackButtonClickedEvent);
+
+	if (AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>())
+	{
+		GS->OnGameStartSequence.AddDynamic(this, &ULobbyManagementWidget::OnGameStartFromNetwork);
+	}
+}
+
+void ULobbyManagementWidget::OnGameStartFromNetwork()
+{
+	FWidgetAnimationDynamicEvent AnimDelegate;
+	AnimDelegate.BindDynamic(this, &ULobbyManagementWidget::OnFadeOutFinished);
+	
+	BindToAnimationFinished(FadeOutAnimation, AnimDelegate);
+
+	PlayAnimationForward(FadeOutAnimation);
 }
 
 void ULobbyManagementWidget::OnStartButtonClickedEvent()
 {
-	OnStartButtonClicked.Broadcast();
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		if (AMyLobbyPlayerController* LobbyPC = Cast<AMyLobbyPlayerController>(PC))
+		{
+			LobbyPC->ServerRequestStartGame();
+		}
+	}
 }
 
 void ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent()
@@ -36,6 +61,13 @@ void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 void ULobbyManagementWidget::OnBackButtonClickedEvent()
 {
 	OnBackButtonClicked.Broadcast();
+}
+
+void ULobbyManagementWidget::OnFadeOutFinished()
+{
+	UnbindAllFromAnimationFinished(FadeOutAnimation);
+
+	OnStartButtonClicked.Broadcast();
 }
 
 void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)

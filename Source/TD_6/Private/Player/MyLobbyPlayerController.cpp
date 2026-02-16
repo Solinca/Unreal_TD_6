@@ -1,4 +1,6 @@
 #include "Player/MyLobbyPlayerController.h"
+
+#include "Animation/WidgetAnimation.h"
 #include "Global/MyGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
@@ -16,6 +18,14 @@ void AMyLobbyPlayerController::BeginPlay()
 	if (IsLocalController())
 	{
 		RegisterPlayerDataToGameState(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData());
+	}
+}
+
+void AMyLobbyPlayerController::ServerRequestStartGame_Implementation()
+{
+	if (AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>())
+	{
+		GS->TriggerGameStart();
 	}
 }
 
