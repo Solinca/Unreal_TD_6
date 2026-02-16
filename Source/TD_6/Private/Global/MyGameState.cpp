@@ -8,6 +8,8 @@ void AMyGameState::DisplayEveryPlayerInLobby()
 	if (AMyLobbyPlayerController* MLPC = Cast<AMyLobbyPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
 		MLPC->DisplayLobbyInfoOnClient(PlayerDataList, CurrentSessionName, CurrentMaxPlayerConnectionAmount, CurrentMaxMonsterAmount);
+
+		MLPC->ToggleStartButtonEnabled();
 	}
 }
 

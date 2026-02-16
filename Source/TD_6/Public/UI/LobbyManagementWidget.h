@@ -58,6 +58,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
+	int MaxPlayers{ 0 };
+	int MaxMonsters{ 0 };
 public:
 	void UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 

@@ -24,6 +24,11 @@ void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(cons
 	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
+void AMyLobbyPlayerController::ToggleStartButtonEnabled() const
+{
+	LobbyManagementWidget->ToggleStartButtonEnabled();
+}
+
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
 	if (HasAuthority())
@@ -63,6 +68,7 @@ void AMyLobbyPlayerController::OnBackButtonClicked()
 		DestroySessionOnClient();
 	}
 }
+// TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 {

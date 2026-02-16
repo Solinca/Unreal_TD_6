@@ -26,11 +26,15 @@ void ULobbyManagementWidget::OnStartButtonClickedEvent()
 void ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent()
 {
 	OnGoToMonsterButtonClicked.Broadcast();
+	
+	ToggleStartButtonEnabled();
 }
 
 void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 {
 	OnGoToPlayerButtonClicked.Broadcast();
+	
+	ToggleStartButtonEnabled();
 }
 
 void ULobbyManagementWidget::OnBackButtonClickedEvent()
@@ -72,9 +76,12 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 
 	LobbyNameText->SetText(FText::FromString(SessionName));
 
-	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
+	MaxPlayers = MaxPlayerConnectionCount - MaxMonsterCount;
+	MaxMonsters = MaxMonsterCount;
 
-	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
+	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayers));
+
+	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsters));
 	
 	if (!IsHost)
 	{
@@ -82,4 +89,14 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 	}
 	
 	StartButton->SetIsEnabled((MonsterCount <= MaxMonsterCount && PlayerCount <= MaxPlayerConnectionCount - MaxMonsterCount) && MonsterCount > 0 && PlayerCount > 0);
+}
+
+void ULobbyManagementWidget::ToggleStartButtonEnabled() const
+{
+	if (MonsterListContainer->GetChildrenCount() > MaxMonsters || PlayerListContainer->GetChildrenCount() > MaxPlayers)
+	{
+		StartButton->SetIsEnabled(false);
+		return;
+	}
+	StartButton->SetIsEnabled(true);
 }
