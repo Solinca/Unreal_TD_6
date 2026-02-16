@@ -35,7 +35,7 @@ void ULobbySelectionWidget::OnRefreshButtonClickedEvent()
 
 void ULobbySelectionWidget::SetLobbyList(const TArray<FCustomSessionInfo>& SessionResults)
 {
-	for (FCustomSessionInfo SessionInfo : SessionResults)
+	for (const FCustomSessionInfo SessionInfo : SessionResults)
 	{
 		ULobbyItemWidget* LobbyItem = CreateWidget<ULobbyItemWidget>(this, LobbyItemWidgetClass);
 

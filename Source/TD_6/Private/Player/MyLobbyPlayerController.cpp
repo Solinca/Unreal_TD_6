@@ -42,6 +42,18 @@ void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 
 }
 
+void AMyLobbyPlayerController::OnBackButtonClicked()
+{
+	if (HasAuthority())
+	{
+		Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->DestroyGame();
+	}
+	else
+	{
+		DestroySessionOnClient();
+	}
+}
+
 // TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
@@ -53,11 +65,6 @@ void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 
 void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount)
 {
-	if (GetWorld()->bIsTearingDown)
-	{
-		return;
-	}
-
 	if (!LobbyManagementWidget)
 	{
 		LobbyManagementWidget = CreateWidget<ULobbyManagementWidget>(this, LobbyManagementWidgetClass);
@@ -70,10 +77,12 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 
 		LobbyManagementWidget->OnGoToPlayerButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnGoToPlayerButtonClicked);
 
+		LobbyManagementWidget->OnBackButtonClicked.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnBackButtonClicked);
+		
 		SetShowMouseCursor(true);
 
 		SetInputMode(UIOnly);
 	}
 
-	LobbyManagementWidget->SetupLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
+	LobbyManagementWidget->UpdateLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
 }

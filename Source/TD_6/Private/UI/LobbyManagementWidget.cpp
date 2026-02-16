@@ -14,6 +14,8 @@ void ULobbyManagementWidget::NativeConstruct()
 	GoToMonsterButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent);
 
 	GoToPlayerButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent);
+
+	BackButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnBackButtonClickedEvent);
 }
 
 void ULobbyManagementWidget::OnStartButtonClickedEvent()
@@ -31,7 +33,12 @@ void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 	OnGoToPlayerButtonClicked.Broadcast();
 }
 
-void ULobbyManagementWidget::SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
+void ULobbyManagementWidget::OnBackButtonClickedEvent()
+{
+	OnBackButtonClicked.Broadcast();
+}
+
+void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
 {
 	int PlayerCount = 0;
 
@@ -68,9 +75,11 @@ void ULobbyManagementWidget::SetupLobby(TArray<FCustomPlayerData> PlayerDataList
 	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
 
 	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
-
+	
 	if (!IsHost)
 	{
-		StartButton->SetVisibility(ESlateVisibility::Hidden);
+		StartButton->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	
+	StartButton->SetIsEnabled((MonsterCount <= MaxMonsterCount && PlayerCount <= MaxPlayerConnectionCount - MaxMonsterCount) /*&& MonsterCount > 0*/);
 }

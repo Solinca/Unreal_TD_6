@@ -27,6 +27,9 @@ private:
 	UFUNCTION(Server, Reliable)
 	void RegisterPlayerDataToGameState(const FCustomPlayerData& CustomPlayerData);
 	
+	UFUNCTION()
+	void OnBackButtonClicked();
+	
 protected:
 	AMyLobbyPlayerController();
 
