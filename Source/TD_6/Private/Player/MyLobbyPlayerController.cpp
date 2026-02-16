@@ -24,11 +24,6 @@ void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(cons
 	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
-void AMyLobbyPlayerController::ToggleStartButtonEnabled() const
-{
-	LobbyManagementWidget->ToggleStartButtonEnabled();
-}
-
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
 	if (HasAuthority())
