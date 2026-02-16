@@ -2,7 +2,6 @@
 #include "Global/MyGameState.h"
 #include "Network/MyGameSession.h"
 #include "Network/MyOnlineBeaconHostObject.h"
-#include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/GameSession.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
@@ -65,6 +64,11 @@ void AMyGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
+	if (!GetWorld() || GetWorld()->bIsTearingDown)
+	{
+		return;
+	}
+
 	GetGameState<AMyGameState>()->RemovePlayerData(Controller);
 }
 
@@ -85,16 +89,5 @@ void AMyGameMode::InitGame(const FString& MapName, const FString& Options, FStri
 		CurrentSession->SessionSettings.Get("SETTING_SESSION_NAME", MyGameSession->SessionName);
 
 		CurrentSession->SessionSettings.Get("SETTING_SESSION_MAX_MONSTER_AMOUNT", MyGameSession->MaxMonsterAmount);
-	}
-}
-
-void AMyGameMode::DestroyGame()
-{
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
-	{
-		if (AMyLobbyPlayerController* PC = Cast<AMyLobbyPlayerController>(It->Get()))
-		{
-			PC->DestroySessionOnClient();
-		}
 	}
 }

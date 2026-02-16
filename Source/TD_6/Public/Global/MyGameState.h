@@ -36,4 +36,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void SetupCurrentSession(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount);
+
+	UFUNCTION(Server, Reliable)
+	void DestroyGame();
 };

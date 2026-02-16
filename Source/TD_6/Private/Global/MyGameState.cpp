@@ -44,6 +44,13 @@ void AMyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayerData)
 
 void AMyGameState::RemovePlayerData(AController* Controller)
 {
+	if (Controller->IsLocalController())
+	{
+		DestroyGame();
+
+		return;
+	}
+
 	for (FCustomPlayerData Data : PlayerDataList)
 	{
 		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
@@ -55,4 +62,15 @@ void AMyGameState::RemovePlayerData(AController* Controller)
 	}
 
 	DisplayEveryPlayerInLobby();
+}
+
+void AMyGameState::DestroyGame_Implementation()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		if (AMyLobbyPlayerController* PC = Cast<AMyLobbyPlayerController>(It->Get()))
+		{
+			PC->DestroySessionOnClient();
+		}
+	}
 }

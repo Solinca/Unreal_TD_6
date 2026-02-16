@@ -72,17 +72,14 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 
 	LobbyNameText->SetText(FText::FromString(SessionName));
 
-	MaxPlayers = MaxPlayerConnectionCount - MaxMonsterCount;
-	MaxMonsters = MaxMonsterCount;
+	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
 
-	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayers));
-
-	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsters));
+	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
 	
 	if (!IsHost)
 	{
 		StartButton->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	
-	StartButton->SetIsEnabled((MonsterCount <= MaxMonsters && PlayerCount <= MaxPlayers) /*&& MonsterCount > 0*/);
+	StartButton->SetIsEnabled((MonsterCount <= MaxMonsterCount && PlayerCount <= MaxPlayerConnectionCount - MaxMonsterCount) /*&& MonsterCount > 0*/);
 }
