@@ -26,6 +26,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void RegisterPlayerDataToGameState(const FCustomPlayerData& CustomPlayerData);
+
+	UFUNCTION(Server, Reliable)
+	void ChangePlayerCurrentTeam(ETeam NewTeam);
 	
 	UFUNCTION()
 	void OnBackButtonClicked();
@@ -44,4 +47,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void DisplayLobbyInfoOnClient(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
+
+	UFUNCTION(Client, Reliable)
+	void UpdatePlayerTeam(ETeam NewTeam);
 };

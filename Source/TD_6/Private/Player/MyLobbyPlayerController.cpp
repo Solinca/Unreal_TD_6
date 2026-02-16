@@ -34,12 +34,22 @@ void AMyLobbyPlayerController::OnStartButtonClicked()
 
 void AMyLobbyPlayerController::OnGoToMonsterButtonClicked()
 {
-
+	ChangePlayerCurrentTeam(ETeam::MONSTER);
 }
 
 void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 {
+	ChangePlayerCurrentTeam(ETeam::PLAYER);
+}
 
+void AMyLobbyPlayerController::ChangePlayerCurrentTeam_Implementation(ETeam NewTeam)
+{
+	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerCurrentTeam(this, NewTeam);
+}
+
+void AMyLobbyPlayerController::UpdatePlayerTeam_Implementation(ETeam NewTeam)
+{
+	GetGameInstance<UMyGameInstance>()->SetCurrentTeam(NewTeam);
 }
 
 void AMyLobbyPlayerController::OnBackButtonClicked()
@@ -53,8 +63,6 @@ void AMyLobbyPlayerController::OnBackButtonClicked()
 		DestroySessionOnClient();
 	}
 }
-
-// TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 {

@@ -64,6 +64,23 @@ void AMyGameState::RemovePlayerData(AController* Controller)
 	DisplayEveryPlayerInLobby();
 }
 
+void AMyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
+{
+	for (FCustomPlayerData& Data : PlayerDataList)
+	{
+		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
+		{
+			Data.CurrentTeam = NewTeam;
+
+			Cast<AMyLobbyPlayerController>(Controller)->UpdatePlayerTeam(NewTeam);
+
+			break;
+		}
+	}
+
+	DisplayEveryPlayerInLobby();
+}
+
 void AMyGameState::DestroyGame_Implementation()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)

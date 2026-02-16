@@ -39,4 +39,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void DestroyGame();
+
+	UFUNCTION(Server, Reliable)
+	void ChangePlayerCurrentTeam(AController* Controller, ETeam NewTeam);
 };

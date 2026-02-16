@@ -81,5 +81,5 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 		StartButton->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	
-	StartButton->SetIsEnabled((MonsterCount <= MaxMonsterCount && PlayerCount <= MaxPlayerConnectionCount - MaxMonsterCount) /*&& MonsterCount > 0*/);
+	StartButton->SetIsEnabled((MonsterCount <= MaxMonsterCount && PlayerCount <= MaxPlayerConnectionCount - MaxMonsterCount) && MonsterCount > 0 && PlayerCount > 0);
 }
