@@ -1,11 +1,27 @@
 #include "Player/MyLobbyPlayerController.h"
-#include "Global/MyPlayerState.h"
+#include "Global/MyGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "UI/LobbyManagementWidget.h"
 
 AMyLobbyPlayerController::AMyLobbyPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AMyLobbyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (IsLocalController())
+	{
+		RegisterPlayerDataToGameState(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData());
+	}
+}
+
+void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(const FCustomPlayerData& CustomPlayerData)
+{
+	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
 void AMyLobbyPlayerController::OnStartButtonClicked()

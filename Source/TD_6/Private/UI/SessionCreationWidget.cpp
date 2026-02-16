@@ -1,6 +1,5 @@
 #include "UI/SessionCreationWidget.h"
-#include "Global/MyPlayerState.h"
-#include "Kismet/GameplayStatics.h"
+#include "Global/MyGameInstance.h"
 #include "Components/EditableText.h"
 #include "Components/SpinBox.h"
 #include "Components/CheckBox.h"
@@ -66,7 +65,7 @@ void USessionCreationWidget::ResetToDefaults() const
 {
 	SessionNameInput->SetText(FText::FromString("Default Session Name"));
 
-	UsernameInput->SetText(FText::FromString(Cast<AMyPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0))->GetCustomPlayerData().CustomPlayerName));
+	UsernameInput->SetText(FText::FromString(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData().CustomPlayerName));
 
 	MaxPlayersSpinBox->SetValue(5);
 

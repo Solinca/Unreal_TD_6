@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerState.h"
-#include "MyPlayerState.generated.h"
+#include "Engine/GameInstance.h"
+#include "MyGameInstance.generated.h"
 
 UENUM()
 enum ETeam
@@ -19,6 +19,9 @@ struct FCustomPlayerData
 	GENERATED_BODY()
 
 	UPROPERTY()
+	FUniqueNetIdRepl CustomPlayerID;
+
+	UPROPERTY()
 	FString CustomPlayerName;
 
 	UPROPERTY()
@@ -30,24 +33,27 @@ struct FCustomPlayerData
 
 		CustomPlayerName = DefaultPlayerName.Append(FString::FromInt(FMath::Rand() % 100));
 	}
+
+	bool operator == (FCustomPlayerData& Other) const
+	{
+		return CustomPlayerID == Other.CustomPlayerID;
+	}
 };
 
 UCLASS()
-class TD_6_API AMyPlayerState : public APlayerState
+class TD_6_API UMyGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(Replicated)
 	FCustomPlayerData CustomPlayerData;
 
 protected:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void StartGameInstance() override;
 
 public:
 	void SetCustomPlayerName(const FString& NewPlayerName);
 
-	UFUNCTION(Server, Reliable)
 	void SetCurrentTeam(ETeam NewTeam);
 
 	FCustomPlayerData GetCustomPlayerData() { return CustomPlayerData; };

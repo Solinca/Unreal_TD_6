@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Global/MyPlayerState.h"
+#include "Global/MyGameInstance.h"
 #include "LobbyManagementWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyManagementButtonClickedSignature);

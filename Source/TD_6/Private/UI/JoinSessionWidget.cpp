@@ -1,6 +1,5 @@
 #include "UI/JoinSessionWidget.h"
-#include "Global/MyPlayerState.h"
-#include "Kismet/GameplayStatics.h"
+#include "Global/MyGameInstance.h"
 #include "Components/EditableText.h"
 #include "Components/Button.h"
 
@@ -34,5 +33,5 @@ void UJoinSessionWidget::OnBackButtonClickedEvent()
 
 void UJoinSessionWidget::ResetToDefaults() const
 {
-	UsernameInput->SetText(FText::FromString(Cast<AMyPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0))->GetCustomPlayerData().CustomPlayerName));
+	UsernameInput->SetText(FText::FromString(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData().CustomPlayerName));
 }

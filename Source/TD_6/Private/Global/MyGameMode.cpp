@@ -61,18 +61,11 @@ void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const
 	}
 }
 
-void AMyGameMode::OnPostLogin(AController* Controller)
-{
-	Super::OnPostLogin(Controller);
-
-	GetGameState<AMyGameState>()->PlayerJoined(Controller);
-}
-
 void AMyGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
-	GetGameState<AMyGameState>()->PlayerLeft(Controller);
+	GetGameState<AMyGameState>()->RemovePlayerData(Controller);
 }
 
 void AMyGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)

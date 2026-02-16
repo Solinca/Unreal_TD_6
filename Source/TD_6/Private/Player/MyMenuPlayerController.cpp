@@ -1,6 +1,6 @@
 #include "Player/MyMenuPlayerController.h"
 #include "Network/OnlineSessionSubsystem.h"
-#include "Global/MyPlayerState.h"
+#include "Global/MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/LobbySelectionWidget.h"
@@ -119,7 +119,7 @@ void AMyMenuPlayerController::OnLobbySelected(int LobbyID)
 
 void AMyMenuPlayerController::OnSessionCreationConfirmed(const FString& SessionName, const FString& Username, int32 MaxPlayers, int32 MaxMonsters, bool IsLan)
 {
-	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
+	GetGameInstance<UMyGameInstance>()->SetCustomPlayerName(Username);
 
 	OnlineSessionSubsystem->CreateSession(SessionName, MaxPlayers, MaxMonsters, IsLan);
 }
@@ -133,7 +133,7 @@ void AMyMenuPlayerController::OnSessionCreationCancelled()
 
 void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
 {
-	GetPlayerState<AMyPlayerState>()->SetCustomPlayerName(Username);
+	GetGameInstance<UMyGameInstance>()->SetCustomPlayerName(Username);
 
 	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
 }

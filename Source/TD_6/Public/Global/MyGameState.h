@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "Global/MyPlayerState.h"
+#include "Global/MyGameInstance.h"
 #include "MyGameState.generated.h"
 
 UCLASS()
@@ -23,8 +23,6 @@ private:
 	UPROPERTY(ReplicatedUsing = DisplayEveryPlayerInLobby)
 	TArray<FCustomPlayerData> PlayerDataList;
 
-	TArray<AMyPlayerState*> PlayerList;
-
 	UFUNCTION()
 	void DisplayEveryPlayerInLobby();
 
@@ -32,11 +30,9 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
-	UFUNCTION(Server, Reliable)
-	void PlayerJoined(AController* Controller);
+	void RegisterPlayerData(const FCustomPlayerData& CustomPlayerData);
 
-	UFUNCTION(Server, Reliable)
-	void PlayerLeft(AController* Controller);
+	void RemovePlayerData(AController* Controller);
 
 	UFUNCTION(Server, Reliable)
 	void SetupCurrentSession(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount);

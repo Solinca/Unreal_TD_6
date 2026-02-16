@@ -1,5 +1,6 @@
 #include "Global/MyGameState.h"
 #include "Player/MyLobbyPlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 void AMyGameState::DisplayEveryPlayerInLobby()
@@ -8,34 +9,6 @@ void AMyGameState::DisplayEveryPlayerInLobby()
 	{
 		MLPC->DisplayLobbyInfoOnClient(PlayerDataList, CurrentSessionName, CurrentMaxPlayerConnectionAmount, CurrentMaxMonsterAmount);
 	}
-}
-
-void AMyGameState::PlayerJoined_Implementation(AController* Controller)
-{
-	PlayerList.Add(Controller->GetPlayerState<AMyPlayerState>());
-
-	PlayerDataList.Empty();
-
-	for (AMyPlayerState* MPS : PlayerList)
-	{
-		PlayerDataList.Add(MPS->GetCustomPlayerData());
-	}
-
-	DisplayEveryPlayerInLobby();
-}
-
-void AMyGameState::PlayerLeft_Implementation(AController* Controller)
-{
-	PlayerList.Remove(Controller->GetPlayerState<AMyPlayerState>());
-
-	PlayerDataList.Empty();
-
-	for (AMyPlayerState* MPS : PlayerList)
-	{
-		PlayerDataList.Add(MPS->GetCustomPlayerData());
-	}
-
-	DisplayEveryPlayerInLobby();
 }
 
 void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
@@ -60,4 +33,26 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyGameState, CurrentMaxMonsterAmount);
 
 	DOREPLIFETIME(AMyGameState, PlayerDataList);
+}
+
+void AMyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayerData)
+{
+	PlayerDataList.Add(CustomPlayerData);
+
+	DisplayEveryPlayerInLobby();
+}
+
+void AMyGameState::RemovePlayerData(AController* Controller)
+{
+	for (FCustomPlayerData Data : PlayerDataList)
+	{
+		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
+		{
+			PlayerDataList.Remove(Data);
+
+			break;
+		}
+	}
+
+	DisplayEveryPlayerInLobby();
 }
