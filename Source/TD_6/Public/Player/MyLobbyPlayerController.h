@@ -44,6 +44,4 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void DisplayLobbyInfoOnClient(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
-
-	void ToggleStartButtonEnabled() const;
 };

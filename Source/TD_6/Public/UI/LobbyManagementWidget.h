@@ -61,7 +61,7 @@ protected:
 	int MaxPlayers{ 0 };
 	int MaxMonsters{ 0 };
 public:
-	void SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
+	void UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 
 	FOnLobbyManagementButtonClickedSignature OnStartButtonClicked;
 
@@ -70,6 +70,4 @@ public:
 	FOnLobbyManagementButtonClickedSignature OnGoToPlayerButtonClicked;
 	
 	FOnLobbyManagementButtonClickedSignature OnBackButtonClicked;
-
-	void ToggleStartButtonEnabled() const;
 };

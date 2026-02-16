@@ -24,11 +24,6 @@ void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(cons
 	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
-void AMyLobbyPlayerController::ToggleStartButtonEnabled() const
-{
-	LobbyManagementWidget->ToggleStartButtonEnabled();
-}
-
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
 	if (HasAuthority())
@@ -87,5 +82,5 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 		SetInputMode(UIOnly);
 	}
 
-	LobbyManagementWidget->SetupLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
+	LobbyManagementWidget->UpdateLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
 }
