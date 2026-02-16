@@ -27,6 +27,9 @@ private:
 	UFUNCTION(Server, Reliable)
 	void RegisterPlayerDataToGameState(const FCustomPlayerData& CustomPlayerData);
 	
+	UFUNCTION()
+	void OnBackButtonClicked();
+	
 protected:
 	AMyLobbyPlayerController();
 
@@ -41,4 +44,6 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void DisplayLobbyInfoOnClient(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
+
+	void ToggleStartButtonEnabled() const;
 };

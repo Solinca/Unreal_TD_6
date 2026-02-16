@@ -14,6 +14,8 @@ void ULobbyManagementWidget::NativeConstruct()
 	GoToMonsterButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent);
 
 	GoToPlayerButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent);
+
+	BackButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnBackButtonClickedEvent);
 }
 
 void ULobbyManagementWidget::OnStartButtonClickedEvent()
@@ -24,11 +26,20 @@ void ULobbyManagementWidget::OnStartButtonClickedEvent()
 void ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent()
 {
 	OnGoToMonsterButtonClicked.Broadcast();
+	
+	ToggleStartButtonEnabled();
 }
 
 void ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent()
 {
 	OnGoToPlayerButtonClicked.Broadcast();
+	
+	ToggleStartButtonEnabled();
+}
+
+void ULobbyManagementWidget::OnBackButtonClickedEvent()
+{
+	OnBackButtonClicked.Broadcast();
 }
 
 void ULobbyManagementWidget::SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
@@ -65,12 +76,25 @@ void ULobbyManagementWidget::SetupLobby(TArray<FCustomPlayerData> PlayerDataList
 
 	LobbyNameText->SetText(FText::FromString(SessionName));
 
-	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
+	MaxPlayers = MaxPlayerConnectionCount - MaxMonsterCount;
+	MaxMonsters = MaxMonsterCount;
 
-	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
+	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayers));
 
+	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsters));
+	
 	if (!IsHost)
 	{
 		StartButton->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void ULobbyManagementWidget::ToggleStartButtonEnabled() const
+{
+	if (MonsterListContainer->GetChildrenCount() > MaxMonsters || PlayerListContainer->GetChildrenCount() > MaxPlayers)
+	{
+		StartButton->SetIsEnabled(false);
+		return;
+	}
+	StartButton->SetIsEnabled(true);
 }

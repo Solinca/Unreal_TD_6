@@ -21,6 +21,9 @@ private:
 
 	UFUNCTION()
 	void OnGoToPlayerButtonClickedEvent();
+	
+	UFUNCTION()
+	void OnBackButtonClickedEvent();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -39,6 +42,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> GoToPlayerButton = nullptr;
+	
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UButton> BackButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> LobbyNameText = nullptr;
@@ -52,6 +58,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
+	int MaxPlayers{ 0 };
+	int MaxMonsters{ 0 };
 public:
 	void SetupLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 
@@ -60,4 +68,8 @@ public:
 	FOnLobbyManagementButtonClickedSignature OnGoToMonsterButtonClicked;
 
 	FOnLobbyManagementButtonClickedSignature OnGoToPlayerButtonClicked;
+	
+	FOnLobbyManagementButtonClickedSignature OnBackButtonClicked;
+
+	void ToggleStartButtonEnabled() const;
 };

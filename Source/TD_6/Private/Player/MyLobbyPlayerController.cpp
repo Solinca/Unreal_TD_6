@@ -24,6 +24,11 @@ void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(cons
 	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
+void AMyLobbyPlayerController::ToggleStartButtonEnabled() const
+{
+	LobbyManagementWidget->ToggleStartButtonEnabled();
+}
+
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
 	if (HasAuthority())
@@ -40,6 +45,11 @@ void AMyLobbyPlayerController::OnGoToMonsterButtonClicked()
 void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 {
 
+}
+
+void AMyLobbyPlayerController::OnBackButtonClicked()
+{
+	DestroySessionOnClient();
 }
 
 // TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
@@ -70,6 +80,8 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 
 		LobbyManagementWidget->OnGoToPlayerButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnGoToPlayerButtonClicked);
 
+		LobbyManagementWidget->OnBackButtonClicked.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnBackButtonClicked);
+		
 		SetShowMouseCursor(true);
 
 		SetInputMode(UIOnly);
