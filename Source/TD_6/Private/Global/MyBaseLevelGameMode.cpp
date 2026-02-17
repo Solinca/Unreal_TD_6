@@ -5,5 +5,5 @@ void AMyBaseLevelGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
-	GetGameState<AMyBaseLevelGameState>()->RemovePlayerData(Controller);
+	GetGameState<AMyBaseLevelGameState>()->RemovePlayer(Controller);
 }

@@ -1,7 +1,7 @@
 #include "Global/MyBaseLevelGameState.h"
 #include "Player/MyPlayerController.h"
 
-void AMyBaseLevelGameState::RemovePlayerData(AController* Controller)
+void AMyBaseLevelGameState::RemovePlayer(AController* Controller)
 {
 	if (Controller->IsLocalController())
 	{

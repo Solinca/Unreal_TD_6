@@ -58,6 +58,17 @@ void AMyLobbyGameMode::PreLogin(const FString& Options, const FString& Address, 
 	{
 		ErrorMessage = TEXT("SESSION FULL");
 	}
+
+	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+
+	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+
+	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
+
+	if (MyGameSession && MyGameSession->SessionStatus == ESessionStatus::LAUNCHED)
+	{
+		ErrorMessage = TEXT("SESSION HAS ALREADY LAUNCHED");
+	}
 }
 
 void AMyLobbyGameMode::Logout(AController* Controller)
@@ -82,12 +93,28 @@ void AMyLobbyGameMode::InitGame(const FString& MapName, const FString& Options, 
 
 	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
 
-	if (CurrentSession && MyGameSession)
+	if (MyGameSession)
 	{
 		MyGameSession->MaxPlayerConnectionAmount = CurrentSession->SessionSettings.NumPublicConnections;
 
 		CurrentSession->SessionSettings.Get("SETTING_SESSION_NAME", MyGameSession->SessionName);
 
 		CurrentSession->SessionSettings.Get("SETTING_SESSION_MAX_MONSTER_AMOUNT", MyGameSession->MaxMonsterAmount);
+	}
+}
+
+void AMyLobbyGameMode::SetCurrentSessionStatusToLaunched()
+{
+	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+
+	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+
+	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
+
+	if (MyGameSession)
+	{
+		MyGameSession->SessionStatus = ESessionStatus::LAUNCHED;
+
+		CurrentSession->SessionSettings.Set("SETTING_SESSION_STATUS", (int) MyGameSession->SessionStatus);
 	}
 }

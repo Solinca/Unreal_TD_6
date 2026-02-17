@@ -10,7 +10,7 @@ class TD_6_API AMyBaseLevelGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
-	void RemovePlayerData(AController* Controller);
+	void RemovePlayer(AController* Controller);
 
 	UFUNCTION(Server, Reliable)
 	void DestroyGame();

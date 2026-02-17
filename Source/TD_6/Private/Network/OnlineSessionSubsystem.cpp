@@ -1,5 +1,6 @@
 #include "Network/OnlineSessionSubsystem.h"
 #include "Network/MyOnlineBeaconClient.h"
+#include "Network/MyGameSession.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSubsystemUtils.h"
 
@@ -48,6 +49,15 @@ void UOnlineSessionSubsystem::OnFindSessionCompleted(bool IsSuccessful)
 		FOnlineSessionSearchResult Result = SearchResults[i];
 
 		FCustomSessionInfo SessionInfo;
+
+		int CurrentSessionStatus;
+
+		Result.Session.SessionSettings.Get("SETTING_SESSION_STATUS", CurrentSessionStatus);
+
+		if (CurrentSessionStatus == ESessionStatus::LAUNCHED)
+		{
+			continue;
+		}
 
 		FString SessionName;
 
@@ -149,6 +159,8 @@ void UOnlineSessionSubsystem::CreateSession(const FString& SessionName, int32 Nu
 	LastSessionSettings->Set("SETTING_SESSION_NAME", SessionName, EOnlineDataAdvertisementType::ViaOnlineService);
 
 	LastSessionSettings->Set("SETTING_SESSION_MAX_MONSTER_AMOUNT", MaxMonsterCount, EOnlineDataAdvertisementType::ViaOnlineService);
+
+	LastSessionSettings->Set("SETTING_SESSION_STATUS", (int) ESessionStatus::PREPARING, EOnlineDataAdvertisementType::ViaOnlineService);
 
 	CreateHandle = Session->AddOnCreateSessionCompleteDelegate_Handle(FOnCreateSessionCompleteDelegate::CreateUObject(this, &UOnlineSessionSubsystem::OnCreateSessionCompleted));
 

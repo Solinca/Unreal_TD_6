@@ -1,7 +1,9 @@
 #include "Global/MyLobbyGameState.h"
+#include "Global/MyLobbyGameMode.h"
 #include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMyLobbyGameState::DisplayEveryPlayerInLobby()
 {
@@ -92,6 +94,8 @@ void AMyLobbyGameState::StartLobbyIfReady_Implementation()
 			}
 		}
 	}
+
+	Cast<AMyLobbyGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetCurrentSessionStatusToLaunched();
 }
 
 void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
