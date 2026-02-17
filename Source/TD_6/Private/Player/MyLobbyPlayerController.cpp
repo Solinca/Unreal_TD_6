@@ -1,6 +1,6 @@
 #include "Player/MyLobbyPlayerController.h"
 #include "Animation/WidgetAnimation.h"
-#include "Global/MyGameState.h"
+#include "Global/MyLobbyGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "UI/LobbyManagementWidget.h"
@@ -22,7 +22,7 @@ void AMyLobbyPlayerController::BeginPlay()
 
 void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(const FCustomPlayerData& CustomPlayerData)
 {
-	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
+	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
 }
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
@@ -35,7 +35,7 @@ void AMyLobbyPlayerController::OnStartButtonClicked()
 
 void AMyLobbyPlayerController::RequestStartingGame_Implementation()
 {
-	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->StartLobbyIfReady();
+	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->StartLobbyIfReady();
 }
 
 void AMyLobbyPlayerController::TriggerLobbyAnimation_Implementation()
@@ -71,7 +71,7 @@ void AMyLobbyPlayerController::OnLobbyManagementFadeFinished()
 
 void AMyLobbyPlayerController::ChangePlayerCurrentTeam_Implementation(ETeam NewTeam)
 {
-	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerCurrentTeam(this, NewTeam);
+	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerCurrentTeam(this, NewTeam);
 }
 
 void AMyLobbyPlayerController::UpdatePlayerTeam_Implementation(ETeam NewTeam)
@@ -88,7 +88,7 @@ void AMyLobbyPlayerController::OnBackButtonClicked()
 
 	if (HasAuthority())
 	{
-		Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->DestroyGame();
+		Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->DestroyGame();
 	}
 	else
 	{

@@ -88,4 +88,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleMenu(const FInputActionValue& Value);
+
+public:
+	UFUNCTION(Client, Reliable)
+	void DestroySessionOnClient();
 };

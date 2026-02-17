@@ -1,10 +1,12 @@
 #include "Player/MyPlayerController.h"
 #include "Player/MyCharacter.h"
+#include "Global/MyBaseLevelGameState.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/PauseMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Network/OnlineSessionSubsystem.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -130,5 +132,19 @@ void AMyPlayerController::OnContinueButtonClicked()
 
 void AMyPlayerController::OnQuitButtonClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	if (HasAuthority())
+	{
+		Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this))->DestroyGame();
+	}
+	else
+	{
+		DestroySessionOnClient();
+	}
+}
+
+void AMyPlayerController::DestroySessionOnClient_Implementation()
+{
+	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();
+
+	ClientTravel("/Game/Levels/MainMenu", ETravelType::TRAVEL_Absolute);
 }

@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "MyGameMode.generated.h"
+#include "MyLobbyGameMode.generated.h"
 
 UCLASS()
-class TD_6_API AMyGameMode : public AGameMode
+class TD_6_API AMyLobbyGameMode : public AGameMode
 {
 	GENERATED_BODY()
 

@@ -1,5 +1,5 @@
-#include "Global/MyGameMode.h"
-#include "Global/MyGameState.h"
+#include "Global/MyLobbyGameMode.h"
+#include "Global/MyLobbyGameState.h"
 #include "Network/MyGameSession.h"
 #include "Network/MyOnlineBeaconHostObject.h"
 #include "GameFramework/GameSession.h"
@@ -8,7 +8,7 @@
 #include "OnlineSubsystemUtils.h"
 #include "OnlineBeaconHost.h"
 
-void AMyGameMode::BeginPlay()
+void AMyLobbyGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -17,7 +17,7 @@ void AMyGameMode::BeginPlay()
 	SetupGameSession();
 }
 
-void AMyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
+void AMyLobbyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 {
 	AOnlineBeaconHost* BeaconHost = GetWorld()->SpawnActor<AOnlineBeaconHost>();
 
@@ -36,7 +36,7 @@ void AMyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 	}
 }
 
-void AMyGameMode::SetupGameSession()
+void AMyLobbyGameMode::SetupGameSession()
 {
 	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
 
@@ -44,13 +44,13 @@ void AMyGameMode::SetupGameSession()
 
 	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
 
-	if (MyGameSession && GetGameState<AMyGameState>())
+	if (MyGameSession && GetGameState<AMyLobbyGameState>())
 	{
-		GetGameState<AMyGameState>()->SetupCurrentSession(MyGameSession->SessionName, MyGameSession->MaxPlayerConnectionAmount, MyGameSession->MaxMonsterAmount);
+		GetGameState<AMyLobbyGameState>()->SetupCurrentSession(MyGameSession->SessionName, MyGameSession->MaxPlayerConnectionAmount, MyGameSession->MaxMonsterAmount);
 	}
 }
 
-void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+void AMyLobbyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
 
@@ -60,7 +60,7 @@ void AMyGameMode::PreLogin(const FString& Options, const FString& Address, const
 	}
 }
 
-void AMyGameMode::Logout(AController* Controller)
+void AMyLobbyGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
@@ -69,10 +69,10 @@ void AMyGameMode::Logout(AController* Controller)
 		return;
 	}
 
-	GetGameState<AMyGameState>()->RemovePlayerData(Controller);
+	GetGameState<AMyLobbyGameState>()->RemovePlayerData(Controller);
 }
 
-void AMyGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+void AMyLobbyGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 

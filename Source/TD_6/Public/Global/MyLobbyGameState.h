@@ -3,12 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "Global/MyGameInstance.h"
-#include "MyGameState.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyStateChanged);
+#include "MyLobbyGameState.generated.h"
 
 UCLASS()
-class TD_6_API AMyGameState : public AGameState
+class TD_6_API AMyLobbyGameState : public AGameState
 {
 	GENERATED_BODY()
 

@@ -5,7 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Blueprint/WidgetTree.h"
-#include "Global/MyGameState.h"
+#include "Global/MyLobbyGameState.h"
 #include "Player/MyLobbyPlayerController.h"
 
 void ULobbyManagementWidget::NativeConstruct()

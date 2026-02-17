@@ -1,9 +1,9 @@
-#include "Global/MyGameState.h"
+#include "Global/MyLobbyGameState.h"
 #include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
-void AMyGameState::DisplayEveryPlayerInLobby()
+void AMyLobbyGameState::DisplayEveryPlayerInLobby()
 {
 	if (AMyLobbyPlayerController* MLPC = Cast<AMyLobbyPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
@@ -11,7 +11,7 @@ void AMyGameState::DisplayEveryPlayerInLobby()
 	}
 }
 
-void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
+void AMyLobbyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
 {
 	CurrentSessionName = SessionName;
 
@@ -22,27 +22,27 @@ void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName
 	DisplayEveryPlayerInLobby();
 }
 
-void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AMyLobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AMyGameState, CurrentSessionName);
+	DOREPLIFETIME(AMyLobbyGameState, CurrentSessionName);
 
-	DOREPLIFETIME(AMyGameState, CurrentMaxPlayerConnectionAmount);
+	DOREPLIFETIME(AMyLobbyGameState, CurrentMaxPlayerConnectionAmount);
 
-	DOREPLIFETIME(AMyGameState, CurrentMaxMonsterAmount);
+	DOREPLIFETIME(AMyLobbyGameState, CurrentMaxMonsterAmount);
 
-	DOREPLIFETIME(AMyGameState, PlayerDataList);
+	DOREPLIFETIME(AMyLobbyGameState, PlayerDataList);
 }
 
-void AMyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayerData)
+void AMyLobbyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayerData)
 {
 	PlayerDataList.Add(CustomPlayerData);
 
 	DisplayEveryPlayerInLobby();
 }
 
-void AMyGameState::RemovePlayerData(AController* Controller)
+void AMyLobbyGameState::RemovePlayerData(AController* Controller)
 {
 	if (Controller->IsLocalController())
 	{
@@ -64,7 +64,7 @@ void AMyGameState::RemovePlayerData(AController* Controller)
 	DisplayEveryPlayerInLobby();
 }
 
-void AMyGameState::StartLobbyIfReady_Implementation()
+void AMyLobbyGameState::StartLobbyIfReady_Implementation()
 {
 	int PlayerCount = 0;
 
@@ -94,7 +94,7 @@ void AMyGameState::StartLobbyIfReady_Implementation()
 	}
 }
 
-void AMyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
+void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
 {
 	for (FCustomPlayerData& Data : PlayerDataList)
 	{
@@ -111,7 +111,7 @@ void AMyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controlle
 	DisplayEveryPlayerInLobby();
 }
 
-void AMyGameState::DestroyGame_Implementation()
+void AMyLobbyGameState::DestroyGame_Implementation()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
