@@ -6,6 +6,7 @@
 #include "LobbyManagementWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyManagementButtonClickedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyManagementFadeFinishedSignature);
 
 UCLASS()
 class TD_6_API ULobbyManagementWidget : public UUserWidget
@@ -13,9 +14,6 @@ class TD_6_API ULobbyManagementWidget : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	UFUNCTION()
-	void OnGameStartFromNetwork();
-	
 	UFUNCTION()
 	void OnStartButtonClickedEvent();
 
@@ -68,6 +66,8 @@ protected:
 	TSubclassOf<UUserWidget> LobbyPlayerItemWidgetClass = nullptr;
 
 public:
+	void StartFadeAnimation();
+
 	void UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost);
 
 	FOnLobbyManagementButtonClickedSignature OnStartButtonClicked;
@@ -77,4 +77,6 @@ public:
 	FOnLobbyManagementButtonClickedSignature OnGoToPlayerButtonClicked;
 	
 	FOnLobbyManagementButtonClickedSignature OnBackButtonClicked;
+
+	FOnLobbyManagementFadeFinishedSignature OnLobbyManagementFadeFinished;
 };

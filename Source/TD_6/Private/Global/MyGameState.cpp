@@ -11,14 +11,6 @@ void AMyGameState::DisplayEveryPlayerInLobby()
 	}
 }
 
-void AMyGameState::MulticastTriggerGameStart_Implementation()
-{
-	if (OnGameStartSequence.IsBound())
-	{
-		OnGameStartSequence.Broadcast();
-	}
-}
-
 void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
 {
 	CurrentSessionName = SessionName;
@@ -72,6 +64,36 @@ void AMyGameState::RemovePlayerData(AController* Controller)
 	DisplayEveryPlayerInLobby();
 }
 
+void AMyGameState::StartLobbyIfReady_Implementation()
+{
+	int PlayerCount = 0;
+
+	int MonsterCount = 0;
+
+	for (FCustomPlayerData PlayerData : PlayerDataList)
+	{
+		if (PlayerData.CurrentTeam == ETeam::PLAYER)
+		{
+			PlayerCount++;
+		}
+		else if (PlayerData.CurrentTeam == ETeam::MONSTER)
+		{
+			MonsterCount++;
+		}
+	}
+
+	if (PlayerCount > 0 && MonsterCount > 0 && PlayerCount <= (CurrentMaxPlayerConnectionAmount - CurrentMaxMonsterAmount) && MonsterCount <= CurrentMaxMonsterAmount)
+	{
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+		{
+			if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(It->Get()))
+			{
+				MyLPC->TriggerLobbyAnimation();
+			}
+		}
+	}
+}
+
 void AMyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
 {
 	for (FCustomPlayerData& Data : PlayerDataList)
@@ -93,17 +115,9 @@ void AMyGameState::DestroyGame_Implementation()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
-		if (AMyLobbyPlayerController* PC = Cast<AMyLobbyPlayerController>(It->Get()))
+		if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(It->Get()))
 		{
-			PC->DestroySessionOnClient();
+			MyLPC->DestroySessionOnClient();
 		}
-	}
-}
-
-void AMyGameState::TriggerGameStart()
-{
-	if (HasAuthority())
-	{
-		MulticastTriggerGameStart();
 	}
 }

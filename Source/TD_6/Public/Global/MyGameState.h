@@ -28,9 +28,6 @@ private:
 	UFUNCTION()
 	void DisplayEveryPlayerInLobby();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastTriggerGameStart();
-
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -40,6 +37,9 @@ public:
 	void RemovePlayerData(AController* Controller);
 
 	UFUNCTION(Server, Reliable)
+	void StartLobbyIfReady();
+
+	UFUNCTION(Server, Reliable)
 	void SetupCurrentSession(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount);
 
 	UFUNCTION(Server, Reliable)
@@ -47,9 +47,4 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ChangePlayerCurrentTeam(AController* Controller, ETeam NewTeam);
-
-	UPROPERTY(BlueprintAssignable)
-	FOnLobbyStateChanged OnGameStartSequence;
-
-	void TriggerGameStart();
 };

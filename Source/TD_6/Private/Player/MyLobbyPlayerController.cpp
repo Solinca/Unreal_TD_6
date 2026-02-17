@@ -20,14 +20,6 @@ void AMyLobbyPlayerController::BeginPlay()
 	}
 }
 
-void AMyLobbyPlayerController::ServerRequestStartGame_Implementation()
-{
-	if (AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>())
-	{
-		GS->TriggerGameStart();
-	}
-}
-
 void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(const FCustomPlayerData& CustomPlayerData)
 {
 	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
@@ -35,20 +27,46 @@ void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(cons
 
 void AMyLobbyPlayerController::OnStartButtonClicked()
 {
-	if (HasAuthority())
+	if (HasAuthority() && !IsLobbyStarting)
 	{
-		GetWorld()->ServerTravel("/Game/Levels/BaseLevel?Listen");
+		RequestStartingGame();
 	}
+}
+
+void AMyLobbyPlayerController::RequestStartingGame_Implementation()
+{
+	Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->StartLobbyIfReady();
+}
+
+void AMyLobbyPlayerController::TriggerLobbyAnimation_Implementation()
+{
+	IsLobbyStarting = true;
+
+	LobbyManagementWidget->StartFadeAnimation();
 }
 
 void AMyLobbyPlayerController::OnGoToMonsterButtonClicked()
 {
-	ChangePlayerCurrentTeam(ETeam::MONSTER);
+	if (!IsLobbyStarting)
+	{
+		ChangePlayerCurrentTeam(ETeam::MONSTER);
+	}
 }
 
 void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 {
-	ChangePlayerCurrentTeam(ETeam::PLAYER);
+	if (!IsLobbyStarting)
+	{
+		ChangePlayerCurrentTeam(ETeam::PLAYER);
+	}
+}
+
+void AMyLobbyPlayerController::OnLobbyManagementFadeFinished()
+{
+	if (HasAuthority() && IsLobbyStarting)
+	{
+		GetWorld()->ServerTravel("/Game/Levels/BaseLevel?Listen");
+	}
 }
 
 void AMyLobbyPlayerController::ChangePlayerCurrentTeam_Implementation(ETeam NewTeam)
@@ -63,6 +81,11 @@ void AMyLobbyPlayerController::UpdatePlayerTeam_Implementation(ETeam NewTeam)
 
 void AMyLobbyPlayerController::OnBackButtonClicked()
 {
+	if (IsLobbyStarting)
+	{
+		return;
+	}
+
 	if (HasAuthority())
 	{
 		Cast<AMyGameState>(UGameplayStatics::GetGameState(this))->DestroyGame();
@@ -95,6 +118,8 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 		LobbyManagementWidget->OnGoToPlayerButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnGoToPlayerButtonClicked);
 
 		LobbyManagementWidget->OnBackButtonClicked.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnBackButtonClicked);
+
+		LobbyManagementWidget->OnLobbyManagementFadeFinished.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnLobbyManagementFadeFinished);
 		
 		SetShowMouseCursor(true);
 

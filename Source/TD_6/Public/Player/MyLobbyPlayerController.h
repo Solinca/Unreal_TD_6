@@ -15,6 +15,8 @@ private:
 
 	FInputModeUIOnly UIOnly;
 
+	bool IsLobbyStarting = false;
+
 	UFUNCTION()
 	void OnStartButtonClicked();
 
@@ -24,14 +26,20 @@ private:
 	UFUNCTION()
 	void OnGoToPlayerButtonClicked();
 
+	UFUNCTION()
+	void OnBackButtonClicked();
+
+	UFUNCTION()
+	void OnLobbyManagementFadeFinished();
+
 	UFUNCTION(Server, Reliable)
 	void RegisterPlayerDataToGameState(const FCustomPlayerData& CustomPlayerData);
 
 	UFUNCTION(Server, Reliable)
 	void ChangePlayerCurrentTeam(ETeam NewTeam);
-	
-	UFUNCTION()
-	void OnBackButtonClicked();
+
+	UFUNCTION(Server, Reliable)
+	void RequestStartingGame();
 	
 protected:
 	AMyLobbyPlayerController();
@@ -51,6 +59,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void UpdatePlayerTeam(ETeam NewTeam);
 
-	UFUNCTION(Server, Reliable)
-	void ServerRequestStartGame();
+	UFUNCTION(Client, Reliable)
+	void TriggerLobbyAnimation();
 };

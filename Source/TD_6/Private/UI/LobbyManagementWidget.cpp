@@ -19,33 +19,11 @@ void ULobbyManagementWidget::NativeConstruct()
 	GoToPlayerButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent);
 
 	BackButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnBackButtonClickedEvent);
-
-	if (AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>())
-	{
-		GS->OnGameStartSequence.AddDynamic(this, &ULobbyManagementWidget::OnGameStartFromNetwork);
-	}
-}
-
-void ULobbyManagementWidget::OnGameStartFromNetwork()
-{
-	FWidgetAnimationDynamicEvent AnimDelegate;
-
-	AnimDelegate.BindDynamic(this, &ULobbyManagementWidget::OnFadeOutFinished);
-	
-	BindToAnimationFinished(FadeOutAnimation, AnimDelegate);
-
-	PlayAnimationForward(FadeOutAnimation);
 }
 
 void ULobbyManagementWidget::OnStartButtonClickedEvent()
 {
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		if (AMyLobbyPlayerController* LobbyPC = Cast<AMyLobbyPlayerController>(PC))
-		{
-			LobbyPC->ServerRequestStartGame();
-		}
-	}
+	OnStartButtonClicked.Broadcast();
 }
 
 void ULobbyManagementWidget::OnGoToMonsterButtonClickedEvent()
@@ -63,11 +41,22 @@ void ULobbyManagementWidget::OnBackButtonClickedEvent()
 	OnBackButtonClicked.Broadcast();
 }
 
+void ULobbyManagementWidget::StartFadeAnimation()
+{
+	FWidgetAnimationDynamicEvent AnimDelegate;
+
+	AnimDelegate.BindDynamic(this, &ULobbyManagementWidget::OnFadeOutFinished);
+
+	BindToAnimationFinished(FadeOutAnimation, AnimDelegate);
+
+	PlayAnimationForward(FadeOutAnimation);
+}
+
 void ULobbyManagementWidget::OnFadeOutFinished()
 {
 	UnbindAllFromAnimationFinished(FadeOutAnimation);
 
-	OnStartButtonClicked.Broadcast();
+	OnLobbyManagementFadeFinished.Broadcast();
 }
 
 void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
