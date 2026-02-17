@@ -1,5 +1,4 @@
 #include "UI/LobbyManagementWidget.h"
-
 #include "Animation/WidgetAnimation.h"
 #include "UI/LobbyPlayerItemWidget.h"
 #include "Components/Button.h"
@@ -30,6 +29,7 @@ void ULobbyManagementWidget::NativeConstruct()
 void ULobbyManagementWidget::OnGameStartFromNetwork()
 {
 	FWidgetAnimationDynamicEvent AnimDelegate;
+
 	AnimDelegate.BindDynamic(this, &ULobbyManagementWidget::OnFadeOutFinished);
 	
 	BindToAnimationFinished(FadeOutAnimation, AnimDelegate);
@@ -104,12 +104,9 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 
 	LobbyNameText->SetText(FText::FromString(SessionName));
 
-	MaxPlayers = MaxPlayerConnectionCount - MaxMonsterCount;
-	MaxMonsters = MaxMonsterCount;
+	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayerConnectionCount - MaxMonsterCount));
 
-	LobbyPlayerCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), PlayerCount, MaxPlayers));
-
-	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsters));
+	LobbyMonsterCountText->SetText(FText::Format(FText::FromString("{0} / {1}"), MonsterCount, MaxMonsterCount));
 	
 	if (!IsHost)
 	{

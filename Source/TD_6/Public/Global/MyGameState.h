@@ -47,6 +47,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ChangePlayerCurrentTeam(AController* Controller, ETeam NewTeam);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnLobbyStateChanged OnGameStartSequence;
 

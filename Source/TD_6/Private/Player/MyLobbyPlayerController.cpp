@@ -1,5 +1,4 @@
 #include "Player/MyLobbyPlayerController.h"
-
 #include "Animation/WidgetAnimation.h"
 #include "Global/MyGameState.h"
 #include "Kismet/GameplayStatics.h"
@@ -73,7 +72,6 @@ void AMyLobbyPlayerController::OnBackButtonClicked()
 		DestroySessionOnClient();
 	}
 }
-// TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 {
