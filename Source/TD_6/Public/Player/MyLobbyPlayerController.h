@@ -50,4 +50,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void UpdatePlayerTeam(ETeam NewTeam);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestStartGame();
 };

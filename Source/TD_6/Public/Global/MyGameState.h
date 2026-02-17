@@ -5,6 +5,8 @@
 #include "Global/MyGameInstance.h"
 #include "MyGameState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyStateChanged);
+
 UCLASS()
 class TD_6_API AMyGameState : public AGameState
 {
@@ -26,6 +28,9 @@ private:
 	UFUNCTION()
 	void DisplayEveryPlayerInLobby();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastTriggerGameStart();
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -42,4 +47,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ChangePlayerCurrentTeam(AController* Controller, ETeam NewTeam);
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyStateChanged OnGameStartSequence;
+
+	void TriggerGameStart();
 };

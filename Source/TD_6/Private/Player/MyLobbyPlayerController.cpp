@@ -1,4 +1,6 @@
 #include "Player/MyLobbyPlayerController.h"
+
+#include "Animation/WidgetAnimation.h"
 #include "Global/MyGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
@@ -16,6 +18,14 @@ void AMyLobbyPlayerController::BeginPlay()
 	if (IsLocalController())
 	{
 		RegisterPlayerDataToGameState(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData());
+	}
+}
+
+void AMyLobbyPlayerController::ServerRequestStartGame_Implementation()
+{
+	if (AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>())
+	{
+		GS->TriggerGameStart();
 	}
 }
 
@@ -63,6 +73,7 @@ void AMyLobbyPlayerController::OnBackButtonClicked()
 		DestroySessionOnClient();
 	}
 }
+// TODO: Il me semble que le Destroy Session est mal fait et emp�che la future cr�ation d'un nouveau Lobby
 
 void AMyLobbyPlayerController::DestroySessionOnClient_Implementation()
 {

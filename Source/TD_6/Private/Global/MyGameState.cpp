@@ -11,6 +11,14 @@ void AMyGameState::DisplayEveryPlayerInLobby()
 	}
 }
 
+void AMyGameState::MulticastTriggerGameStart_Implementation()
+{
+	if (OnGameStartSequence.IsBound())
+	{
+		OnGameStartSequence.Broadcast();
+	}
+}
+
 void AMyGameState::SetupCurrentSession_Implementation(const FString& SessionName, int MaxConnectionAmount, int MaxMonsterAmount)
 {
 	CurrentSessionName = SessionName;
@@ -89,5 +97,13 @@ void AMyGameState::DestroyGame_Implementation()
 		{
 			PC->DestroySessionOnClient();
 		}
+	}
+}
+
+void AMyGameState::TriggerGameStart()
+{
+	if (HasAuthority())
+	{
+		MulticastTriggerGameStart();
 	}
 }

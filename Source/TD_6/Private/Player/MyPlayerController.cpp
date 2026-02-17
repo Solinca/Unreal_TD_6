@@ -35,9 +35,9 @@ void AMyPlayerController::BeginPlay()
 		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
 	}
 
-	PlayerCameraManager->ViewPitchMin = 0;
+	PlayerCameraManager->ViewPitchMin = -40;
 
-	PlayerCameraManager->ViewPitchMax = 0;
+	PlayerCameraManager->ViewPitchMax = 15;
 
 	SetShowMouseCursor(false);
 
