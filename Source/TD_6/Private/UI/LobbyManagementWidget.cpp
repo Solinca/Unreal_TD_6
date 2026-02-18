@@ -19,6 +19,16 @@ void ULobbyManagementWidget::NativeConstruct()
 	GoToPlayerButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnGoToPlayerButtonClickedEvent);
 
 	BackButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnBackButtonClickedEvent);
+
+	SetMonsterButcherButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnSetMonsterButcherButtonClicked);
+
+	SetMonsterHunterButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnSetMonsterHunterButtonClicked);
+
+	SetMonsterGhostButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnSetMonsterGhostButtonClicked);
+
+	SetMonsterSlimeButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnSetMonsterSlimeButtonClicked);
+
+	SetMonsterPredatorButton->OnClicked.AddDynamic(this, &ULobbyManagementWidget::OnSetMonsterPredatorButtonClicked);
 }
 
 void ULobbyManagementWidget::OnStartButtonClickedEvent()
@@ -41,6 +51,31 @@ void ULobbyManagementWidget::OnBackButtonClickedEvent()
 	OnBackButtonClicked.Broadcast();
 }
 
+void ULobbyManagementWidget::OnSetMonsterButcherButtonClicked()
+{
+	OnSetMonsterButtonClicked.Broadcast(EMonsterType::BUTCHER);
+}
+
+void ULobbyManagementWidget::OnSetMonsterHunterButtonClicked()
+{
+	OnSetMonsterButtonClicked.Broadcast(EMonsterType::HUNTER);
+}
+
+void ULobbyManagementWidget::OnSetMonsterGhostButtonClicked()
+{
+	OnSetMonsterButtonClicked.Broadcast(EMonsterType::GHOST);
+}
+
+void ULobbyManagementWidget::OnSetMonsterSlimeButtonClicked()
+{
+	OnSetMonsterButtonClicked.Broadcast(EMonsterType::SLIME);
+}
+
+void ULobbyManagementWidget::OnSetMonsterPredatorButtonClicked()
+{
+	OnSetMonsterButtonClicked.Broadcast(EMonsterType::PREDATOR);
+}
+
 void ULobbyManagementWidget::StartFadeAnimation()
 {
 	FWidgetAnimationDynamicEvent AnimDelegate;
@@ -59,7 +94,7 @@ void ULobbyManagementWidget::OnFadeOutFinished()
 	OnLobbyManagementFadeFinished.Broadcast();
 }
 
-void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost)
+void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataList, FString SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount, bool IsHost, FUniqueNetIdRepl CurrentPlayerID)
 {
 	int PlayerCount = 0;
 
@@ -68,6 +103,18 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 	PlayerListContainer->ClearChildren();
 
 	MonsterListContainer->ClearChildren();
+
+	SetMonsterButtonContainer->SetVisibility(ESlateVisibility::Hidden);
+
+	SetMonsterButcherButton->SetBackgroundColor(DefaultButtonColor);
+
+	SetMonsterHunterButton->SetBackgroundColor(DefaultButtonColor);
+
+	SetMonsterGhostButton->SetBackgroundColor(DefaultButtonColor);
+
+	SetMonsterSlimeButton->SetBackgroundColor(DefaultButtonColor);
+
+	SetMonsterPredatorButton->SetBackgroundColor(DefaultButtonColor);
 
 	for (FCustomPlayerData PlayerData : PlayerDataList)
 	{
@@ -86,6 +133,73 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 		else if (PlayerData.CurrentTeam == ETeam::MONSTER)
 		{
 			MonsterListContainer->AddChild(PlayerItem);
+
+			if (PlayerData.CustomPlayerID == CurrentPlayerID)
+			{
+				SetMonsterButtonContainer->SetVisibility(ESlateVisibility::Visible);
+
+				switch (PlayerData.MonsterType)
+				{
+					case EMonsterType::BUTCHER:
+						SetMonsterButcherButton->SetBackgroundColor(ButcherColor);
+
+						break;
+
+					case EMonsterType::HUNTER:
+						SetMonsterHunterButton->SetBackgroundColor(HunterColor);
+
+						break;
+
+					case EMonsterType::SLIME:
+						SetMonsterSlimeButton->SetBackgroundColor(SlimeColor);
+
+						break;
+
+					case EMonsterType::GHOST:
+						SetMonsterGhostButton->SetBackgroundColor(GhostColor);
+
+						break;
+
+					case EMonsterType::PREDATOR:
+						SetMonsterPredatorButton->SetBackgroundColor(PredatorColor);
+
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			switch (PlayerData.MonsterType)
+			{
+				case EMonsterType::BUTCHER:
+					PlayerItem->SetPlayerColor(ButcherColor);
+
+					break;
+
+				case EMonsterType::HUNTER:
+					PlayerItem->SetPlayerColor(HunterColor);
+
+					break;
+
+				case EMonsterType::SLIME:
+					PlayerItem->SetPlayerColor(GhostColor);
+
+					break;
+
+				case EMonsterType::GHOST:
+					PlayerItem->SetPlayerColor(SlimeColor);
+
+					break;
+
+				case EMonsterType::PREDATOR:
+					PlayerItem->SetPlayerColor(PredatorColor);
+
+					break;
+
+				default:
+					break;
+			}
 
 			MonsterCount++;
 		}

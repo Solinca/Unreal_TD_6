@@ -47,4 +47,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ChangePlayerCurrentTeam(AController* Controller, ETeam NewTeam);
+
+	UFUNCTION(Server, Reliable)
+	void ChangePlayerMonsterType(AController* Controller, EMonsterType MonsterType);
 };

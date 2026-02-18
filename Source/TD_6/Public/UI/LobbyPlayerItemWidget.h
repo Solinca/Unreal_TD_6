@@ -15,4 +15,6 @@ protected:
 
 public:
 	void SetPlayerName(FString PlayerName);
+
+	void SetPlayerColor(FColor PlayerColor);
 };

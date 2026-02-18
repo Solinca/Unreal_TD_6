@@ -113,9 +113,24 @@ void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Cont
 		{
 			Data.CurrentTeam = NewTeam;
 
-			Cast<AMyLobbyPlayerController>(Controller)->UpdatePlayerTeam(NewTeam);
-
 			ServerPlayerDataList[Data.CustomPlayerID].CurrentTeam = NewTeam;
+
+			break;
+		}
+	}
+
+	DisplayEveryPlayerInLobby();
+}
+
+void AMyLobbyGameState::ChangePlayerMonsterType_Implementation(AController* Controller, EMonsterType MonsterType)
+{
+	for (FCustomPlayerData& Data : PlayerDataList)
+	{
+		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId() && Data.CurrentTeam == ETeam::MONSTER)
+		{
+			Data.MonsterType = MonsterType;
+
+			ServerPlayerDataList[Data.CustomPlayerID].MonsterType = MonsterType;
 
 			break;
 		}

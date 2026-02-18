@@ -16,6 +16,8 @@ void AMyLobbyPlayerController::BeginPlay()
 
 	if (IsLocalController())
 	{
+		CurrentPlayerID = GetGameInstance<UMyGameInstance>()->GetCustomPlayerData().CustomPlayerID;
+
 		RegisterPlayerDataToGameState(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData());
 	}
 }
@@ -61,6 +63,11 @@ void AMyLobbyPlayerController::OnGoToPlayerButtonClicked()
 	}
 }
 
+void AMyLobbyPlayerController::ChangePlayerCurrentTeam_Implementation(ETeam NewTeam)
+{
+	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerCurrentTeam(this, NewTeam);
+}
+
 void AMyLobbyPlayerController::OnLobbyManagementFadeFinished()
 {
 	if (HasAuthority() && IsLobbyStarting)
@@ -69,14 +76,17 @@ void AMyLobbyPlayerController::OnLobbyManagementFadeFinished()
 	}
 }
 
-void AMyLobbyPlayerController::ChangePlayerCurrentTeam_Implementation(ETeam NewTeam)
+void AMyLobbyPlayerController::OnSetMonsterButtonClicked(EMonsterType MonsterType)
 {
-	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerCurrentTeam(this, NewTeam);
+	if (!IsLobbyStarting)
+	{
+		ChangePlayerMonsterType(MonsterType);
+	}
 }
 
-void AMyLobbyPlayerController::UpdatePlayerTeam_Implementation(ETeam NewTeam)
+void AMyLobbyPlayerController::ChangePlayerMonsterType_Implementation(EMonsterType MonsterType)
 {
-	GetGameInstance<UMyGameInstance>()->SetCurrentTeam(NewTeam);
+	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->ChangePlayerMonsterType(this, MonsterType);
 }
 
 void AMyLobbyPlayerController::OnBackButtonClicked()
@@ -117,14 +127,16 @@ void AMyLobbyPlayerController::DisplayLobbyInfoOnClient_Implementation(const TAr
 
 		LobbyManagementWidget->OnGoToPlayerButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnGoToPlayerButtonClicked);
 
-		LobbyManagementWidget->OnBackButtonClicked.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnBackButtonClicked);
+		LobbyManagementWidget->OnBackButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnBackButtonClicked);
 
-		LobbyManagementWidget->OnLobbyManagementFadeFinished.AddDynamic(this, &ThisClass::AMyLobbyPlayerController::OnLobbyManagementFadeFinished);
+		LobbyManagementWidget->OnLobbyManagementFadeFinished.AddDynamic(this, &AMyLobbyPlayerController::OnLobbyManagementFadeFinished);
+
+		LobbyManagementWidget->OnSetMonsterButtonClicked.AddDynamic(this, &AMyLobbyPlayerController::OnSetMonsterButtonClicked);
 		
 		SetShowMouseCursor(true);
 
 		SetInputMode(UIOnly);
 	}
 
-	LobbyManagementWidget->UpdateLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority());
+	LobbyManagementWidget->UpdateLobby(PlayerDataList, SessionName, MaxPlayerConnectionCount, MaxMonsterCount, HasAuthority(), CurrentPlayerID);
 }

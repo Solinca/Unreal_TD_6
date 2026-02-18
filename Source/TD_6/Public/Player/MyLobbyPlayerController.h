@@ -15,6 +15,8 @@ private:
 
 	FInputModeUIOnly UIOnly;
 
+	FUniqueNetIdRepl CurrentPlayerID;
+
 	bool IsLobbyStarting = false;
 
 	UFUNCTION()
@@ -32,6 +34,9 @@ private:
 	UFUNCTION()
 	void OnLobbyManagementFadeFinished();
 
+	UFUNCTION()
+	void OnSetMonsterButtonClicked(EMonsterType MonsterType);
+
 	UFUNCTION(Server, Reliable)
 	void RegisterPlayerDataToGameState(const FCustomPlayerData& CustomPlayerData);
 
@@ -40,6 +45,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void RequestStartingGame();
+
+	UFUNCTION(Server, Reliable)
+	void ChangePlayerMonsterType(EMonsterType MonsterType);
 	
 protected:
 	AMyLobbyPlayerController();
@@ -55,9 +63,6 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void DisplayLobbyInfoOnClient(const TArray<FCustomPlayerData>& PlayerDataList, const FString& SessionName, int MaxPlayerConnectionCount, int MaxMonsterCount);
-
-	UFUNCTION(Client, Reliable)
-	void UpdatePlayerTeam(ETeam NewTeam);
 
 	UFUNCTION(Client, Reliable)
 	void TriggerLobbyAnimation();
