@@ -1,5 +1,6 @@
 #include "Global/MyLobbyGameState.h"
 #include "Global/MyLobbyGameMode.h"
+#include "Global/MyGameInstance.h"
 #include "Player/MyLobbyPlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
@@ -41,6 +42,8 @@ void AMyLobbyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayer
 {
 	PlayerDataList.Add(CustomPlayerData);
 
+	ServerPlayerDataList.Add(CustomPlayerData.CustomPlayerID, CustomPlayerData);
+
 	DisplayEveryPlayerInLobby();
 }
 
@@ -58,6 +61,8 @@ void AMyLobbyGameState::RemovePlayerData(AController* Controller)
 		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
 		{
 			PlayerDataList.Remove(Data);
+
+			ServerPlayerDataList.Remove(Data.CustomPlayerID);
 
 			break;
 		}
@@ -95,6 +100,8 @@ void AMyLobbyGameState::StartLobbyIfReady_Implementation()
 		}
 	}
 
+	GetGameInstance<UMyGameInstance>()->SetServerPlayerDataList(ServerPlayerDataList);
+
 	Cast<AMyLobbyGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetCurrentSessionStatusToLaunched();
 }
 
@@ -107,6 +114,8 @@ void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Cont
 			Data.CurrentTeam = NewTeam;
 
 			Cast<AMyLobbyPlayerController>(Controller)->UpdatePlayerTeam(NewTeam);
+
+			ServerPlayerDataList[Data.CustomPlayerID].CurrentTeam = NewTeam;
 
 			break;
 		}

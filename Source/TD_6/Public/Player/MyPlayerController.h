@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputLibrary.h"
+#include "Global/MyGameInstance.h"
 #include "MyPlayerController.generated.h"
 
 USTRUCT(BlueprintType)
@@ -44,18 +45,28 @@ private:
 	UFUNCTION()
 	void OnQuitButtonClicked();
 
+	void SetupCommonInput();
+
+	void SetupPlayerInput();
+
+	void SetupMonsterInput();
+
 protected:
 	AMyPlayerController();
 
 	virtual void BeginPlay() override;
 
-	virtual void SetupInputComponent() override;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Mapping")
 	TObjectPtr<UInputMappingContext> MappingContext = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Data")
-	TArray<FInputData> InputDataList;
+	TArray<FInputData> CommonInputDataList;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Data")
+	TArray<FInputData> PlayerInputDataList;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Data")
+	TArray<FInputData> MonsterInputDataList;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
 	float CameraSensitivity = 50.f;
@@ -89,7 +100,28 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ToggleMenu(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void CrouchStart(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void CrouchEnd(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleFlashlight(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void Interact(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void TriggerAttack(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void TriggerSpecial(const FInputActionValue& Value);
+
 public:
+	UFUNCTION(Client, Reliable)
+	void SetupClient(FCustomPlayerData Data);
+
 	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();
 };

@@ -11,6 +11,16 @@ enum ETeam
 	MONSTER
 };
 
+UENUM()
+enum EMonsterType
+{
+	BUTCHER,
+	HUNTER,
+	SLIME,
+	GHOST,
+	PREDATOR
+};
+
 const TArray<FString> DefaultAnimalNames{ "AnonymousLama", "AnonymousGoat", "AnonymousBear", "AnonymousRabbit" };
 
 USTRUCT()
@@ -26,6 +36,9 @@ struct FCustomPlayerData
 
 	UPROPERTY()
 	TEnumAsByte<ETeam> CurrentTeam = ETeam::PLAYER;
+
+	UPROPERTY()
+	TEnumAsByte<EMonsterType> MonsterType = EMonsterType::BUTCHER;
 
 	FCustomPlayerData()
 	{
@@ -46,6 +59,8 @@ class TD_6_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 private:
+	TMap<FUniqueNetIdRepl, FCustomPlayerData> ServerPlayerDataList;
+
 	FCustomPlayerData CustomPlayerData;
 
 protected:
@@ -57,4 +72,10 @@ public:
 	void SetCurrentTeam(ETeam NewTeam);
 
 	FCustomPlayerData GetCustomPlayerData() { return CustomPlayerData; };
+
+	void SetServerPlayerDataList(TMap<FUniqueNetIdRepl, FCustomPlayerData> DataList) { ServerPlayerDataList = DataList; };
+
+	TMap<FUniqueNetIdRepl, FCustomPlayerData> RetrieveServerPlayerDataList() { return ServerPlayerDataList; };
+
+	FCustomPlayerData RetrieveServerPlayerDataList(FUniqueNetIdRepl ID) { return ServerPlayerDataList[ID]; };
 };

@@ -46,13 +46,47 @@ void AMyPlayerController::BeginPlay()
 	SetInputMode(GameOnly);
 }
 
-void AMyPlayerController::SetupInputComponent()
+void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data)
 {
-	Super::SetupInputComponent();
+	SetupCommonInput();
 
+	if (Data.CurrentTeam == ETeam::PLAYER)
+	{
+		SetupPlayerInput();
+	}
+	else if (Data.CurrentTeam == ETeam::MONSTER)
+	{
+		SetupMonsterInput();
+	}
+}
+
+void AMyPlayerController::SetupCommonInput()
+{
 	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		for (FInputData data : InputDataList)
+		for (FInputData data : CommonInputDataList)
+		{
+			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
+		}
+	}
+}
+
+void AMyPlayerController::SetupPlayerInput()
+{
+	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		for (FInputData data : PlayerInputDataList)
+		{
+			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
+		}
+	}
+}
+
+void AMyPlayerController::SetupMonsterInput()
+{
+	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		for (FInputData data : MonsterInputDataList)
 		{
 			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
 		}
@@ -121,6 +155,40 @@ void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 	PauseWidget->SetVisibility(IsPauseMenuOpened ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
 	SetShowMouseCursor(IsPauseMenuOpened);
+}
+
+void AMyPlayerController::CrouchStart(const FInputActionValue& Value)
+{
+	MyChara->Crouch();
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch Start");
+}
+
+void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
+{
+	MyChara->UnCrouch();
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch End");
+}
+
+void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Toggle Flashlight");
+}
+
+void AMyPlayerController::Interact(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Interact");
+}
+
+void AMyPlayerController::TriggerAttack(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Trigger Attack");
+}
+
+void AMyPlayerController::TriggerSpecial(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Trigger Special");
 }
 
 void AMyPlayerController::OnContinueButtonClicked()
