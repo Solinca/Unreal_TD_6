@@ -12,6 +12,8 @@ class TD_6_API AMyLobbyGameMode : public AGameMode
 private:
 	TObjectPtr<class AOnlineBeaconHost> BeaconHost = nullptr;
 
+	TObjectPtr<class AMyOnlineBeaconHostObject> HostObject = nullptr;
+
 	void CreateHostBeacon(int32 ListenPort, bool bOverridePort);
 
 	void SetupGameSession();

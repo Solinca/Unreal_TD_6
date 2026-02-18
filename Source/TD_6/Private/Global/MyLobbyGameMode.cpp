@@ -25,7 +25,7 @@ void AMyLobbyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 	{
 		BeaconHost->PauseBeaconRequests(false);
 
-		if (AMyOnlineBeaconHostObject* HostObject = GetWorld()->SpawnActor<AMyOnlineBeaconHostObject>())
+		if (HostObject = GetWorld()->SpawnActor<AMyOnlineBeaconHostObject>())
 		{
 			HostObject->ReservedSlots++;
 
@@ -79,6 +79,8 @@ void AMyLobbyGameMode::Logout(AController* Controller)
 	{
 		return;
 	}
+
+	HostObject->ReservedSlots--;
 
 	GetGameState<AMyLobbyGameState>()->RemovePlayerData(Controller);
 }
