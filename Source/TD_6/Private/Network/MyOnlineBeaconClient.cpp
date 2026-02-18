@@ -5,23 +5,7 @@ void AMyOnlineBeaconClient::OnConnected()
 {
 	Super::OnConnected();
 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "CONNECTED TO HOST BEACON");
-
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-
-	Server_RequestReservation(LocalPlayer->GetPreferredUniqueNetId());
-}
-
-void AMyOnlineBeaconClient::OnFailure()
-{
-	Super::OnFailure();
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "FAILED TO CONNECT TO HOST BEACON");
-}
-
-bool AMyOnlineBeaconClient::ConnectToServer(FURL& Url)
-{
-	return InitClient(Url);
+	Server_RequestReservation(GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId());
 }
 
 void AMyOnlineBeaconClient::Server_RequestReservation_Implementation(const FUniqueNetIdRepl& PlayerNetId)

@@ -19,7 +19,7 @@ void AMyLobbyGameMode::BeginPlay()
 
 void AMyLobbyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 {
-	AOnlineBeaconHost* BeaconHost = GetWorld()->SpawnActor<AOnlineBeaconHost>();
+	BeaconHost = GetWorld()->SpawnActor<AOnlineBeaconHost>();
 
 	if (BeaconHost->InitHost())
 	{
@@ -116,5 +116,7 @@ void AMyLobbyGameMode::SetCurrentSessionStatusToLaunched()
 		MyGameSession->SessionStatus = ESessionStatus::LAUNCHED;
 
 		CurrentSession->SessionSettings.Set("SETTING_SESSION_STATUS", (int) MyGameSession->SessionStatus);
+
+		BeaconHost->PauseBeaconRequests(true);
 	}
 }

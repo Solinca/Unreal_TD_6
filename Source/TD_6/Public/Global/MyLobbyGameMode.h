@@ -10,6 +10,8 @@ class TD_6_API AMyLobbyGameMode : public AGameMode
 	GENERATED_BODY()
 
 private:
+	TObjectPtr<class AOnlineBeaconHost> BeaconHost = nullptr;
+
 	void CreateHostBeacon(int32 ListenPort, bool bOverridePort);
 
 	void SetupGameSession();

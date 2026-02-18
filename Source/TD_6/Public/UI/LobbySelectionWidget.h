@@ -49,6 +49,8 @@ public:
 
 	void OnLobbyButtonClicked(class ULobbyItemWidget* SelectedLobbyItem);
 
+	void ClearLobbyList();
+
 	FOnLobbySelectionButtonClickedSignature OnCreateButtonClicked;
 
 	FOnLobbySelectionButtonClickedSignature OnJoinButtonClicked;

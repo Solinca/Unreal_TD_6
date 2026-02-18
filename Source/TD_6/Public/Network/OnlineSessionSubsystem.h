@@ -28,6 +28,8 @@ struct FCustomSessionInfo
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFindGameSessionCompleteSignature, const TArray<FCustomSessionInfo>&, SessionResults, bool, HasSuccess);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoinSessionFailedSignature, FString, ErrorMessage);
+
 UCLASS()
 class TD_6_API UOnlineSessionSubsystem : public UGameInstanceSubsystem
 {
@@ -51,6 +53,8 @@ private:
 	FDelegateHandle DestroyHandle;
 
 	FDelegateHandle UpdateHandle;
+
+	bool HasHandshakeCompleted = false;
 
 	void OnCreateSessionCompleted(FName SessionName, bool IsSuccessful);
 
@@ -80,9 +84,7 @@ public:
 	UFUNCTION(Category = "Session")
 	void DestroySession();
 
-	template<typename ValueType>
-	void UpdateCustomSessionSettings(const FName& KeyName, const ValueType& Value, EOnlineDataAdvertisementType::Type InType);
-
-	UPROPERTY(BlueprintAssignable, Category = "Session")
 	FOnFindGameSessionCompleteSignature OnFindGameSessionComplete;
+
+	FOnJoinSessionFailedSignature OnJoinSessionFailed;
 };

@@ -12,10 +12,6 @@ class TD_6_API AMyOnlineBeaconHostObject : public AOnlineBeaconHostObject
 public:
 	AMyOnlineBeaconHostObject(const FObjectInitializer& Initializer);
 
-	virtual void OnClientConnected(AOnlineBeaconClient* NewClientActor, UNetConnection* ClientConnection) override;
-
-	virtual AOnlineBeaconClient* SpawnBeaconActor(UNetConnection* ClientConnection) override;
-
 	int32 ReservedSlots = 0;
 
 	int32 MaxSlots = 2;

@@ -88,8 +88,6 @@ void UOnlineSessionSubsystem::OnJoinSessionCompleted(FName SessionName, EOnJoinS
 
 	if (Result != EOnJoinSessionCompleteResult::Success || !Session->GetResolvedConnectString(NAME_GameSession, ConnectString))
 	{
-		// Do something like broadcast to display join error
-
 		return;
 	}
 
@@ -211,23 +209,35 @@ void UOnlineSessionSubsystem::CustomJoinSession(int32 SessionIndex)
 
 		Destination.Port = 7787;
 
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Trying to connect to: %s:%d"), *Destination.Host, Destination.Port));
-
-		BeaconClient->ConnectToServer(Destination);
-
 		BeaconClient->OnRequestValidate.BindLambda([this, TempResult](bool IsValid)
 		{
+			HasHandshakeCompleted = true;
+
 			if (IsValid)
 			{
 				JoinGameSession(TempResult);
 			}
 			else
 			{
-				// Display an error via broadcast
-
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Failed to connect...");
+				OnJoinSessionFailed.Broadcast("Someone took your place! The room is full :/");
 			}
 		});
+
+		BeaconClient->InitClient(Destination);
+
+		FTimerHandle WaitForHandshakeHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(WaitForHandshakeHandle, [this]
+		{
+			if (!HasHandshakeCompleted)
+			{
+				OnJoinSessionFailed.Broadcast("Session doesn't exist anymore or has already launched :(");
+			}
+		}, 3, false);
+	}
+	else
+	{
+		OnJoinSessionFailed.Broadcast("Can't connect to server :O");
 	}
 }
 
@@ -244,30 +254,4 @@ void UOnlineSessionSubsystem::DestroySession()
 	{
 		Session->ClearOnDestroySessionCompleteDelegate_Handle(DestroyHandle);
 	}
-}
-
-template<typename ValueType>
-inline void UOnlineSessionSubsystem::UpdateCustomSessionSettings(const FName& KeyName, const ValueType& Value, EOnlineDataAdvertisementType::Type InType)
-{
-	if (!Session.IsValid() || !LastSessionSettings.IsValid())
-	{
-		return;
-	}
-
-	TSharedPtr<FOnlineSessionSettings> UpdatedSessionSettings = MakeShareable(new FOnlineSessionSettings(*LastSessionSettings));
-
-	UpdatedSessionSettings->Set(KeyName, Value, InType);
-
-	UpdateHandle = Session->AddOnUpdateSessionCompleteDelegate_Handle(FOnUpdateSessionCompleteDelegate::CreateUObject(this, &UOnlineSessionSubsystem::OnUpdatedSessionSettingsCompleted));
-
-	if (!Session->UpdateSession(NAME_GameSession, *UpdatedSessionSettings))
-	{
-		Session->ClearOnUpdateSessionCompleteDelegate_Handle(UpdateHandle);
-
-		return;
-	}
-
-	LastSessionSettings = UpdatedSessionSettings;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "SESSION SETTINGS UPDATED");
 }

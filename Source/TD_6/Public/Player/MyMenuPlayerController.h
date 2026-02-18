@@ -57,6 +57,9 @@ private:
 	UFUNCTION()
 	void OnJoinSessionCancelled();
 
+	UFUNCTION()
+	void OnJoinSessionFailed(FString ErrorMessage);
+
 protected:
 	AMyMenuPlayerController();
 

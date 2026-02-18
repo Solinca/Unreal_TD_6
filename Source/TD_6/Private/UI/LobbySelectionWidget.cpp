@@ -62,3 +62,10 @@ void ULobbySelectionWidget::OnLobbyButtonClicked(ULobbyItemWidget* SelectedLobby
 
 	JoinButton->SetIsEnabled(true);
 }
+
+void ULobbySelectionWidget::ClearLobbyList()
+{
+	LobbyContainer->ClearChildren();
+
+	RefreshButton->SetIsEnabled(false);
+}

@@ -20,6 +20,8 @@ void AMyMenuPlayerController::BeginPlay()
 
 	OnlineSessionSubsystem->OnFindGameSessionComplete.AddDynamic(this, &AMyMenuPlayerController::OnFindGameSessionComplete);
 
+	OnlineSessionSubsystem->OnJoinSessionFailed.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionFailed);
+
 	MainMenuWidget = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
 
 	MainMenuWidget->AddToViewport();
@@ -136,6 +138,10 @@ void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
 	GetGameInstance<UMyGameInstance>()->SetCustomPlayerName(Username);
 
 	OnlineSessionSubsystem->CustomJoinSession(CurrentlySelectedLobbyID);
+
+	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	// TODO: Display a spinning wheel / loading
 }
 
 void AMyMenuPlayerController::OnJoinSessionCancelled()
@@ -143,4 +149,17 @@ void AMyMenuPlayerController::OnJoinSessionCancelled()
 	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void AMyMenuPlayerController::OnJoinSessionFailed(FString ErrorMessage)
+{
+	LobbySelectionWidget->SetVisibility(ESlateVisibility::Visible);
+
+	LobbySelectionWidget->ClearLobbyList();
+
+	OnlineSessionSubsystem->FindSession(10, true);
+
+	// TODO: Display a popup error message with ErrorMessage inside it
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, ErrorMessage);
 }
