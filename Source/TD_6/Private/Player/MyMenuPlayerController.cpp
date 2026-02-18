@@ -6,6 +6,8 @@
 #include "UI/LobbySelectionWidget.h"
 #include "UI/SessionCreationWidget.h"
 #include "UI/JoinSessionWidget.h"
+#include "UI/LoadingLobbyWidget.h"
+#include "UI/LobbyJoinErrorPopupWidget.h"
 
 AMyMenuPlayerController::AMyMenuPlayerController()
 {
@@ -63,6 +65,20 @@ void AMyMenuPlayerController::BeginPlay()
 	JoinSessionWidget->OnJoinSessionConfirmed.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionConfirmed);
 
 	JoinSessionWidget->OnJoinSessionCancelled.AddDynamic(this, &AMyMenuPlayerController::OnJoinSessionCancelled);
+
+	LoadingLobbyWidget = CreateWidget<ULoadingLobbyWidget>(this, LoadingLobbyWidgetClass);
+
+	LoadingLobbyWidget->AddToViewport();
+
+	LoadingLobbyWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	LobbyJoinErrorPopupWidget = CreateWidget<ULobbyJoinErrorPopupWidget>(this, LobbyJoinErrorPopupWidgetClass);
+
+	LobbyJoinErrorPopupWidget->AddToViewport();
+
+	LobbyJoinErrorPopupWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	LobbyJoinErrorPopupWidget->OnOkButtonClicked.AddDynamic(this, &AMyMenuPlayerController::OnOkButtonClicked);
 
 	SetShowMouseCursor(true);
 
@@ -141,7 +157,7 @@ void AMyMenuPlayerController::OnJoinSessionConfirmed(const FString& Username)
 
 	JoinSessionWidget->SetVisibility(ESlateVisibility::Hidden);
 
-	// TODO: Display a spinning wheel / loading
+	LoadingLobbyWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AMyMenuPlayerController::OnJoinSessionCancelled()
@@ -159,7 +175,14 @@ void AMyMenuPlayerController::OnJoinSessionFailed(FString ErrorMessage)
 
 	OnlineSessionSubsystem->FindSession(10, true);
 
-	// TODO: Display a popup error message with ErrorMessage inside it
+	LoadingLobbyWidget->SetVisibility(ESlateVisibility::Hidden);
 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, ErrorMessage);
+	LobbyJoinErrorPopupWidget->SetVisibility(ESlateVisibility::Visible);
+
+	LobbyJoinErrorPopupWidget->SetErrorMessageText(ErrorMessage);
+}
+
+void AMyMenuPlayerController::OnOkButtonClicked()
+{
+	LobbyJoinErrorPopupWidget->SetVisibility(ESlateVisibility::Hidden);
 }

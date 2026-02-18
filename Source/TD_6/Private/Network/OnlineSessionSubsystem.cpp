@@ -219,7 +219,7 @@ void UOnlineSessionSubsystem::CustomJoinSession(int32 SessionIndex)
 			}
 			else
 			{
-				OnJoinSessionFailed.Broadcast("Someone took your place! The room is full :/");
+				OnJoinSessionFailed.Broadcast("Someone took your spot! \n The room is full :/");
 			}
 		});
 
@@ -231,7 +231,7 @@ void UOnlineSessionSubsystem::CustomJoinSession(int32 SessionIndex)
 		{
 			if (!HasHandshakeCompleted)
 			{
-				OnJoinSessionFailed.Broadcast("Session doesn't exist anymore or has already launched :(");
+				OnJoinSessionFailed.Broadcast("Session doesn't exist anymore \n or has already launched :(");
 			}
 		}, 3, false);
 	}

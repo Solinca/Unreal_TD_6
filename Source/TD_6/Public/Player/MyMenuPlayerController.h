@@ -20,6 +20,10 @@ private:
 
 	TObjectPtr<class UJoinSessionWidget> JoinSessionWidget = nullptr;
 
+	TObjectPtr<class ULoadingLobbyWidget> LoadingLobbyWidget = nullptr;
+
+	TObjectPtr<class ULobbyJoinErrorPopupWidget> LobbyJoinErrorPopupWidget = nullptr;
+
 	FInputModeUIOnly UIOnly;
 
 	int CurrentlySelectedLobbyID = -1;
@@ -60,6 +64,9 @@ private:
 	UFUNCTION()
 	void OnJoinSessionFailed(FString ErrorMessage);
 
+	UFUNCTION()
+	void OnOkButtonClicked();
+
 protected:
 	AMyMenuPlayerController();
 
@@ -76,4 +83,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> JoinSessionWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> LoadingLobbyWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> LobbyJoinErrorPopupWidgetClass = nullptr;
 };
