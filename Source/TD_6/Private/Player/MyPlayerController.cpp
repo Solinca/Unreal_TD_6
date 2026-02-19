@@ -253,7 +253,19 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl Pl
 
 		PlaySpecialAnimation();
 
-		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType)->MonsterSpecialCooldown, false);
+		const auto MonsterTypeData = MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType);
+
+		GetWorld()->GetTimerManager().SetTimer(
+			ResetSpecialHandle,
+			this,
+			&AMyPlayerController::ResetSpecial,
+			MonsterTypeData->MonsterSpecialCooldown,
+			false);
+
+		if (MonsterTypeData->MonsterType == EMonsterType::PREDATOR)
+		{
+			MyChara->ChangePostProcess(false);
+		}
 	}
 }
 
@@ -265,6 +277,7 @@ void AMyPlayerController::PlaySpecialAnimation_Implementation()
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
+	MyChara->ChangePostProcess();
 }
 
 void AMyPlayerController::OnContinueButtonClicked()

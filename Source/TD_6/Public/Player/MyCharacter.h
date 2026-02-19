@@ -21,6 +21,8 @@ private:
 protected:
 	AMyCharacter();
 
+	virtual void BeginPlay() override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -35,6 +37,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float InteractRange = 200.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UPostProcessComponent> PostProcess = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	FPostProcessSettings DefaultPostProcess;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	FPostProcessSettings NightVisionPostProcess;
+
 public:
 	UFUNCTION(Server, Reliable)
 	void ToggleFlashlight();
@@ -44,4 +55,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void StopInteractingWithActor();
+
+	UFUNCTION(BlueprintCallable)
+	void ChangePostProcess(const bool bIsDefault = true) const;
 };
