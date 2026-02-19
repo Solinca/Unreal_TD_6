@@ -55,45 +55,23 @@ void AMyPlayerController::BeginPlay()
 
 void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data)
 {
-	SetupCommonInput();
+	SetupInput(CommonInputDataList);
 
 	if (Data.CurrentTeam == ETeam::PLAYER)
 	{
-		SetupPlayerInput();
+		SetupInput(PlayerInputDataList);
 	}
 	else if (Data.CurrentTeam == ETeam::MONSTER)
 	{
-		SetupMonsterInput();
+		SetupInput(MonsterInputDataList);
 	}
 }
 
-void AMyPlayerController::SetupCommonInput()
+void AMyPlayerController::SetupInput(TArray<FInputData> InputDataList)
 {
 	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		for (FInputData data : CommonInputDataList)
-		{
-			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
-		}
-	}
-}
-
-void AMyPlayerController::SetupPlayerInput()
-{
-	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		for (FInputData data : PlayerInputDataList)
-		{
-			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
-		}
-	}
-}
-
-void AMyPlayerController::SetupMonsterInput()
-{
-	if (TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		for (FInputData data : MonsterInputDataList)
+		for (FInputData data : InputDataList)
 		{
 			EIC->BindAction(data.Action, data.Event, this, data.ActionName.GetMemberName());
 		}

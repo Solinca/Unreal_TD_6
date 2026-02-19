@@ -59,11 +59,7 @@ private:
 	UFUNCTION()
 	void OnQuitButtonClicked();
 
-	void SetupCommonInput();
-
-	void SetupPlayerInput();
-
-	void SetupMonsterInput();
+	void SetupInput(TArray<FInputData> InputDataList);
 
 	UFUNCTION(Server, Reliable)
 	void AskToTriggerAttack(FUniqueNetIdRepl PlayerID);
