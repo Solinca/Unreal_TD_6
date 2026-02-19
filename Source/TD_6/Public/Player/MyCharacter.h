@@ -58,4 +58,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ChangePostProcess(const bool bIsDefault = true) const;
+
+	UCameraComponent* GetCameraComponent() const { return Camera; }
 };

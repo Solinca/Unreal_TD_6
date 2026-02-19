@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
+#include "Player/HuntVisionComponent.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -265,6 +266,10 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl Pl
 		if (MonsterTypeData->MonsterType == EMonsterType::PREDATOR)
 		{
 			MyChara->ChangePostProcess(false);
+			if (UHuntVisionComponent* HuntVision = MyChara->FindComponentByClass<UHuntVisionComponent>())
+			{
+				HuntVision->Activate();
+			}
 		}
 	}
 }
@@ -278,6 +283,10 @@ void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
 	MyChara->ChangePostProcess();
+	if (UHuntVisionComponent* HuntVision = MyChara->FindComponentByClass<UHuntVisionComponent>())
+	{
+		HuntVision->Deactivate();
+	}
 }
 
 void AMyPlayerController::OnContinueButtonClicked()
