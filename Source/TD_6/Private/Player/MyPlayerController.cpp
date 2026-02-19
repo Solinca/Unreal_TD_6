@@ -7,6 +7,7 @@
 #include "UI/PauseMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
+#include "Data/MonsterDataAsset.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -29,6 +30,12 @@ void AMyPlayerController::BeginPlay()
 			EILPS->AddMappingContext(MappingContext, 0);
 		}
 	}
+
+	MyGI = GetGameInstance<UMyGameInstance>();
+
+	MyGS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this));
+
+	CurrentPlayerID = MyGI->GetCustomPlayerData().CustomPlayerID;
 
 	MyChara = Cast<AMyCharacter>(GetPawn());
 
@@ -183,12 +190,56 @@ void AMyPlayerController::Interact(const FInputActionValue& Value)
 
 void AMyPlayerController::TriggerAttack(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Trigger Attack");
+	AskToTriggerAttack(CurrentPlayerID);
+}
+
+void AMyPlayerController::AskToTriggerAttack_Implementation(FUniqueNetIdRepl PlayerID)
+{
+	if (CanAttack)
+	{
+		CanAttack = false;
+
+		PlayAttackAnimation();
+
+		GetWorld()->GetTimerManager().SetTimer(ResetAttackHandle, this, &AMyPlayerController::ResetAttack, MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType)->MonsterAttackCooldown, false);
+	}
+}
+
+void AMyPlayerController::PlayAttackAnimation_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Player Attack");
+}
+
+void AMyPlayerController::ResetAttack()
+{
+	CanAttack = true;
 }
 
 void AMyPlayerController::TriggerSpecial(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Trigger Special");
+	AskToTriggerSpecial(CurrentPlayerID);
+}
+
+void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl PlayerID)
+{
+	if (CanTriggerSpecial)
+	{
+		CanTriggerSpecial = false;
+
+		PlaySpecialAnimation();
+
+		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType)->MonsterSpecialCooldown, false);
+	}
+}
+
+void AMyPlayerController::PlaySpecialAnimation_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Player Special");
+}
+
+void AMyPlayerController::ResetSpecial()
+{
+	CanTriggerSpecial = true;
 }
 
 void AMyPlayerController::OnContinueButtonClicked()

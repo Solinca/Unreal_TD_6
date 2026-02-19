@@ -1,11 +1,11 @@
 #include "Global/MyBaseLevelGameState.h"
-#include "Global/MyGameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/MyPlayerController.h"
+#include "Data/MonsterDataAsset.h"
 
 void AMyBaseLevelGameState::HandlePlayer(AController* Controller)
 {
-	Cast<AMyPlayerController>(Controller)->SetupClient(GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerDataList(Controller->GetPlayerState<APlayerState>()->GetUniqueId()));
+	Cast<AMyPlayerController>(Controller)->SetupClient(GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId()));
 }
 
 void AMyBaseLevelGameState::RemovePlayer(AController* Controller)

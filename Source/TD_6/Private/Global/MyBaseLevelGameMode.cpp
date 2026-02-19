@@ -19,7 +19,7 @@ void AMyBaseLevelGameMode::Logout(AController* Controller)
 
 UClass* AMyBaseLevelGameMode::GetDefaultPawnClassForController_Implementation(AController* Controller)
 {
-	FCustomPlayerData Data = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerDataList()[Controller->GetPlayerState<APlayerState>()->GetUniqueId()];
+	FCustomPlayerData Data = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId());
 
 	if (Data.CurrentTeam == ETeam::PLAYER)
 	{

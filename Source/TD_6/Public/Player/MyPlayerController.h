@@ -31,6 +31,16 @@ private:
 
 	TObjectPtr<class UPauseMenuWidget> PauseWidget = nullptr;
 
+	TObjectPtr<class UMyGameInstance> MyGI = nullptr;
+
+	TObjectPtr<class AMyBaseLevelGameState> MyGS = nullptr;
+
+	FTimerHandle ResetAttackHandle;
+
+	FTimerHandle ResetSpecialHandle;
+
+	FUniqueNetIdRepl CurrentPlayerID;
+
 	FInputModeGameOnly GameOnly;
 
 	FInputModeUIOnly UIOnly;
@@ -38,6 +48,10 @@ private:
 	float DefaultMaxSpeed;
 
 	bool IsPauseMenuOpened = false;
+
+	bool CanAttack = true;
+
+	bool CanTriggerSpecial = true;
 
 	UFUNCTION()
 	void OnContinueButtonClicked();
@@ -50,6 +64,22 @@ private:
 	void SetupPlayerInput();
 
 	void SetupMonsterInput();
+
+	UFUNCTION(Server, Reliable)
+	void AskToTriggerAttack(FUniqueNetIdRepl PlayerID);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayAttackAnimation();
+
+	void ResetAttack();
+
+	UFUNCTION(Server, Reliable)
+	void AskToTriggerSpecial(FUniqueNetIdRepl PlayerID);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlaySpecialAnimation();
+
+	void ResetSpecial();
 
 protected:
 	AMyPlayerController();

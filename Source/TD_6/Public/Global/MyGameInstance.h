@@ -75,7 +75,5 @@ public:
 
 	void SetServerPlayerDataList(TMap<FUniqueNetIdRepl, FCustomPlayerData> DataList) { ServerPlayerDataList = DataList; };
 
-	TMap<FUniqueNetIdRepl, FCustomPlayerData> RetrieveServerPlayerDataList() { return ServerPlayerDataList; };
-
-	FCustomPlayerData RetrieveServerPlayerDataList(FUniqueNetIdRepl ID) { return ServerPlayerDataList[ID]; };
+	FCustomPlayerData RetrieveServerPlayerData(FUniqueNetIdRepl ID) { return ServerPlayerDataList[ID]; };
 };
