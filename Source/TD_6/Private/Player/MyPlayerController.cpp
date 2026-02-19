@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/PauseMenuWidget.h"
+#include "UI/WaitingScreenWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
@@ -50,11 +51,13 @@ void AMyPlayerController::BeginPlay()
 
 	SetShowMouseCursor(false);
 
-	SetInputMode(GameOnly);
+	SetInputMode(UIOnly);
 }
 
-void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data)
+void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, int WaitingTime)
 {
+	CustomPlayerData = Data;
+
 	SetupInput(CommonInputDataList);
 
 	if (Data.CurrentTeam == ETeam::PLAYER)
@@ -65,6 +68,29 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data)
 	{
 		SetupInput(MonsterInputDataList);
 	}
+
+	WaitingScreenWidget = CreateWidget<UWaitingScreenWidget>(this, WaitingScreenWidgetClass);
+
+	WaitingScreenWidget->AddToViewport();
+
+	FTimerHandle WaitingScreenHandle;
+
+	// TODO: Je comprends pas, dès fois les clients wait pendant au moins 15 secondes Oo
+
+	GetWorld()->GetTimerManager().SetTimer(WaitingScreenHandle, this, &AMyPlayerController::OnWaitingComplete, WaitingTime, false);
+}
+
+void AMyPlayerController::OnWaitingComplete()
+{
+	RegisterReadyToGameState();
+}
+
+void AMyPlayerController::RegisterReadyToGameState_Implementation()
+{
+	// TODO: Dès fois, j'ai lancé une game sans le waiting screen + countdown
+	// Comme si les joueurs étaient ready d'office. A voir si on reproduit
+
+	Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this))->PlayerHasLoaded();
 }
 
 void AMyPlayerController::SetupInput(TArray<FInputData> InputDataList)
@@ -244,4 +270,30 @@ void AMyPlayerController::DestroySessionOnClient_Implementation()
 	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();
 
 	ClientTravel("/Game/Levels/MainMenu", ETravelType::TRAVEL_Absolute);
+}
+
+void AMyPlayerController::ToggleWaitingScreenOff_Implementation()
+{
+	WaitingScreenWidget->PlayWaitingScreenFadeOutAnimation();
+}
+
+void AMyPlayerController::DisplayCountdown_Implementation(int Countdown)
+{
+	WaitingScreenWidget->SetCountdownText(FString::FromInt(Countdown));
+
+	if (Countdown <= 0)
+	{
+		SetInputMode(GameOnly);
+
+		if (CustomPlayerData.CurrentTeam == ETeam::PLAYER)
+		{
+			WaitingScreenWidget->SetCountdownText("SURVIVE!");
+		}
+		else if (CustomPlayerData.CurrentTeam == ETeam::MONSTER)
+		{
+			WaitingScreenWidget->SetCountdownText("HUNT!");
+		}
+
+		WaitingScreenWidget->PlayCountdownTextPopupAnimation();
+	}
 }

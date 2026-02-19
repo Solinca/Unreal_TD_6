@@ -38,9 +38,7 @@ void AMyLobbyGameMode::CreateHostBeacon(int32 ListenPort, bool bOverridePort)
 
 void AMyLobbyGameMode::SetupGameSession()
 {
-	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
-
-	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+	FNamedOnlineSession* CurrentSession = IOnlineSubsystem::Get()->GetSessionInterface()->GetNamedSession(NAME_GameSession);
 
 	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
 
@@ -59,9 +57,7 @@ void AMyLobbyGameMode::PreLogin(const FString& Options, const FString& Address, 
 		ErrorMessage = TEXT("SESSION FULL");
 	}
 
-	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
-
-	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+	FNamedOnlineSession* CurrentSession = IOnlineSubsystem::Get()->GetSessionInterface()->GetNamedSession(NAME_GameSession);
 
 	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
 
@@ -89,13 +85,9 @@ void AMyLobbyGameMode::InitGame(const FString& MapName, const FString& Options, 
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
-	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+	FNamedOnlineSession* CurrentSession = IOnlineSubsystem::Get()->GetSessionInterface()->GetNamedSession(NAME_GameSession);
 
-	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
-
-	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
-
-	if (MyGameSession)
+	if (AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession))
 	{
 		MyGameSession->MaxPlayerConnectionAmount = CurrentSession->SessionSettings.NumPublicConnections;
 
@@ -107,13 +99,9 @@ void AMyLobbyGameMode::InitGame(const FString& MapName, const FString& Options, 
 
 void AMyLobbyGameMode::SetCurrentSessionStatusToLaunched()
 {
-	IOnlineSessionPtr SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+	FNamedOnlineSession* CurrentSession = IOnlineSubsystem::Get()->GetSessionInterface()->GetNamedSession(NAME_GameSession);
 
-	FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
-
-	AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession);
-
-	if (MyGameSession)
+	if (AMyGameSession* MyGameSession = Cast<AMyGameSession>(GameSession))
 	{
 		MyGameSession->SessionStatus = ESessionStatus::LAUNCHED;
 

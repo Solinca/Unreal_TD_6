@@ -12,14 +12,35 @@ class TD_6_API AMyBaseLevelGameState : public AGameState
 {
 	GENERATED_BODY()
 
+private:
+	FTimerHandle GameStartCountdownHandle;
+
+	int CurrentLoadedPlayer = 0;
+
+	UPROPERTY(ReplicatedUsing = DisplayTimerToClients)
+	int TimeToWaitBeforeGameStart = 6;
+
+	void CountdownTimer();
+
+	UFUNCTION()
+	void DisplayTimerToClients();
+
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DATA")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
 	TMap<TEnumAsByte<EMonsterType>, UMonsterDataAsset*> MonsterDataPerType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Multiplayer|Settings")
+	float PlayerWaitingTimeAtStart = 3.f;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 public:
 	void HandlePlayer(AController* Controller);
 
 	void RemovePlayer(AController* Controller);
+
+	UFUNCTION(Server, Reliable)
+	void PlayerHasLoaded();
 
 	UFUNCTION(Server, Reliable)
 	void DestroyGame();

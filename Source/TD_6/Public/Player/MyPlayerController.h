@@ -31,9 +31,13 @@ private:
 
 	TObjectPtr<class UPauseMenuWidget> PauseWidget = nullptr;
 
+	TObjectPtr<class UWaitingScreenWidget> WaitingScreenWidget = nullptr;
+
 	TObjectPtr<class UMyGameInstance> MyGI = nullptr;
 
 	TObjectPtr<class AMyBaseLevelGameState> MyGS = nullptr;
+
+	FCustomPlayerData CustomPlayerData;
 
 	FTimerHandle ResetAttackHandle;
 
@@ -52,6 +56,11 @@ private:
 	bool CanAttack = true;
 
 	bool CanTriggerSpecial = true;
+
+	void OnWaitingComplete();
+
+	UFUNCTION(Server, Reliable)
+	void RegisterReadyToGameState();
 
 	UFUNCTION()
 	void OnContinueButtonClicked();
@@ -103,6 +112,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> PauseWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> WaitingScreenWidgetClass = nullptr;
+
 #if WITH_EDITOR
 	UFUNCTION(BlueprintInternalUseOnly)
 	void Prototype_InputAction(const FInputActionValue& Value) {};
@@ -146,7 +158,13 @@ protected:
 
 public:
 	UFUNCTION(Client, Reliable)
-	void SetupClient(FCustomPlayerData Data);
+	void SetupClient(FCustomPlayerData Data, int WaitingTime);
+
+	UFUNCTION(Client, Reliable)
+	void ToggleWaitingScreenOff();
+
+	UFUNCTION(Client, Reliable)
+	void DisplayCountdown(int Countdown);
 
 	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();

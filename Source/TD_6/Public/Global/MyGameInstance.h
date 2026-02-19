@@ -76,4 +76,6 @@ public:
 	void SetServerPlayerDataList(TMap<FUniqueNetIdRepl, FCustomPlayerData> DataList) { ServerPlayerDataList = DataList; };
 
 	FCustomPlayerData RetrieveServerPlayerData(FUniqueNetIdRepl ID) { return ServerPlayerDataList[ID]; };
+
+	int GetNumberOfPlayers() { return ServerPlayerDataList.Num(); };
 };
