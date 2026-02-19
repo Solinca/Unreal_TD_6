@@ -183,12 +183,12 @@ void ULobbyManagementWidget::UpdateLobby(TArray<FCustomPlayerData> PlayerDataLis
 					break;
 
 				case EMonsterType::SLIME:
-					PlayerItem->SetPlayerColor(GhostColor);
+					PlayerItem->SetPlayerColor(SlimeColor);
 
 					break;
 
 				case EMonsterType::GHOST:
-					PlayerItem->SetPlayerColor(SlimeColor);
+					PlayerItem->SetPlayerColor(GhostColor);
 
 					break;
 
