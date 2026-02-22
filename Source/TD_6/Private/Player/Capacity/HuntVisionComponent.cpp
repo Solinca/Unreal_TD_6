@@ -1,4 +1,4 @@
-#include "Player/HuntVisionComponent.h"
+#include "Player/Capacity/HuntVisionComponent.h"
 #include "Player/MyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
@@ -14,21 +14,23 @@ void UHuntVisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CachedOwnerCharacter = Cast<AMyCharacter>(GetOwner());
-	if (CachedOwnerCharacter)
+	if (auto* MyCharacter = Cast<AMyCharacter>(GetOwner()))
 	{
-		CachedPC = Cast<APlayerController>(CachedOwnerCharacter->GetController());
-		CachedCamera = CachedOwnerCharacter->GetCameraComponent();
+		CachedMyCharacter = MyCharacter;
+		CachedPlayerController = Cast<APlayerController>(MyCharacter->GetController());
+		CachedCamera = MyCharacter->GetCameraComponent();
 	}
 }
 
-void UHuntVisionComponent::Activate()
+void UHuntVisionComponent::ActivateAbility()
 {
-	if (!CachedOwnerCharacter || !CachedPC || !CachedCamera)
+	if (!CachedMyCharacter.IsValid() || !CachedPlayerController.IsValid() || !CachedCamera.IsValid())
 	{
 		return;
 	}
 
+	CachedMyCharacter->ChangePostProcess(false);
+	
 	GetWorld()->GetTimerManager().SetTimer(
 		ScanTimerHandle,
 		this,
@@ -37,25 +39,35 @@ void UHuntVisionComponent::Activate()
 		true);
 }
 
-void UHuntVisionComponent::Deactivate()
+void UHuntVisionComponent::DeactivateAbility()
 {
+	if (CachedMyCharacter.IsValid())
+	{
+		CachedMyCharacter->ChangePostProcess();
+	}
+	
 	GetWorld()->GetTimerManager().ClearTimer(ScanTimerHandle);
 	ClearAllHighlights();
 }
 
 void UHuntVisionComponent::UpdateHuntVision()
 {
+	if (!CachedPlayerController.IsValid() || !CachedCamera.IsValid() || !CachedMyCharacter.IsValid())
+	{
+		return;
+	}
+	
 	const FVector CameraLocation = CachedCamera->GetComponentLocation();
 
 	int32 ViewportSizeX, ViewportSizeY;
-	CachedPC->GetViewportSize(ViewportSizeX, ViewportSizeY);
+	CachedPlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
 
 	TArray<TWeakObjectPtr<ACharacter>> CurrentlyVisible;
 
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		const APlayerController* OtherPC = It->Get();
-		if (!OtherPC || OtherPC == CachedPC)
+		if (!OtherPC || OtherPC == CachedPlayerController)
 		{
 			continue;
 		}
@@ -69,7 +81,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 		const FVector TargetLocation = OtherCharacter->GetActorLocation();
 
 		FVector2D ScreenLocation;
-		if (!CachedPC->ProjectWorldLocationToScreen(TargetLocation, ScreenLocation))
+		if (!CachedPlayerController->ProjectWorldLocationToScreen(TargetLocation, ScreenLocation))
 		{
 			continue;
 		}
@@ -82,7 +94,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 
 		FHitResult HitResult;
 		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(CachedOwnerCharacter);
+		QueryParams.AddIgnoredActor(CachedMyCharacter.Get());
 		QueryParams.AddIgnoredActor(OtherCharacter);
 
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, TargetLocation, ECC_Visibility, QueryParams))

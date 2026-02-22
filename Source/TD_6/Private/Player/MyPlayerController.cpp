@@ -9,7 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
-#include "Player/HuntVisionComponent.h"
+#include "Player/Capacity/BaseAbilityComponent.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -76,7 +76,7 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, int
 
 	FTimerHandle WaitingScreenHandle;
 
-	// TODO: Je comprends pas, dès fois les clients wait pendant au moins 15 secondes Oo
+	// TODO: Je comprends pas, dï¿½s fois les clients wait pendant au moins 15 secondes Oo
 
 	GetWorld()->GetTimerManager().SetTimer(WaitingScreenHandle, this, &AMyPlayerController::OnWaitingComplete, WaitingTime, false);
 }
@@ -88,8 +88,8 @@ void AMyPlayerController::OnWaitingComplete()
 
 void AMyPlayerController::RegisterReadyToGameState_Implementation()
 {
-	// TODO: Dès fois, j'ai lancé une game sans le waiting screen + countdown
-	// Comme si les joueurs étaient ready d'office. A voir si on reproduit
+	// TODO: Dï¿½s fois, j'ai lancï¿½ une game sans le waiting screen + countdown
+	// Comme si les joueurs ï¿½taient ready d'office. A voir si on reproduit
 
 	Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this))->PlayerHasLoaded();
 }
@@ -263,12 +263,11 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl Pl
 			MonsterTypeData->MonsterSpecialCooldown,
 			false);
 
-		if (MonsterTypeData->MonsterType == EMonsterType::PREDATOR)
+		if (MyChara)
 		{
-			MyChara->ChangePostProcess(false);
-			if (UHuntVisionComponent* HuntVision = MyChara->FindComponentByClass<UHuntVisionComponent>())
+			if (UBaseAbilityComponent* AbilityComp = MyChara->FindComponentByClass<UBaseAbilityComponent>())
 			{
-				HuntVision->Activate();
+				AbilityComp->ActivateAbility();
 			}
 		}
 	}
@@ -282,10 +281,14 @@ void AMyPlayerController::PlaySpecialAnimation_Implementation()
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
-	MyChara->ChangePostProcess();
-	if (UHuntVisionComponent* HuntVision = MyChara->FindComponentByClass<UHuntVisionComponent>())
+	
+	if (MyChara)
 	{
-		HuntVision->Deactivate();
+		MyChara->ChangePostProcess();
+		if (UBaseAbilityComponent* AbilityComp = MyChara->FindComponentByClass<UBaseAbilityComponent>())
+		{
+			AbilityComp->DeactivateAbility();
+		}
 	}
 }
 
