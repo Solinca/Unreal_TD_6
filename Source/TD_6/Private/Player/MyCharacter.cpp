@@ -3,6 +3,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "Interface/Interactable.h"
 
 AMyCharacter::AMyCharacter()
 {
@@ -31,6 +33,45 @@ void AMyCharacter::ToggleFlashlight_Implementation()
 void AMyCharacter::SetFlashlightVisibility()
 {
 	Flashlight->SetVisibility(IsFlashlightOn, true);
+}
+
+void AMyCharacter::InteractWithSurroundingActor_Implementation()
+{
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+
+    TArray<AActor*> OutActors;
+
+    TArray<AActor*> ActorsToIgnore;
+
+    ActorsToIgnore.Add(this);
+
+    if (UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), InteractRange, ObjectTypes, nullptr, ActorsToIgnore, OutActors))
+	{
+        for (AActor* OverlappedActor : OutActors)
+		{
+			if (OverlappedActor->Implements<UInteractable>())
+			{
+				IInteractable* InteractableActor = Cast<IInteractable>(OverlappedActor);
+
+				if (InteractableActor && InteractableActor->InteractWith())
+				{
+					InteractingActor = OverlappedActor;
+
+					return;
+				}
+			}
+        }
+    }
+}
+
+void AMyCharacter::StopInteractingWithActor_Implementation()
+{
+	if (IInteractable* InteractableActor = Cast<IInteractable>(InteractingActor))
+	{
+		InteractableActor->StopInteractWith();
+	}
 }
 
 void AMyCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

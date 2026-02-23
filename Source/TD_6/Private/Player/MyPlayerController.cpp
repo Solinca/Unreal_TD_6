@@ -106,6 +106,11 @@ void AMyPlayerController::SetupInput(TArray<FInputData> InputDataList)
 
 void AMyPlayerController::Move(const FInputActionValue& Value)
 {
+	if (IsInteracting)
+	{
+		return;
+	}
+
 	FVector Movement = Value.Get<FVector>();
 
 	FRotator CameraRotation = FRotator(0, GetControlRotation().Yaw, 0);
@@ -124,6 +129,11 @@ void AMyPlayerController::Look(const FInputActionValue& Value)
 
 void AMyPlayerController::Jump(const FInputActionValue& Value)
 {
+	if (IsInteracting)
+	{
+		return;
+	}
+
 	MyChara->Jump();
 }
 
@@ -140,6 +150,8 @@ void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 {
 	IsPauseMenuOpened = !IsPauseMenuOpened;
+
+	IsInteracting = false;
 
 	if (IsPauseMenuOpened)
 	{
@@ -187,9 +199,18 @@ void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)
 	MyChara->ToggleFlashlight();
 }
 
-void AMyPlayerController::Interact(const FInputActionValue& Value)
+void AMyPlayerController::InteractStart(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Interact");
+	IsInteracting = true;
+
+	MyChara->InteractWithSurroundingActor();
+}
+
+void AMyPlayerController::InteractStop(const FInputActionValue& Value)
+{
+	IsInteracting = false;
+
+	MyChara->StopInteractingWithActor();
 }
 
 void AMyPlayerController::TriggerAttack(const FInputActionValue& Value)

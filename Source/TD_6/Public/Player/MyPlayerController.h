@@ -57,6 +57,8 @@ private:
 
 	bool CanTriggerSpecial = true;
 
+	bool IsInteracting = false;
+
 	void OnWaitingComplete();
 
 	UFUNCTION(Server, Reliable)
@@ -148,7 +150,10 @@ protected:
 	void ToggleFlashlight(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
-	void Interact(const FInputActionValue& Value);
+	void InteractStart(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void InteractStop(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	void TriggerAttack(const FInputActionValue& Value);
