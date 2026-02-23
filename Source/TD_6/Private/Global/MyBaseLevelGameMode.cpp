@@ -2,6 +2,8 @@
 #include "Global/MyBaseLevelGameState.h"
 #include "Global/MyGameInstance.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerStart.h"
+#include "EngineUtils.h"
 
 void AMyBaseLevelGameMode::PostLogin(APlayerController* Controller)
 {
@@ -15,6 +17,34 @@ void AMyBaseLevelGameMode::Logout(AController* Controller)
 	Super::Logout(Controller);
 
 	GetGameState<AMyBaseLevelGameState>()->RemovePlayer(Controller);
+}
+
+AActor* AMyBaseLevelGameMode::ChoosePlayerStart_Implementation(AController* Controller)
+{
+	FCustomPlayerData Data = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId());
+
+	TArray<APlayerStart*> PlayerStartList;
+
+	TArray<APlayerStart*> MonsterStartList;
+
+	for (TActorIterator<APlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator)
+	{
+		APlayerStart* PlayerStart = *PlayerStartIterator;
+
+		if (PlayerStart)
+		{
+			if (PlayerStart->PlayerStartTag == FName("PLAYER"))
+			{
+				PlayerStartList.Add(PlayerStart);
+			}
+			else if (PlayerStart->PlayerStartTag == FName("MONSTER"))
+			{
+				MonsterStartList.Add(PlayerStart);
+			}
+		}
+	}
+
+	return Data.CurrentTeam == ETeam::PLAYER ? PlayerStartList[FMath::Rand() % PlayerStartList.Num()] : MonsterStartList[FMath::Rand() % MonsterStartList.Num()];
 }
 
 UClass* AMyBaseLevelGameMode::GetDefaultPawnClassForController_Implementation(AController* Controller)

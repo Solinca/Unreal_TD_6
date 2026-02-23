@@ -63,7 +63,11 @@ void USessionCreationWidget::OnBackButtonClickedEvent()
 
 void USessionCreationWidget::ResetToDefaults() const
 {
-	SessionNameInput->SetText(FText::FromString("Default Session Name"));
+	FString DefaultSessionName = "Default Session Name ";
+
+	DefaultSessionName.Append(FString::FromInt(FMath::Rand() % 10000));
+
+	SessionNameInput->SetText(FText::FromString(DefaultSessionName));
 
 	UsernameInput->SetText(FText::FromString(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData().CustomPlayerName));
 

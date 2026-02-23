@@ -14,6 +14,8 @@ protected:
 
 	virtual void Logout(AController* Controller) override;
 
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Controller) override;
+
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* Controller) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn CLasses")

@@ -6,7 +6,7 @@
 
 void AMyBaseLevelGameState::HandlePlayer(AController* Controller)
 {
-	Cast<AMyPlayerController>(Controller)->SetupClient(GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId()), TimeToWaitBeforeGameStart);
+	Cast<AMyPlayerController>(Controller)->SetupClient(GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId()), PlayerWaitingTimeAtStart);
 }
 
 void AMyBaseLevelGameState::RemovePlayer(AController* Controller)
