@@ -252,10 +252,8 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl Pl
 	{
 		CanTriggerSpecial = false;
 
-		PlaySpecialAnimation();
-
 		const auto MonsterTypeData = MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType);
-
+		
 		GetWorld()->GetTimerManager().SetTimer(
 			ResetSpecialHandle,
 			this,
@@ -263,11 +261,11 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl Pl
 			MonsterTypeData->MonsterSpecialCooldown,
 			false);
 
-		if (MyChara)
+		if (AMyCharacter* CurrentChara = Cast<AMyCharacter>(GetPawn()))
 		{
-			if (UBaseAbilityComponent* AbilityComp = MyChara->FindComponentByClass<UBaseAbilityComponent>())
+			if (UBaseAbilityComponent* AbilityComp = CurrentChara->FindComponentByClass<UBaseAbilityComponent>())
 			{
-				AbilityComp->ActivateAbility();
+				AbilityComp->StartAbility(MonsterTypeData);
 			}
 		}
 	}
@@ -281,15 +279,6 @@ void AMyPlayerController::PlaySpecialAnimation_Implementation()
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
-	
-	if (MyChara)
-	{
-		MyChara->ChangePostProcess();
-		if (UBaseAbilityComponent* AbilityComp = MyChara->FindComponentByClass<UBaseAbilityComponent>())
-		{
-			AbilityComp->DeactivateAbility();
-		}
-	}
 }
 
 void AMyPlayerController::OnContinueButtonClicked()

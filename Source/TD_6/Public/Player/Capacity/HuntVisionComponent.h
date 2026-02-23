@@ -4,8 +4,6 @@
 #include "Player/Capacity/BaseAbilityComponent.h"
 #include "HuntVisionComponent.generated.h"
 
-class AMyCharacter;
-class APlayerController;
 class UCameraComponent;
 class ACharacter;
 
@@ -20,8 +18,6 @@ private:
 
 	FTimerHandle ScanTimerHandle;
 
-	TWeakObjectPtr<AMyCharacter> CachedMyCharacter = nullptr;
-	TWeakObjectPtr<APlayerController> CachedPlayerController = nullptr;
 	TWeakObjectPtr<UCameraComponent> CachedCamera = nullptr;
 
 	TArray<TWeakObjectPtr<ACharacter>> HighlightedCharacters;

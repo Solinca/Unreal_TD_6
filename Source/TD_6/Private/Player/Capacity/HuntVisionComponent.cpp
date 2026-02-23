@@ -1,8 +1,12 @@
 #include "Player/Capacity/HuntVisionComponent.h"
+
+#include "EngineUtils.h"
 #include "Player/MyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Data/MonsterDataAsset.h"
+#include "Player/MyPlayerController.h"
 
 UHuntVisionComponent::UHuntVisionComponent()
 {
@@ -14,45 +18,49 @@ void UHuntVisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto* MyCharacter = Cast<AMyCharacter>(GetOwner()))
+	if (CachedMyCharacter.IsValid())
 	{
-		CachedMyCharacter = MyCharacter;
-		CachedPlayerController = Cast<APlayerController>(MyCharacter->GetController());
-		CachedCamera = MyCharacter->GetCameraComponent();
+		CachedCamera = CachedMyCharacter->GetCameraComponent();
 	}
 }
 
 void UHuntVisionComponent::ActivateAbility()
 {
-	if (!CachedMyCharacter.IsValid() || !CachedPlayerController.IsValid() || !CachedCamera.IsValid())
+	if (GetOwner() && GetOwner()->HasAuthority() && MonsterDataAsset.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			AbilityTimer,
+			this,
+			&UBaseAbilityComponent::StopAbility,
+			MonsterDataAsset->PredatorHuntDuration,
+			false);
+	}
+
+	if (!CachedMyCharacter.IsValid() || !CachedMyPlayerController.IsValid() || !CachedCamera.IsValid())
 	{
 		return;
 	}
 
-	CachedMyCharacter->ChangePostProcess(false);
-	
-	GetWorld()->GetTimerManager().SetTimer(
-		ScanTimerHandle,
-		this,
-		&UHuntVisionComponent::UpdateHuntVision,
-		ScanInterval,
-		true);
+	if (CachedMyCharacter->IsLocallyControlled())
+	{
+		CachedMyCharacter->ChangePostProcess(false);
+		GetWorld()->GetTimerManager().SetTimer(ScanTimerHandle, this, &UHuntVisionComponent::UpdateHuntVision, ScanInterval, true);
+	}
 }
 
 void UHuntVisionComponent::DeactivateAbility()
 {
-	if (CachedMyCharacter.IsValid())
+	if (CachedMyCharacter.IsValid() && CachedMyCharacter->IsLocallyControlled())
 	{
 		CachedMyCharacter->ChangePostProcess();
+		GetWorld()->GetTimerManager().ClearTimer(ScanTimerHandle);
+		ClearAllHighlights();
 	}
-	
-	GetWorld()->GetTimerManager().ClearTimer(ScanTimerHandle);
-	ClearAllHighlights();
 }
 
 void UHuntVisionComponent::UpdateHuntVision()
 {
-	if (!CachedPlayerController.IsValid() || !CachedCamera.IsValid() || !CachedMyCharacter.IsValid())
+	if (!CachedMyPlayerController.IsValid() || !CachedCamera.IsValid() || !CachedMyCharacter.IsValid())
 	{
 		return;
 	}
@@ -60,20 +68,14 @@ void UHuntVisionComponent::UpdateHuntVision()
 	const FVector CameraLocation = CachedCamera->GetComponentLocation();
 
 	int32 ViewportSizeX, ViewportSizeY;
-	CachedPlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+	CachedMyPlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
 
 	TArray<TWeakObjectPtr<ACharacter>> CurrentlyVisible;
 
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	for (TActorIterator<AMyCharacter> It(GetWorld()); It; ++It)
 	{
-		const APlayerController* OtherPC = It->Get();
-		if (!OtherPC || OtherPC == CachedPlayerController)
-		{
-			continue;
-		}
-
-		ACharacter* OtherCharacter = OtherPC->GetCharacter();
-		if (!OtherCharacter)
+		ACharacter* OtherCharacter = *It;
+		if (!OtherCharacter || OtherCharacter == CachedMyCharacter.Get())
 		{
 			continue;
 		}
@@ -81,7 +83,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 		const FVector TargetLocation = OtherCharacter->GetActorLocation();
 
 		FVector2D ScreenLocation;
-		if (!CachedPlayerController->ProjectWorldLocationToScreen(TargetLocation, ScreenLocation))
+		if (!CachedMyPlayerController->ProjectWorldLocationToScreen(TargetLocation, ScreenLocation))
 		{
 			continue;
 		}
@@ -99,7 +101,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, TargetLocation, ECC_Visibility, QueryParams))
 		{
-			continue;
+			//continue;
 		}
 
 		CurrentlyVisible.Add(OtherCharacter);
