@@ -184,7 +184,7 @@ void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
 
 void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Toggle Flashlight");
+	MyChara->ToggleFlashlight();
 }
 
 void AMyPlayerController::Interact(const FInputActionValue& Value)

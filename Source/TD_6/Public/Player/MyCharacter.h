@@ -9,6 +9,13 @@ class TD_6_API AMyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(ReplicatedUsing = SetFlashlightVisibility)
+	bool IsFlashlightOn = false;
+
+	UFUNCTION()
+	void SetFlashlightVisibility();
+
 protected:
 	AMyCharacter();
 
@@ -17,4 +24,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class USpringArmComponent> SpringArm = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class USpotLightComponent> Flashlight = nullptr;
+
+protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	UFUNCTION(Server, Reliable)
+	void ToggleFlashlight();
 };
