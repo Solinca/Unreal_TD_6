@@ -17,6 +17,8 @@ private:
 
 	int CurrentLoadedPlayer = 0;
 
+	int CurrentNumberOfMonsterPlayer = 0;
+
 	UPROPERTY(ReplicatedUsing = DisplayTimerToClients)
 	int TimeToWaitBeforeGameStart = 4;
 
@@ -25,12 +27,17 @@ private:
 	UFUNCTION()
 	void DisplayTimerToClients();
 
+	void SetupPlayerObjectives();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
 	TMap<TEnumAsByte<EMonsterType>, UMonsterDataAsset*> MonsterDataPerType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Multiplayer|Settings")
 	float PlayerWaitingTimeAtStart = 3.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Multiplayer|Settings")
+	TSubclassOf<AActor> PlayerObjective = nullptr;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	

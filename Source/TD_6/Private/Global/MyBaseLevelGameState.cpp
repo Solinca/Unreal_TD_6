@@ -1,12 +1,20 @@
 #include "Global/MyBaseLevelGameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/MyPlayerController.h"
+#include "Player/PlayerObjective.h"
 #include "Data/MonsterDataAsset.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/TargetPoint.h"
+#include "EngineUtils.h"
 
 void AMyBaseLevelGameState::HandlePlayer(AController* Controller)
 {
 	FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId());
+
+	if (PlayerData.CurrentTeam == ETeam::MONSTER)
+	{
+		CurrentNumberOfMonsterPlayer++;
+	}
 
 	Cast<AMyPlayerController>(Controller)->SetupServer(PlayerData, MonsterDataPerType[PlayerData.MonsterType]);
 
@@ -27,6 +35,8 @@ void AMyBaseLevelGameState::PlayerHasLoaded_Implementation()
 
 	if (CurrentLoadedPlayer >= GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers())
 	{
+		SetupPlayerObjectives();
+
 		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 		{
 			if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
@@ -36,6 +46,30 @@ void AMyBaseLevelGameState::PlayerHasLoaded_Implementation()
 		}
 
 		GetWorld()->GetTimerManager().SetTimer(GameStartCountdownHandle, this, &AMyBaseLevelGameState::CountdownTimer, 1.f, true);
+	}
+}
+
+void AMyBaseLevelGameState::SetupPlayerObjectives()
+{
+	TArray<ATargetPoint*> PlayerObjectiveSpawnPoints;
+
+	for (TActorIterator<ATargetPoint> PlayerObjectiveIterator(GetWorld()); PlayerObjectiveIterator; ++PlayerObjectiveIterator)
+	{
+		if (PlayerObjectiveIterator->Tags.Contains(FName("PlayerObjectiveSpawnPoint")))
+		{
+			PlayerObjectiveSpawnPoints.Add(*PlayerObjectiveIterator);
+		}
+	}
+
+	for (int i = 0; i < CurrentNumberOfMonsterPlayer + 1; i++)
+	{
+		int RandomSpawnPointIndex = FMath::Rand() % PlayerObjectiveSpawnPoints.Num();
+
+		ATargetPoint* PlayerObjectiveSpawnPoint = PlayerObjectiveSpawnPoints[RandomSpawnPointIndex];
+
+		PlayerObjectiveSpawnPoints.RemoveAt(RandomSpawnPointIndex);
+
+		GetWorld()->SpawnActor<APlayerObjective>(PlayerObjective, PlayerObjectiveSpawnPoint->GetActorLocation(), PlayerObjectiveSpawnPoint->GetActorRotation());
 	}
 }
 
