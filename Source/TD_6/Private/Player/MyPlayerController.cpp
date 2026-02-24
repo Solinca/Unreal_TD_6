@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
+#include "Player/Capacity/BaseAbilityComponent.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -19,42 +20,46 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!MappingContext)
+	if (IsLocalController())
 	{
-		return;
-	}
-
-	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
-	{
-		if (TObjectPtr<UEnhancedInputLocalPlayerSubsystem> EILPS = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (!MappingContext)
 		{
-			EILPS->AddMappingContext(MappingContext, 0);
+			return;
 		}
-	}
 
-	MyGI = GetGameInstance<UMyGameInstance>();
+		if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
+		{
+			if (TObjectPtr<UEnhancedInputLocalPlayerSubsystem> EILPS = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				EILPS->AddMappingContext(MappingContext, 0);
+			}
+		}
 
-	MyGS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this));
+		MyChara = Cast<AMyCharacter>(GetPawn());
 
-	CurrentPlayerID = MyGI->GetCustomPlayerData().CustomPlayerID;
+		PlayerCameraManager->ViewPitchMin = -40;
 
-	MyChara = Cast<AMyCharacter>(GetPawn());
+		PlayerCameraManager->ViewPitchMax = 15;
 
-	if (MyChara && MyChara->GetCharacterMovement())
-	{
 		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
+
+		SetShowMouseCursor(false);
+
+		SetInputMode(UIOnly);
 	}
-
-	PlayerCameraManager->ViewPitchMin = -40;
-
-	PlayerCameraManager->ViewPitchMax = 15;
-
-	SetShowMouseCursor(false);
-
-	SetInputMode(UIOnly);
 }
 
-void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, int WaitingTime)
+void AMyPlayerController::SetupServer_Implementation(FCustomPlayerData Data, class UMonsterDataAsset* MonsterData)
+{
+	CustomPlayerData = Data;
+
+	if (Data.CurrentTeam == ETeam::MONSTER)
+	{
+		MyMonsterData = MonsterData;
+	}
+}
+
+void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, UMonsterDataAsset* MonsterData, int WaitingTime)
 {
 	CustomPlayerData = Data;
 
@@ -67,6 +72,8 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, int
 	else if (Data.CurrentTeam == ETeam::MONSTER)
 	{
 		SetupInput(MonsterInputDataList);
+
+		MyMonsterData = MonsterData;
 	}
 
 	WaitingScreenWidget = CreateWidget<UWaitingScreenWidget>(this, WaitingScreenWidgetClass);
@@ -74,8 +81,6 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, int
 	WaitingScreenWidget->AddToViewport();
 
 	FTimerHandle WaitingScreenHandle;
-
-	// TODO: Je comprends pas, dès fois les clients wait pendant au moins 15 secondes Oo
 
 	GetWorld()->GetTimerManager().SetTimer(WaitingScreenHandle, this, &AMyPlayerController::OnWaitingComplete, WaitingTime, false);
 }
@@ -87,9 +92,6 @@ void AMyPlayerController::OnWaitingComplete()
 
 void AMyPlayerController::RegisterReadyToGameState_Implementation()
 {
-	// TODO: Dès fois, j'ai lancé une game sans le waiting screen + countdown
-	// Comme si les joueurs étaient ready d'office. A voir si on reproduit
-
 	Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(this))->PlayerHasLoaded();
 }
 
@@ -215,18 +217,18 @@ void AMyPlayerController::InteractStop(const FInputActionValue& Value)
 
 void AMyPlayerController::TriggerAttack(const FInputActionValue& Value)
 {
-	AskToTriggerAttack(CurrentPlayerID);
+	AskToTriggerAttack();
 }
 
-void AMyPlayerController::AskToTriggerAttack_Implementation(FUniqueNetIdRepl PlayerID)
+void AMyPlayerController::AskToTriggerAttack_Implementation()
 {
-	if (CanAttack)
+	if (CanAttack && MyMonsterData)
 	{
 		CanAttack = false;
 
 		PlayAttackAnimation();
 
-		GetWorld()->GetTimerManager().SetTimer(ResetAttackHandle, this, &AMyPlayerController::ResetAttack, MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType)->MonsterAttackCooldown, false);
+		GetWorld()->GetTimerManager().SetTimer(ResetAttackHandle, this, &AMyPlayerController::ResetAttack, MyMonsterData->MonsterAttackCooldown, false);
 	}
 }
 
@@ -242,24 +244,19 @@ void AMyPlayerController::ResetAttack()
 
 void AMyPlayerController::TriggerSpecial(const FInputActionValue& Value)
 {
-	AskToTriggerSpecial(CurrentPlayerID);
+	AskToTriggerSpecial();
 }
 
-void AMyPlayerController::AskToTriggerSpecial_Implementation(FUniqueNetIdRepl PlayerID)
+void AMyPlayerController::AskToTriggerSpecial_Implementation()
 {
-	if (CanTriggerSpecial)
+	if (CanTriggerSpecial && MyMonsterData)
 	{
 		CanTriggerSpecial = false;
 
-		PlaySpecialAnimation();
+		GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StartAbility(MyMonsterData);
 
-		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyGS->RetrieveMonsterData(MyGI->RetrieveServerPlayerData(PlayerID).MonsterType)->MonsterSpecialCooldown, false);
+		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyMonsterData->MonsterSpecialCooldown, false);
 	}
-}
-
-void AMyPlayerController::PlaySpecialAnimation_Implementation()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Player Special");
 }
 
 void AMyPlayerController::ResetSpecial()

@@ -2,6 +2,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interface/Interactable.h"
@@ -21,6 +22,22 @@ AMyCharacter::AMyCharacter()
 	Flashlight = CreateDefaultSubobject<USpotLightComponent>("Flashlight");
 
 	Flashlight->SetupAttachment(RootComponent);
+
+	PostProcess = CreateDefaultSubobject<UPostProcessComponent>("Post Process");
+
+	PostProcess->SetupAttachment(Camera);
+}
+
+void AMyCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PostProcess->Settings = DefaultPostProcess;
+}
+
+void AMyCharacter::ChangePostProcess(const bool bIsDefault) const
+{
+	PostProcess->Settings = bIsDefault ? DefaultPostProcess : NightVisionPostProcess;
 }
 
 void AMyCharacter::ToggleFlashlight_Implementation()

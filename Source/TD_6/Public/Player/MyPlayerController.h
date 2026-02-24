@@ -33,17 +33,13 @@ private:
 
 	TObjectPtr<class UWaitingScreenWidget> WaitingScreenWidget = nullptr;
 
-	TObjectPtr<class UMyGameInstance> MyGI = nullptr;
-
-	TObjectPtr<class AMyBaseLevelGameState> MyGS = nullptr;
+	TObjectPtr<class UMonsterDataAsset> MyMonsterData;
 
 	FCustomPlayerData CustomPlayerData;
 
 	FTimerHandle ResetAttackHandle;
 
 	FTimerHandle ResetSpecialHandle;
-
-	FUniqueNetIdRepl CurrentPlayerID;
 
 	FInputModeGameOnly GameOnly;
 
@@ -73,7 +69,7 @@ private:
 	void SetupInput(TArray<FInputData> InputDataList);
 
 	UFUNCTION(Server, Reliable)
-	void AskToTriggerAttack(FUniqueNetIdRepl PlayerID);
+	void AskToTriggerAttack();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void PlayAttackAnimation();
@@ -81,10 +77,7 @@ private:
 	void ResetAttack();
 
 	UFUNCTION(Server, Reliable)
-	void AskToTriggerSpecial(FUniqueNetIdRepl PlayerID);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void PlaySpecialAnimation();
+	void AskToTriggerSpecial();
 
 	void ResetSpecial();
 
@@ -162,8 +155,11 @@ protected:
 	void TriggerSpecial(const FInputActionValue& Value);
 
 public:
+	UFUNCTION(Server, Reliable)
+	void SetupServer(FCustomPlayerData Data, class UMonsterDataAsset* MonsterData);
+
 	UFUNCTION(Client, Reliable)
-	void SetupClient(FCustomPlayerData Data, int WaitingTime);
+	void SetupClient(FCustomPlayerData Data, class UMonsterDataAsset* MonsterData, int WaitingTime);
 
 	UFUNCTION(Client, Reliable)
 	void ToggleWaitingScreenOff();
