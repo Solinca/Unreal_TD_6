@@ -6,7 +6,11 @@
 
 void AMyBaseLevelGameState::HandlePlayer(AController* Controller)
 {
-	Cast<AMyPlayerController>(Controller)->SetupClient(GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId()), PlayerWaitingTimeAtStart);
+	FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId());
+
+	Cast<AMyPlayerController>(Controller)->SetupServer(PlayerData, MonsterDataPerType[PlayerData.MonsterType]);
+
+	Cast<AMyPlayerController>(Controller)->SetupClient(PlayerData, MonsterDataPerType[PlayerData.MonsterType], PlayerWaitingTimeAtStart);
 }
 
 void AMyBaseLevelGameState::RemovePlayer(AController* Controller)

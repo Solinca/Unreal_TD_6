@@ -1,8 +1,8 @@
 #include "Player/MyCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "Components/PostProcessComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interface/Interactable.h"
@@ -54,19 +54,19 @@ void AMyCharacter::SetFlashlightVisibility()
 
 void AMyCharacter::InteractWithSurroundingActor_Implementation()
 {
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 
-	TArray<AActor*> OutActors;
+    TArray<AActor*> OutActors;
 
-	TArray<AActor*> ActorsToIgnore;
+    TArray<AActor*> ActorsToIgnore;
 
-	ActorsToIgnore.Add(this);
+    ActorsToIgnore.Add(this);
 
-	if (UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), InteractRange, ObjectTypes, nullptr, ActorsToIgnore, OutActors))
+    if (UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), InteractRange, ObjectTypes, nullptr, ActorsToIgnore, OutActors))
 	{
-		for (AActor* OverlappedActor : OutActors)
+        for (AActor* OverlappedActor : OutActors)
 		{
 			if (OverlappedActor->Implements<UInteractable>())
 			{
@@ -79,8 +79,8 @@ void AMyCharacter::InteractWithSurroundingActor_Implementation()
 					return;
 				}
 			}
-		}
-	}
+        }
+    }
 }
 
 void AMyCharacter::StopInteractingWithActor_Implementation()

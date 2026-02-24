@@ -44,6 +44,4 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void DestroyGame();
-
-	UMonsterDataAsset* RetrieveMonsterData(EMonsterType MonsterType) { return MonsterDataPerType[MonsterType]; };
 };

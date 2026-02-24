@@ -1,5 +1,4 @@
 #include "Player/Capacity/HuntVisionComponent.h"
-
 #include "EngineUtils.h"
 #include "Player/MyCharacter.h"
 #include "Camera/CameraComponent.h"
@@ -11,6 +10,7 @@
 UHuntVisionComponent::UHuntVisionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
 	bAutoActivate = false;
 }
 
@@ -18,56 +18,39 @@ void UHuntVisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CachedMyCharacter.IsValid())
-	{
-		CachedCamera = CachedMyCharacter->GetCameraComponent();
-	}
+	CachedCamera = CachedMyCharacter->GetCameraComponent();
 }
 
 void UHuntVisionComponent::ActivateAbility()
 {
-	if (GetOwner() && GetOwner()->HasAuthority() && MonsterDataAsset.IsValid())
-	{
-		GetWorld()->GetTimerManager().SetTimer(
-			AbilityTimer,
-			this,
-			&UBaseAbilityComponent::StopAbility,
-			MonsterDataAsset->PredatorHuntDuration,
-			false);
-	}
-
-	if (!CachedMyCharacter.IsValid() || !CachedMyPlayerController.IsValid() || !CachedCamera.IsValid())
-	{
-		return;
-	}
-
-	if (CachedMyCharacter->IsLocallyControlled())
+	if (CachedMyPlayerController.IsValid() && CachedMyPlayerController->IsLocalController())
 	{
 		CachedMyCharacter->ChangePostProcess(false);
+
 		GetWorld()->GetTimerManager().SetTimer(ScanTimerHandle, this, &UHuntVisionComponent::UpdateHuntVision, ScanInterval, true);
+
+		GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->PredatorHuntDuration, false);
 	}
 }
 
 void UHuntVisionComponent::DeactivateAbility()
 {
-	if (CachedMyCharacter.IsValid() && CachedMyCharacter->IsLocallyControlled())
+	if (CachedMyPlayerController.IsValid() && CachedMyPlayerController->IsLocalController())
 	{
-		CachedMyCharacter->ChangePostProcess();
+		CachedMyCharacter->ChangePostProcess(true);
+
 		GetWorld()->GetTimerManager().ClearTimer(ScanTimerHandle);
+
 		ClearAllHighlights();
 	}
 }
 
 void UHuntVisionComponent::UpdateHuntVision()
 {
-	if (!CachedMyPlayerController.IsValid() || !CachedCamera.IsValid() || !CachedMyCharacter.IsValid())
-	{
-		return;
-	}
-	
 	const FVector CameraLocation = CachedCamera->GetComponentLocation();
 
 	int32 ViewportSizeX, ViewportSizeY;
+
 	CachedMyPlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
 
 	TArray<TWeakObjectPtr<ACharacter>> CurrentlyVisible;
@@ -75,6 +58,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 	for (TActorIterator<AMyCharacter> It(GetWorld()); It; ++It)
 	{
 		ACharacter* OtherCharacter = *It;
+
 		if (!OtherCharacter || OtherCharacter == CachedMyCharacter.Get())
 		{
 			continue;
@@ -83,26 +67,24 @@ void UHuntVisionComponent::UpdateHuntVision()
 		const FVector TargetLocation = OtherCharacter->GetActorLocation();
 
 		FVector2D ScreenLocation;
+
 		if (!CachedMyPlayerController->ProjectWorldLocationToScreen(TargetLocation, ScreenLocation))
 		{
 			continue;
 		}
 
-		if (ScreenLocation.X < 0 || ScreenLocation.X > ViewportSizeX ||
-			ScreenLocation.Y < 0 || ScreenLocation.Y > ViewportSizeY)
+		if (ScreenLocation.X < 0 || ScreenLocation.X > ViewportSizeX || ScreenLocation.Y < 0 || ScreenLocation.Y > ViewportSizeY)
 		{
 			continue;
 		}
 
 		FHitResult HitResult;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(CachedMyCharacter.Get());
-		QueryParams.AddIgnoredActor(OtherCharacter);
 
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, TargetLocation, ECC_Visibility, QueryParams))
-		{
-			//continue;
-		}
+		FCollisionQueryParams QueryParams;
+
+		QueryParams.AddIgnoredActor(CachedMyCharacter.Get());
+
+		QueryParams.AddIgnoredActor(OtherCharacter);
 
 		CurrentlyVisible.Add(OtherCharacter);
 
@@ -120,6 +102,7 @@ void UHuntVisionComponent::UpdateHuntVision()
 			{
 				SetCharacterHighlight(HighlightedCharacters[i].Get(), false);
 			}
+
 			HighlightedCharacters.RemoveAt(i);
 		}
 	}
@@ -138,6 +121,7 @@ void UHuntVisionComponent::SetCharacterHighlight(ACharacter* Character, bool bHi
 	if (USkeletalMeshComponent* MeshComp = Character->GetMesh())
 	{
 		MeshComp->SetRenderCustomDepth(bHighlight);
+
 		if (bHighlight)
 		{
 			MeshComp->SetCustomDepthStencilValue(1);
@@ -154,5 +138,6 @@ void UHuntVisionComponent::ClearAllHighlights()
 			SetCharacterHighlight(Char.Get(), false);
 		}
 	}
+
 	HighlightedCharacters.Empty();
 }

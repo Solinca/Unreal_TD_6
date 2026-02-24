@@ -1,20 +1,35 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BaseAbilityComponent.h"
 #include "InvisibilityComponent.generated.h"
 
-class AMyCharacter;
-class APlayerController;
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TD_6_API UInvisibilityComponent : public UBaseAbilityComponent
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY()
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
+
+	FTimerHandle DissolveTimerHandle;
+
+	float CurrentDissolveTime = 0.0f;
+
+	float DissolveRate = 0.016f;
+
+	bool bIsFadingOut = false;
+
+	void InitDynamicMaterials();
+
+	void UpdateDissolve();
+
 protected:
+	UInvisibilityComponent();
+
+	virtual void BeginPlay() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Visual Effects")
 	FName DissolveParamName = "Dissolve";
 
@@ -27,25 +42,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Visual Effects")
 	float DissolveMaxValue = 1.0f;
 
-	UPROPERTY()
-	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
-
-	FTimerHandle DissolveTimerHandle;
-	
-	float CurrentDissolveTime = 0.0f;
-	float Rate = 0.016f;
-
-	bool bIsFadingOut = false;
-	
 public:
-	UInvisibilityComponent();
-
-	virtual void BeginPlay() override;
-
 	virtual void ActivateAbility() override;
-	virtual void DeactivateAbility() override;
 
-private:
-	void InitDynamicMaterials();
-	void UpdateDissolve();
+	virtual void DeactivateAbility() override;
 };
