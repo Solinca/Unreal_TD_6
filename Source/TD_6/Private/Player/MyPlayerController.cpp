@@ -41,8 +41,6 @@ void AMyPlayerController::BeginPlay()
 
 		PlayerCameraManager->ViewPitchMax = 15;
 
-		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
-
 		SetShowMouseCursor(false);
 
 		SetInputMode(UIOnly);
@@ -141,19 +139,45 @@ void AMyPlayerController::Jump(const FInputActionValue& Value)
 
 void AMyPlayerController::SprintStart(const FInputActionValue& Value)
 {
-	MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
+	if (!HasAuthority())
+	{
+		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
+
+		MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
+	}
+
+	SetIsSprintingOnServer(true);
 }
 
 void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 {
-	MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
+	if (!HasAuthority())
+	{
+		MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
+	}
+
+	SetIsSprintingOnServer(false);
+}
+
+void AMyPlayerController::SetIsSprintingOnServer_Implementation(bool IsSprinting)
+{
+	if (IsSprinting)
+	{
+		DefaultMaxSpeed = Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed;
+
+		Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
+	}
+	else
+	{
+		Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
+	}
 }
 
 void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 {
 	IsPauseMenuOpened = !IsPauseMenuOpened;
 
-	IsInteracting = false;
+	InteractStop(Value);
 
 	if (IsPauseMenuOpened)
 	{

@@ -81,6 +81,9 @@ private:
 
 	void ResetSpecial();
 
+	UFUNCTION(Server, Reliable)
+	void SetIsSprintingOnServer(bool IsSprinting);
+
 protected:
 	AMyPlayerController();
 

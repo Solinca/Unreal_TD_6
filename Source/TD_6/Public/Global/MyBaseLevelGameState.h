@@ -18,7 +18,7 @@ private:
 	int CurrentLoadedPlayer = 0;
 
 	UPROPERTY(ReplicatedUsing = DisplayTimerToClients)
-	int TimeToWaitBeforeGameStart = 6;
+	int TimeToWaitBeforeGameStart = 4;
 
 	void CountdownTimer();
 
