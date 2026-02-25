@@ -15,6 +15,10 @@ void AMyBaseLevelGameState::HandlePlayer(AController* Controller)
 	{
 		CurrentNumberOfMonsterPlayer++;
 	}
+	else if (PlayerData.CurrentTeam == ETeam::PLAYER)
+	{
+		SurvivorStateList.Add(Controller, ESurvivorState::ALIVE);
+	}
 
 	Cast<AMyPlayerController>(Controller)->SetupServer(PlayerData, MonsterDataPerType[PlayerData.MonsterType]);
 
@@ -87,8 +91,6 @@ void AMyBaseLevelGameState::RegisterPlayerObjectiveCompleted()
 
 	if (CurrentNumberOfCompletedPlayerObjective == GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers())
 	{
-		GetWorld()->GetTimerManager().ClearTimer(GameGlobalTimerHandle);
-
 		TriggerResultScreen(ETeam::PLAYER);
 	}
 }
@@ -121,8 +123,6 @@ void AMyBaseLevelGameState::CountdownGlobalTimer()
 
 	if (GlobalGameTimer <= 0)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(GameGlobalTimerHandle);
-
 		if (CurrentNumberOfCompletedPlayerObjective >= GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers() - CurrentNumberOfMonsterPlayer)
 		{
 			TriggerResultScreen(ETeam::PLAYER);
@@ -146,6 +146,8 @@ void AMyBaseLevelGameState::DisplayTimerToClients()
 
 void AMyBaseLevelGameState::TriggerResultScreen(ETeam WinningTeam)
 {
+	GetWorld()->GetTimerManager().ClearTimer(GameGlobalTimerHandle);
+
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
 		FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(It->Get()->GetPlayerState<APlayerState>()->GetUniqueId());
@@ -169,7 +171,9 @@ void AMyBaseLevelGameState::TriggerResultScreen(ETeam WinningTeam)
 				}
 			}
 
-			MyPC->DisplayResultScreen(WinningTeam, PlayerPosition);
+			MyPC->DisplayResultScreenServer(PlayerPosition);
+
+			MyPC->DisplayResultScreenClient(WinningTeam);
 		}
 	}
 
@@ -179,6 +183,53 @@ void AMyBaseLevelGameState::TriggerResultScreen(ETeam WinningTeam)
 	{
 		GetWorld()->ServerTravel("/Game/Levels/LobbyManagement?Listen");
 	}, 2, false);
+}
+
+void AMyBaseLevelGameState::KillPlayer(AController* Controller)
+{
+	if (SurvivorStateList[Controller] == ESurvivorState::ALIVE)
+	{
+		SurvivorStateList[Controller] = ESurvivorState::DOWN;
+
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
+		{
+			MyPC->KillPlayer();
+		}
+	}
+	else if (SurvivorStateList[Controller] == ESurvivorState::LAST_LIFE)
+	{
+		SurvivorStateList[Controller] = ESurvivorState::DEAD;
+
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
+		{
+			MyPC->KillPlayer();
+		}
+	}
+
+	int AlivePlayerCount = 0;
+
+	for (TTuple<AController*, ESurvivorState> SurvivorState : SurvivorStateList)
+	{
+		if (SurvivorState.Value == ESurvivorState::ALIVE || SurvivorState.Value == ESurvivorState::LAST_LIFE)
+		{
+			AlivePlayerCount++;
+		}
+	}
+
+	if (AlivePlayerCount == 0)
+	{
+		TriggerResultScreen(ETeam::MONSTER);
+	}
+}
+
+bool AMyBaseLevelGameState::CanBeResurrected(AController* Controller)
+{
+	return SurvivorStateList[Controller] == ESurvivorState::DOWN;
+}
+
+void AMyBaseLevelGameState::ResurrectPlayer(AController* Controller)
+{
+	SurvivorStateList[Controller] = ESurvivorState::LAST_LIFE;
 }
 
 void AMyBaseLevelGameState::DestroyGame_Implementation()

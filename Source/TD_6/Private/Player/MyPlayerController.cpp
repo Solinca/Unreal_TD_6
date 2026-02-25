@@ -106,7 +106,7 @@ void AMyPlayerController::SetupInput(TArray<FInputData> InputDataList)
 
 void AMyPlayerController::Move(const FInputActionValue& Value)
 {
-	if (IsInteracting)
+	if (IsInteracting || MyChara->IsPlayerDead())
 	{
 		return;
 	}
@@ -129,7 +129,7 @@ void AMyPlayerController::Look(const FInputActionValue& Value)
 
 void AMyPlayerController::Jump(const FInputActionValue& Value)
 {
-	if (IsInteracting)
+	if (IsInteracting || MyChara->IsPlayerDead())
 	{
 		return;
 	}
@@ -210,6 +210,11 @@ void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 
 void AMyPlayerController::CrouchStart(const FInputActionValue& Value)
 {
+	if (MyChara->IsPlayerDead())
+	{
+		return;
+	}
+
 	MyChara->Crouch();
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch Start");
@@ -217,6 +222,11 @@ void AMyPlayerController::CrouchStart(const FInputActionValue& Value)
 
 void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
 {
+	if (MyChara->IsPlayerDead())
+	{
+		return;
+	}
+
 	MyChara->UnCrouch();
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch End");
@@ -224,11 +234,21 @@ void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
 
 void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)
 {
+	if (MyChara->IsPlayerDead())
+	{
+		return;
+	}
+
 	MyChara->ToggleFlashlight();
 }
 
 void AMyPlayerController::InteractStart(const FInputActionValue& Value)
 {
+	if (MyChara->IsPlayerDead())
+	{
+		return;
+	}
+
 	IsInteracting = true;
 
 	MyChara->InteractWithSurroundingActor();
@@ -236,6 +256,11 @@ void AMyPlayerController::InteractStart(const FInputActionValue& Value)
 
 void AMyPlayerController::InteractStop(const FInputActionValue& Value)
 {
+	if (MyChara->IsPlayerDead())
+	{
+		return;
+	}
+
 	IsInteracting = false;
 
 	MyChara->StopInteractingWithActor();
@@ -252,15 +277,10 @@ void AMyPlayerController::AskToTriggerAttack_Implementation()
 	{
 		CanAttack = false;
 
-		PlayAttackAnimation();
+		Cast<AMyCharacter>(GetPawn())->SetIsAttacking();
 
 		GetWorld()->GetTimerManager().SetTimer(ResetAttackHandle, this, &AMyPlayerController::ResetAttack, MyMonsterData->MonsterAttackCooldown, false);
 	}
-}
-
-void AMyPlayerController::PlayAttackAnimation_Implementation()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Player Attack");
 }
 
 void AMyPlayerController::ResetAttack()
@@ -323,6 +343,11 @@ void AMyPlayerController::OnQuitButtonClicked()
 	}
 }
 
+void AMyPlayerController::KillPlayer_Implementation()
+{
+	Cast<AMyCharacter>(GetPawn())->KillPlayer();
+}
+
 void AMyPlayerController::DestroySessionOnClient_Implementation()
 {
 	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();
@@ -361,7 +386,12 @@ void AMyPlayerController::DisplayGlobalTimer_Implementation(int Countdown)
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(Countdown));
 }
 
-void AMyPlayerController::DisplayResultScreen_Implementation(ETeam WinningTeam, FVector TargetPosition)
+void AMyPlayerController::DisplayResultScreenServer_Implementation(FVector TargetPosition)
+{
+	Cast<AMyCharacter>(GetPawn())->SetActorLocation(TargetPosition);
+}
+
+void AMyPlayerController::DisplayResultScreenClient_Implementation(ETeam WinningTeam)
 {
 	if (IsPauseMenuOpened)
 	{
@@ -369,8 +399,6 @@ void AMyPlayerController::DisplayResultScreen_Implementation(ETeam WinningTeam, 
 	}
 
 	SetInputMode(UIOnly);
-
-	MyChara->SetActorLocation(TargetPosition);
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, WinningTeam == ETeam::MONSTER ? "MONSTER WIN" : "PLAYER WIN");
 }

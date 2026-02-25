@@ -71,9 +71,6 @@ private:
 	UFUNCTION(Server, Reliable)
 	void AskToTriggerAttack();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void PlayAttackAnimation();
-
 	void ResetAttack();
 
 	UFUNCTION(Server, Reliable)
@@ -176,6 +173,12 @@ public:
 	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();
 
+	UFUNCTION(Server, Reliable)
+	void KillPlayer();
+
+	UFUNCTION(Server, Reliable)
+	void DisplayResultScreenServer(FVector TargetPosition);
+
 	UFUNCTION(Client, Reliable)
-	void DisplayResultScreen(ETeam WinningTeam, FVector TargetPosition);
+	void DisplayResultScreenClient(ETeam WinningTeam);
 };

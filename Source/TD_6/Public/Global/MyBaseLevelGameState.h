@@ -5,7 +5,14 @@
 #include "Global/MyGameInstance.h"
 #include "MyBaseLevelGameState.generated.h"
 
-class UMonsterDataAsset;
+UENUM()
+enum ESurvivorState
+{
+	ALIVE,
+	DOWN,
+	LAST_LIFE,
+	DEAD
+};
 
 UCLASS()
 class TD_6_API AMyBaseLevelGameState : public AGameState
@@ -13,6 +20,8 @@ class TD_6_API AMyBaseLevelGameState : public AGameState
 	GENERATED_BODY()
 
 private:
+	TMap<class AController*, ESurvivorState> SurvivorStateList;
+
 	TArray<class ATargetPoint*> WinningTargetPointList;
 
 	TArray<class ATargetPoint*> LoosingTargetPointList;
@@ -49,7 +58,7 @@ private:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
-	TMap<TEnumAsByte<EMonsterType>, UMonsterDataAsset*> MonsterDataPerType;
+	TMap<TEnumAsByte<EMonsterType>, class UMonsterDataAsset*> MonsterDataPerType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Multiplayer|Settings")
 	float PlayerWaitingTimeAtStart = 3.f;
@@ -71,4 +80,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void DestroyGame();
+
+	void KillPlayer(AController* Controller);
+
+	void ResurrectPlayer(AController* Controller);
+
+	bool CanBeResurrected(AController* Controller);
 };

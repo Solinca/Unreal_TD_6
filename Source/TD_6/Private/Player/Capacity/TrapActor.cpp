@@ -49,27 +49,19 @@ void ATrapActor::OnTriggerOverlap(
 	}
 
 	AMyCharacter* OtherCharacter = Cast<AMyCharacter>(OtherActor);
+
 	if (!OtherCharacter)
 	{
 		return;
 	}
 
-	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
+	if (OtherActor->Tags.Contains("MONSTER"))
 	{
-		if (const APlayerController* PC = Cast<APlayerController>(OtherCharacter->GetController()))
-		{
-			if (PC->GetNetConnection())
-			{
-				const FCustomPlayerData PlayerData = GI->RetrieveServerPlayerData(PC->GetPlayerState<APlayerState>()->GetUniqueId());
-				if (PlayerData.CurrentTeam != ETeam::PLAYER)
-				{
-					return;
-				}
-			}
-		}
+		return;
 	}
 
 	bIsTriggered = true;
+
 	SnarePlayer(OtherCharacter);
 }
 
