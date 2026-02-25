@@ -69,7 +69,7 @@ protected:
 public:
 	void SetCustomPlayerName(const FString& NewPlayerName);
 
-	void SetCurrentTeam(ETeam NewTeam);
+	void SetPlayerData(FCustomPlayerData PlayerData);
 
 	FCustomPlayerData GetCustomPlayerData() { return CustomPlayerData; };
 

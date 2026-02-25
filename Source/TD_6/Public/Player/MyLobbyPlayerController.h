@@ -66,4 +66,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void TriggerLobbyAnimation();
+
+	UFUNCTION(Client, Reliable)
+	void UpdatePlayerData(FCustomPlayerData PlayerData);
 };

@@ -1,4 +1,6 @@
 #include "Player/PlayerObjective.h"
+#include "Global/MyBaseLevelGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 APlayerObjective::APlayerObjective()
@@ -12,13 +14,17 @@ void APlayerObjective::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!IsCompleted && PlayerInteractingWithCount > 0)
+	if (HasAuthority() && !IsCompleted && PlayerInteractingWithCount > 0)
 	{
 		ObjectiveProgression += DeltaTime * PlayerInteractingWithCount;
 
 		if (ObjectiveProgression >= ObjectiveGoal)
 		{
 			IsCompleted = true;
+
+			ObjectiveProgression = ObjectiveGoal;
+
+			Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld()))->RegisterPlayerObjectiveCompleted();
 		}
 
 		DisplayObjectiveProgression();

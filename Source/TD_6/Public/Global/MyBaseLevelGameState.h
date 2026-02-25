@@ -13,21 +13,39 @@ class TD_6_API AMyBaseLevelGameState : public AGameState
 	GENERATED_BODY()
 
 private:
+	TArray<class ATargetPoint*> WinningTargetPointList;
+
+	TArray<class ATargetPoint*> LoosingTargetPointList;
+
 	FTimerHandle GameStartCountdownHandle;
+
+	FTimerHandle GameGlobalTimerHandle;
 
 	int CurrentLoadedPlayer = 0;
 
 	int CurrentNumberOfMonsterPlayer = 0;
 
-	UPROPERTY(ReplicatedUsing = DisplayTimerToClients)
-	int TimeToWaitBeforeGameStart = 4;
+	int CurrentNumberOfCompletedPlayerObjective = 0;
 
 	void CountdownTimer();
+
+	UPROPERTY(ReplicatedUsing = DisplayCountdownToClients)
+	int TimeToWaitBeforeGameStart = 4;
+
+	UFUNCTION()
+	void DisplayCountdownToClients();
+
+	void CountdownGlobalTimer();
+
+	UPROPERTY(ReplicatedUsing = DisplayTimerToClients)
+	int GlobalGameTimer = 301;
 
 	UFUNCTION()
 	void DisplayTimerToClients();
 
 	void SetupPlayerObjectives();
+
+	void TriggerResultScreen(ETeam WinningTeam);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
@@ -45,6 +63,8 @@ public:
 	void HandlePlayer(AController* Controller);
 
 	void RemovePlayer(AController* Controller);
+
+	void RegisterPlayerObjectiveCompleted();
 
 	UFUNCTION(Server, Reliable)
 	void PlayerHasLoaded();

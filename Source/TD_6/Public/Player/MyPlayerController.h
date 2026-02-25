@@ -171,5 +171,11 @@ public:
 	void DisplayCountdown(int Countdown);
 
 	UFUNCTION(Client, Reliable)
+	void DisplayGlobalTimer(int Countdown);
+
+	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();
+
+	UFUNCTION(Client, Reliable)
+	void DisplayResultScreen(ETeam WinningTeam, FVector TargetPosition);
 };

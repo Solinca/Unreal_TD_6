@@ -16,6 +16,11 @@ void AMyBaseLevelGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
+	if (!GetWorld() || GetWorld()->bIsTearingDown)
+	{
+		return;
+	}
+
 	GetGameState<AMyBaseLevelGameState>()->RemovePlayer(Controller);
 }
 

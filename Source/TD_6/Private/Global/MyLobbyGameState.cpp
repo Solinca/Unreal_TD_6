@@ -115,6 +115,11 @@ void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Cont
 
 			ServerPlayerDataList[Data.CustomPlayerID].CurrentTeam = NewTeam;
 
+			if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(Controller))
+			{
+				MyLPC->UpdatePlayerData(Data);
+			}
+
 			break;
 		}
 	}
@@ -131,6 +136,11 @@ void AMyLobbyGameState::ChangePlayerMonsterType_Implementation(AController* Cont
 			Data.MonsterType = MonsterType;
 
 			ServerPlayerDataList[Data.CustomPlayerID].MonsterType = MonsterType;
+
+			if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(Controller))
+			{
+				MyLPC->UpdatePlayerData(Data);
+			}
 
 			break;
 		}

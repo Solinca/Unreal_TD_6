@@ -339,3 +339,22 @@ void AMyPlayerController::DisplayCountdown_Implementation(int Countdown)
 		WaitingScreenWidget->PlayCountdownTextPopupAnimation();
 	}
 }
+
+void AMyPlayerController::DisplayGlobalTimer_Implementation(int Countdown)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(Countdown));
+}
+
+void AMyPlayerController::DisplayResultScreen_Implementation(ETeam WinningTeam, FVector TargetPosition)
+{
+	if (IsPauseMenuOpened)
+	{
+		ToggleMenu(FInputActionValue{});
+	}
+
+	SetInputMode(UIOnly);
+
+	MyChara->SetActorLocation(TargetPosition);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, WinningTeam == ETeam::MONSTER ? "MONSTER WIN" : "PLAYER WIN");
+}

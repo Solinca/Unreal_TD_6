@@ -13,7 +13,7 @@ void UMyGameInstance::SetCustomPlayerName(const FString& NewPlayerName)
 	CustomPlayerData.CustomPlayerName = NewPlayerName;
 }
 
-void UMyGameInstance::SetCurrentTeam(ETeam NewTeam)
+void UMyGameInstance::SetPlayerData(FCustomPlayerData PlayerData)
 {
-	CustomPlayerData.CurrentTeam = NewTeam;
+	CustomPlayerData = PlayerData;
 }

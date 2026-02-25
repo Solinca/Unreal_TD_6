@@ -22,6 +22,11 @@ void AMyLobbyPlayerController::BeginPlay()
 	}
 }
 
+void AMyLobbyPlayerController::UpdatePlayerData_Implementation(FCustomPlayerData PlayerData)
+{
+	GetGameInstance<UMyGameInstance>()->SetPlayerData(PlayerData);
+}
+
 void AMyLobbyPlayerController::RegisterPlayerDataToGameState_Implementation(const FCustomPlayerData& CustomPlayerData)
 {
 	Cast<AMyLobbyGameState>(UGameplayStatics::GetGameState(this))->RegisterPlayerData(CustomPlayerData);
