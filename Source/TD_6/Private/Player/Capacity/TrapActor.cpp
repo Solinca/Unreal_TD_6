@@ -25,13 +25,6 @@ ATrapActor::ATrapActor()
 	TrapMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ATrapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ATrapActor, SnareTime);
-}
-
 void ATrapActor::InitTrap(float InSnareTime)
 {
 	SnareTime = InSnareTime;

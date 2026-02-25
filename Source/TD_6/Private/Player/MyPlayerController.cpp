@@ -161,15 +161,17 @@ void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 
 void AMyPlayerController::SetIsSprintingOnServer_Implementation(bool IsSprinting)
 {
+	UCharacterMovementComponent* CMC = Cast<AMyCharacter>(GetPawn())->GetCharacterMovement();
+
 	if (IsSprinting)
 	{
-		DefaultMaxSpeed = Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed;
+		DefaultMaxSpeed = CMC->MaxWalkSpeed;
 
-		Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
+		CMC->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
 	}
 	else
 	{
-		Cast<AMyCharacter>(GetPawn())->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
+		CMC->MaxWalkSpeed = DefaultMaxSpeed;
 	}
 }
 
@@ -279,10 +281,6 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 
 		GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StartAbility(MyMonsterData);
 
-<<<<<<< HEAD
-		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyMonsterData->MonsterSpecialCooldown, false);
-=======
-
 		GetWorld()->GetTimerManager().SetTimer(
 			ResetSpecialHandle,
 			this,
@@ -290,32 +288,27 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 			MyMonsterData->MonsterSpecialCooldown,
 			false);
 
-		
+
 		if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
 		{
 			BaseAbility->StartAbility(MyMonsterData);
 		}
->>>>>>> 5baeb6f (Switch special handling to BaseAbilityComponent)
 	}
 }
 
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
-<<<<<<< HEAD
-=======
+
 	if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
 	{
 		BaseAbility->StopAbility();
 	}
->>>>>>> 5baeb6f (Switch special handling to BaseAbilityComponent)
 }
 
 void AMyPlayerController::OnContinueButtonClicked()
 {
-	FInputActionValue _;
-
-	ToggleMenu(_);
+	ToggleMenu(FInputActionValue{});
 }
 
 void AMyPlayerController::OnQuitButtonClicked()

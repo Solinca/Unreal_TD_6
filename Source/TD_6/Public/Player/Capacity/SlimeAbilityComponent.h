@@ -12,6 +12,10 @@ class TD_6_API USlimeAbilityComponent : public UBaseAbilityComponent
 {
 	GENERATED_BODY()
 
+private:
+	UFUNCTION(Server, Reliable)
+	void SetMovementSpeedServerSide(float MovementSpeed);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Slime|Transformation")
 	float TransformationDuration = 2.f;

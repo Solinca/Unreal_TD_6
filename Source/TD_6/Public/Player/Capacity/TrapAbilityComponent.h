@@ -27,7 +27,7 @@ public:
 	UTrapAbilityComponent();
 
 	virtual void ActivateAbility() override;
-	virtual void DeactivateAbility() override;
+	virtual void DeactivateAbility() override {};
 
 private:
 	void RemoveOldestTrapIfNeeded();

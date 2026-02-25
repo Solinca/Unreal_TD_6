@@ -39,6 +39,8 @@ void USlimeAbilityComponent::ActivateAbility()
 
 	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = TransformationSlowSpeed;
 
+	SetMovementSpeedServerSide(TransformationSlowSpeed);
+
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 
 	TimerManager.SetTimer(
@@ -79,6 +81,8 @@ void USlimeAbilityComponent::OnTransformationComplete()
 	bIsTransforming = false;
 
 	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = SlimeSprintSpeed;
+
+	SetMovementSpeedServerSide(SlimeSprintSpeed);
 }
 
 void USlimeAbilityComponent::DeactivateAbility()
@@ -93,6 +97,8 @@ void USlimeAbilityComponent::DeactivateAbility()
 	CurrentLerpTime = 0.f;
 
 	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = TransformationSlowSpeed;
+
+	SetMovementSpeedServerSide(TransformationSlowSpeed);
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 
@@ -123,6 +129,8 @@ void USlimeAbilityComponent::OnRevertTransformationComplete()
 	bIsTransforming = false;
 
 	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
+
+	SetMovementSpeedServerSide(DefaultMaxSpeed);
 }
 
 void USlimeAbilityComponent::UpdateScaleLerp()
@@ -146,4 +154,9 @@ void USlimeAbilityComponent::UpdateScaleLerp()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ScaleLerpTimerHandle);
 	}
+}
+
+void USlimeAbilityComponent::SetMovementSpeedServerSide_Implementation(float MovementSpeed)
+{
+	Cast<AMyCharacter>(GetOwner())->GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 }

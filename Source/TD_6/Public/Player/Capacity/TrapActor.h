@@ -27,7 +27,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Trap|Settings")
 	float TriggerRadius = 80.f;
 
-	UPROPERTY(Replicated)
 	float SnareTime = 3.f;
 
 	TWeakObjectPtr<AMyCharacter> SnaredCharacter = nullptr;
@@ -58,8 +57,6 @@ private:
 
 public:
 	ATrapActor();
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void InitTrap(float InSnareTime);
 };

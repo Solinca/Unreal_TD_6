@@ -75,11 +75,6 @@ void UTrapAbilityComponent::ActivateAbility()
 	}
 }
 
-void UTrapAbilityComponent::DeactivateAbility()
-{
-
-}
-
 void UTrapAbilityComponent::RemoveOldestTrapIfNeeded()
 {
 	SpawnedTraps.RemoveAll([](const TWeakObjectPtr<ATrapActor>& Trap)
