@@ -54,7 +54,7 @@ private:
 	void ReleasePlayer();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnPlayerReleased();
+	void MulticastOnPlayerReleased();	
 
 public:
 	ATrapActor();

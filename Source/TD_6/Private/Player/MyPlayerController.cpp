@@ -279,13 +279,36 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 
 		GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StartAbility(MyMonsterData);
 
+<<<<<<< HEAD
 		GetWorld()->GetTimerManager().SetTimer(ResetSpecialHandle, this, &AMyPlayerController::ResetSpecial, MyMonsterData->MonsterSpecialCooldown, false);
+=======
+
+		GetWorld()->GetTimerManager().SetTimer(
+			ResetSpecialHandle,
+			this,
+			&AMyPlayerController::ResetSpecial,
+			MyMonsterData->MonsterSpecialCooldown,
+			false);
+
+		
+		if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
+		{
+			BaseAbility->StartAbility(MyMonsterData);
+		}
+>>>>>>> 5baeb6f (Switch special handling to BaseAbilityComponent)
 	}
 }
 
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
+<<<<<<< HEAD
+=======
+	if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
+	{
+		BaseAbility->StopAbility();
+	}
+>>>>>>> 5baeb6f (Switch special handling to BaseAbilityComponent)
 }
 
 void AMyPlayerController::OnContinueButtonClicked()
