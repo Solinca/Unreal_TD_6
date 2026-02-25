@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/MyCharacter.h"
 #include "Player/Capacity/HookAbilityComponent.h"
 #include "Global/MyGameInstance.h"
@@ -12,17 +13,39 @@ AHookProjectile::AHookProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	SetReplicatingMovement(true);
+
+	SetReplicatingMovement(false);
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionSphere"));
 	CollisionSphere->SetSphereRadius(CollisionRadius);
-	CollisionSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	CollisionSphere->SetGenerateOverlapEvents(true);
+	CollisionSphere->SetCollisionProfileName(TEXT("NoCollision"));
+	CollisionSphere->SetGenerateOverlapEvents(false);
 	SetRootComponent(CollisionSphere);
 
 	HookMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HookMesh"));
 	HookMesh->SetupAttachment(CollisionSphere);
 	HookMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HookMesh->SetIsReplicated(false);
+}
+
+void AHookProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHookProjectile, CurrentState);
+	DOREPLIFETIME(AHookProjectile, CurrentReach);
+	DOREPLIFETIME(AHookProjectile, LaunchOrigin);
+	DOREPLIFETIME(AHookProjectile, TravelDirection);
+}
+
+void AHookProjectile::OnRep_CurrentReach()
+{
+	UpdateHookScale();
+}
+
+void AHookProjectile::OnRep_CurrentState()
+{
+	// Les clients peuvent réagir aux changements d'état ici (ex: SFX, animations)
 }
 
 void AHookProjectile::InitHook(UHookAbilityComponent* InAbility, float InMaxDistance, float InHookSpeed, float InReelingTime)
@@ -31,9 +54,13 @@ void AHookProjectile::InitHook(UHookAbilityComponent* InAbility, float InMaxDist
 	MaxDistance = InMaxDistance;
 	HookSpeed = InHookSpeed;
 	ReelingTime = InReelingTime;
+
 	LaunchOrigin = GetActorLocation();
 	TravelDirection = GetActorForwardVector();
 	CurrentState = EHookState::Traveling;
+	CurrentReach = 0.f;
+
+	UpdateHookScale();
 
 	if (AMyCharacter* OwnerChara = Cast<AMyCharacter>(GetOwner()))
 	{
@@ -42,8 +69,6 @@ void AHookProjectile::InitHook(UHookAbilityComponent* InAbility, float InMaxDist
 
 	if (HasAuthority())
 	{
-		CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AHookProjectile::OnHitSomething);
-
 		FreezeCharacter(CachedOwnerCharacter.Get());
 	}
 }
@@ -52,7 +77,20 @@ void AHookProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!HasAuthority() || CurrentState == EHookState::Finished)
+	if (!HasAuthority())
+	{
+		if (CachedOwnerCharacter.IsValid())
+		{
+			SetActorLocation(CachedOwnerCharacter->GetActorLocation());
+		}
+		else if (const AActor* OwnerActor = GetOwner())
+		{
+			SetActorLocation(OwnerActor->GetActorLocation());
+		}
+		return;
+	}
+
+	if (CurrentState == EHookState::Finished)
 	{
 		return;
 	}
@@ -64,51 +102,102 @@ void AHookProjectile::Tick(float DeltaTime)
 		return;
 	}
 
+	SetActorLocation(CachedOwnerCharacter->GetActorLocation());
+	LaunchOrigin = CachedOwnerCharacter->GetActorLocation();
+
 	switch (CurrentState)
 	{
 	case EHookState::Traveling:
-	{
 		Traveling(DeltaTime);
 		break;
-	}
-		
+
 	case EHookState::Pulling:
-	{
 		Pulling(DeltaTime);
-	}
+		break;
 
 	case EHookState::Returning:
-	{
 		Returning(DeltaTime);
-	}
+		break;
 
 	default:
 		break;
 	}
 }
 
+FVector AHookProjectile::GetHookTipLocation() const
+{
+	return LaunchOrigin + TravelDirection * CurrentReach;
+}
+
+void AHookProjectile::UpdateHookScale()
+{
+	const float ScaleZ = FMath::Max(CurrentReach / BaseHookLength, 0.01f);
+	HookMesh->SetWorldScale3D(FVector(1.f, 1.f, ScaleZ));
+}
+
 void AHookProjectile::Traveling(float DeltaTime)
 {
-	const FVector PreviousLocation = GetActorLocation();
-	const FVector Delta = TravelDirection * HookSpeed * DeltaTime;
-	const FVector NewLocation = PreviousLocation + Delta;
+	const float PreviousReach = CurrentReach;
+	CurrentReach = FMath::Min(CurrentReach + HookSpeed * DeltaTime, MaxDistance);
 
-	FHitResult WallHit;
+	const FVector TraceStart = LaunchOrigin + TravelDirection * PreviousReach;
+	const FVector TraceEnd = LaunchOrigin + TravelDirection * CurrentReach;
+
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 	QueryParams.AddIgnoredActor(GetOwner());
 
-	if (GetWorld()->LineTraceSingleByChannel(WallHit, PreviousLocation, NewLocation, ECC_Visibility, QueryParams))
+	FHitResult WallHit;
+	
+	if (GetWorld()->LineTraceSingleByChannel(WallHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		SetActorLocation(WallHit.ImpactPoint);
+		CurrentReach = FVector::Dist(LaunchOrigin, WallHit.ImpactPoint);
+		UpdateHookScale();
 		MulticastOnHookMiss();
 		StartReturning();
 		return;
 	}
 
-	SetActorLocation(NewLocation);
+	FHitResult CharacterHit;
+	
+	if (GetWorld()->SweepSingleByChannel(
+		CharacterHit,
+		TraceStart,
+		TraceEnd,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(CollisionRadius),
+		QueryParams))
+	{
+		
+		AMyCharacter* HitCharacter = Cast<AMyCharacter>(CharacterHit.GetActor());
+		
+		if (HitCharacter && HitCharacter != GetOwner() && IsPlayerTeam(HitCharacter))
+		{
+			FCollisionQueryParams WallCheckParams;
+			WallCheckParams.AddIgnoredActor(this);
+			WallCheckParams.AddIgnoredActor(GetOwner());
+			WallCheckParams.AddIgnoredActor(HitCharacter);
 
-	if (FVector::Dist(LaunchOrigin, NewLocation) >= MaxDistance)
+			FHitResult WallCheck;
+			if (!GetWorld()->LineTraceSingleByChannel(
+				WallCheck,
+				LaunchOrigin,
+				HitCharacter->GetActorLocation(),
+				ECC_Visibility,
+				WallCheckParams))
+			{
+				CurrentReach = FVector::Dist(LaunchOrigin, CharacterHit.ImpactPoint);
+				UpdateHookScale();
+				StartPulling(HitCharacter);
+				return;
+			}
+		}
+	}
+
+	UpdateHookScale();
+
+	if (CurrentReach >= MaxDistance)
 	{
 		MulticastOnHookMiss();
 		StartReturning();
@@ -144,80 +233,30 @@ void AHookProjectile::Pulling(float DeltaTime)
 	}
 
 	const FVector Dir = (OwnerLocation - TargetLocation).GetSafeNormal();
-	const FVector NextPosition = TargetLocation + Dir * PullSpeed * DeltaTime;
-	HookedCharacter->SetActorLocation(NextPosition, false);
+	HookedCharacter->SetActorLocation(TargetLocation + Dir * PullSpeed * DeltaTime, false);
 
-	SetActorLocation(HookedCharacter->GetActorLocation());
+	CurrentReach = FVector::Dist(OwnerLocation, HookedCharacter->GetActorLocation());
+	UpdateHookScale();
 }
 
 void AHookProjectile::Returning(float DeltaTime)
 {
-	const FVector OwnerLocation = CachedOwnerCharacter->GetActorLocation();
-	const FVector CurrentLocation = GetActorLocation();
-	const float Dist = FVector::Dist(CurrentLocation, OwnerLocation);
+	CurrentReach -= ReturnSpeed * DeltaTime;
 
-	if (Dist <= ReturnArrivalDistance)
+	if (CurrentReach <= 0.f)
 	{
+		CurrentReach = 0.f;
+		UpdateHookScale();
 		FinishHook();
 	}
 	else
 	{
-		const FVector Dir = (OwnerLocation - CurrentLocation).GetSafeNormal();
-		SetActorLocation(CurrentLocation + Dir * ReturnSpeed * DeltaTime);
+		UpdateHookScale();
 	}
-}
-
-void AHookProjectile::OnHitSomething(
-	UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	if (!HasAuthority() || CurrentState != EHookState::Traveling)
-	{
-		return;
-	}
-
-	if (OtherActor == GetOwner() || OtherActor == this)
-	{
-		return;
-	}
-
-	AMyCharacter* HitCharacter = Cast<AMyCharacter>(OtherActor);
-	if (!HitCharacter)
-	{
-		return;
-	}
-
-	if (!IsPlayerTeam(HitCharacter))
-	{
-		return;
-	}
-
-	FHitResult WallCheck;
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
-	QueryParams.AddIgnoredActor(GetOwner());
-	QueryParams.AddIgnoredActor(HitCharacter);
-
-	if (GetWorld()->LineTraceSingleByChannel(
-		WallCheck,
-		GetActorLocation(),
-		HitCharacter->GetActorLocation(),
-		ECC_Visibility,
-		QueryParams))
-	{
-		return;
-	}
-
-	StartPulling(HitCharacter);
 }
 
 void AHookProjectile::StartPulling(AMyCharacter* TargetCharacter)
 {
-	CurrentState = EHookState::Pulling;
 	HookedCharacter = TargetCharacter;
 	PullElapsedTime = 0.f;
 
@@ -232,7 +271,22 @@ void AHookProjectile::StartPulling(AMyCharacter* TargetCharacter)
 
 	FreezeCharacter(TargetCharacter);
 
+	CurrentState = EHookState::Pulling;
 	MulticastOnHookHit();
+}
+
+void AHookProjectile::StartReturning()
+{
+	if (CachedOwnerCharacter.IsValid())
+	{
+		ReturnSpeed = CurrentReach / FMath::Max(ReelingTime, 0.01f);
+	}
+	else
+	{
+		ReturnSpeed = HookSpeed;
+	}
+
+	CurrentState = EHookState::Returning;
 }
 
 void AHookProjectile::ReleasePulledPlayer()
@@ -244,29 +298,11 @@ void AHookProjectile::ReleasePulledPlayer()
 	}
 }
 
-void AHookProjectile::StartReturning()
-{
-	CurrentState = EHookState::Returning;
-
-	if (CachedOwnerCharacter.IsValid())
-	{
-		const float Dist = FVector::Dist(GetActorLocation(), CachedOwnerCharacter->GetActorLocation());
-		ReturnSpeed = Dist / FMath::Max(ReelingTime, 0.01f);
-	}
-	else
-	{
-		ReturnSpeed = HookSpeed;
-	}
-
-	CollisionSphere->SetGenerateOverlapEvents(false);
-}
-
 void AHookProjectile::FinishHook()
 {
 	CurrentState = EHookState::Finished;
 
 	ReleasePulledPlayer();
-
 	UnfreezeCharacter(CachedOwnerCharacter.Get());
 
 	MulticastOnHookFinished();
@@ -323,7 +359,7 @@ void AHookProjectile::MulticastOnHookMiss_Implementation()
 
 void AHookProjectile::MulticastOnHookFinished_Implementation()
 {
-	// Placeholder VFX/SFX hook finished
+	// Placeholder VFX/SFX
 }
 
 bool AHookProjectile::IsPlayerTeam(AMyCharacter* Character) const

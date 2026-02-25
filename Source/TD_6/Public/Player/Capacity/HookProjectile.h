@@ -5,12 +5,14 @@
 #include "HookProjectile.generated.h"
 
 class USphereComponent;
-class UHookAbilityComponent;
+class UStaticMeshComponent;
 class AMyCharacter;
+class UHookAbilityComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum class EHookState : uint8
 {
+	Idle,
 	Traveling,
 	Pulling,
 	Returning,
@@ -18,87 +20,99 @@ enum class EHookState : uint8
 };
 
 UCLASS()
-class TD_6_API AHookProjectile : public AActor
+class AHookProjectile : public AActor
 {
 	GENERATED_BODY()
-
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Hook")
-	TObjectPtr<USphereComponent> CollisionSphere = nullptr;
-
-	UPROPERTY(VisibleAnywhere, Category = "Hook")
-	TObjectPtr<UStaticMeshComponent> HookMesh = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pull")
-	float PullDuration = 2.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pull")
-	float PullArrivalDistance = 120.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pull")
-	float PullTimeout = 3.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Settings")
-	float CollisionRadius = 30.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Settings")
-	float ReturnArrivalDistance = 100.f;
-
-	TWeakObjectPtr<UHookAbilityComponent> OwningAbility = nullptr;
-	TWeakObjectPtr<AMyCharacter> CachedOwnerCharacter = nullptr;
-	TWeakObjectPtr<AMyCharacter> HookedCharacter = nullptr;
-
-	FVector LaunchOrigin = FVector::ZeroVector;
-	FVector TravelDirection = FVector::ZeroVector;
-
-	float MaxDistance = 0.f;
-	float HookSpeed = 0.f;
-	float ReelingTime = 0.f;
-	float ReturnSpeed = 0.f;
-	float PullSpeed = 0.f;
-	float PullElapsedTime = 0.f;
-
-	EHookState CurrentState = EHookState::Finished;
-
-	UFUNCTION()
-	void OnHitSomething(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
-	void StartPulling(AMyCharacter* TargetCharacter);
-	void ReleasePulledPlayer();
-	void StartReturning();
-	void FinishHook();
-
-	void FreezeCharacter(AMyCharacter* Character);
-	void UnfreezeCharacter(AMyCharacter* Character);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnHookHit();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnHookMiss();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnHookFinished();
-
-	bool IsPlayerTeam(AMyCharacter* Character) const;
 
 public:
 	AHookProjectile();
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void InitHook(UHookAbilityComponent* InAbility, float InMaxDistance, float InHookSpeed, float InReelingTime);
+	void ForceCleanup();
+
+protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USphereComponent> CollisionSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> HookMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
+	float CollisionRadius = 30.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
+	float BaseHookLength = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pulling")
+	float PullDuration = 2.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pulling")
+	float PullTimeout = 5.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Pulling")
+	float PullArrivalDistance = 150.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hook|Returning")
+	float ReturnArrivalDistance = 50.f;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentState)
+	EHookState CurrentState = EHookState::Idle;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentReach)
+	float CurrentReach = 0.f;
+
+	UPROPERTY(Replicated)
+	FVector LaunchOrigin = FVector::ZeroVector;
+
+	UPROPERTY(Replicated)
+	FVector TravelDirection = FVector::ForwardVector;
+
+	float MaxDistance = 0.f;
+	float HookSpeed = 0.f;
+	float ReelingTime = 0.f;
+	float PullSpeed = 0.f;
+	float ReturnSpeed = 0.f;
+	float PullElapsedTime = 0.f;
+
+	TWeakObjectPtr<UHookAbilityComponent> OwningAbility;
+	TWeakObjectPtr<AMyCharacter> CachedOwnerCharacter;
+	TWeakObjectPtr<AMyCharacter> HookedCharacter;
+
+private:
+	
 	void Traveling(float DeltaTime);
 	void Pulling(float DeltaTime);
 	void Returning(float DeltaTime);
 
-	void InitHook(UHookAbilityComponent* InAbility, float InMaxDistance, float InHookSpeed, float InReelingTime);
+	void StartPulling(AMyCharacter* TargetCharacter);
+	void StartReturning();
+	void ReleasePulledPlayer();
+	void FinishHook();
 
-	void ForceCleanup();
+	void FreezeCharacter(AMyCharacter* Character);
+	void UnfreezeCharacter(AMyCharacter* Character);
+
+	bool IsPlayerTeam(AMyCharacter* Character) const;
+
+	void UpdateHookScale();
+	FVector GetHookTipLocation() const;
+
+	UFUNCTION()
+	void OnRep_CurrentReach();
+
+	UFUNCTION()
+	void OnRep_CurrentState();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastOnHookHit();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastOnHookMiss();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastOnHookFinished();
 };
