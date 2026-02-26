@@ -1,5 +1,4 @@
 #include "Player/Capacity/HookProjectile.h"
-
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -8,6 +7,8 @@
 #include "Player/MyCharacter.h"
 #include "Player/Capacity/HookAbilityComponent.h"
 #include "Global/MyGameInstance.h"
+#include "Global/MyBaseLevelGameState.h"
+#include "Kismet/GameplayStatics.h"
 
 AHookProjectile::AHookProjectile()
 {
@@ -172,7 +173,7 @@ void AHookProjectile::Traveling(float DeltaTime)
 		
 		AMyCharacter* HitCharacter = Cast<AMyCharacter>(CharacterHit.GetActor());
 		
-		if (HitCharacter && HitCharacter != GetOwner() && IsPlayerTeam(HitCharacter))
+		if (HitCharacter && HitCharacter != GetOwner() && HitCharacter->Tags.Contains("PLAYER"))
 		{
 			FCollisionQueryParams WallCheckParams;
 			WallCheckParams.AddIgnoredActor(this);
@@ -262,16 +263,15 @@ void AHookProjectile::StartPulling(AMyCharacter* TargetCharacter)
 
 	if (CachedOwnerCharacter.IsValid())
 	{
-		const float InitialDist = FVector::Dist(
-			TargetCharacter->GetActorLocation(),
-			CachedOwnerCharacter->GetActorLocation()
-		);
+		const float InitialDist = FVector::Dist(TargetCharacter->GetActorLocation(), CachedOwnerCharacter->GetActorLocation());
+
 		PullSpeed = InitialDist / FMath::Max(PullDuration, 0.01f);
 	}
 
-	FreezeCharacter(TargetCharacter);
+	Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld()))->KillPlayer(TargetCharacter->GetController());
 
 	CurrentState = EHookState::Pulling;
+
 	MulticastOnHookHit();
 }
 
@@ -293,7 +293,6 @@ void AHookProjectile::ReleasePulledPlayer()
 {
 	if (HookedCharacter.IsValid())
 	{
-		UnfreezeCharacter(HookedCharacter.Get());
 		HookedCharacter = nullptr;
 	}
 }
@@ -360,26 +359,4 @@ void AHookProjectile::MulticastOnHookMiss_Implementation()
 void AHookProjectile::MulticastOnHookFinished_Implementation()
 {
 	// Placeholder VFX/SFX
-}
-
-bool AHookProjectile::IsPlayerTeam(AMyCharacter* Character) const
-{
-	if (!Character)
-	{
-		return false;
-	}
-
-	if (UMyGameInstance* GI = GetGameInstance<UMyGameInstance>())
-	{
-		if (const APlayerController* PC = Cast<APlayerController>(Character->GetController()))
-		{
-			if (const APlayerState* PS = PC->GetPlayerState<APlayerState>())
-			{
-				const FCustomPlayerData PlayerData = GI->RetrieveServerPlayerData(PS->GetUniqueId());
-				return PlayerData.CurrentTeam == ETeam::PLAYER;
-			}
-		}
-	}
-
-	return false;
 }

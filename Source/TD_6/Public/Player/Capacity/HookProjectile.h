@@ -96,8 +96,6 @@ private:
 	void FreezeCharacter(AMyCharacter* Character);
 	void UnfreezeCharacter(AMyCharacter* Character);
 
-	bool IsPlayerTeam(AMyCharacter* Character) const;
-
 	void UpdateHookScale();
 	FVector GetHookTipLocation() const;
 
