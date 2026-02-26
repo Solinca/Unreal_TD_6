@@ -10,6 +10,8 @@
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
 #include "Player/Capacity/BaseAbilityComponent.h"
+#include "UI/HudMonsterWidget.h"
+#include "UI/HudSurvivorWidget.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -66,12 +68,20 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, UMo
 	if (Data.CurrentTeam == ETeam::PLAYER)
 	{
 		SetupInput(PlayerInputDataList);
+
+		HudSurvivorWidget = CreateWidget<UHudSurvivorWidget>(this, HudSurvivorClass);
+
+		HudSurvivorWidget->AddToViewport();
 	}
 	else if (Data.CurrentTeam == ETeam::MONSTER)
 	{
 		SetupInput(MonsterInputDataList);
 
 		MyMonsterData = MonsterData;
+
+		HudMonsterWidget = CreateWidget<UHudMonsterWidget>(this, HudMonsterClass);
+
+		HudMonsterWidget->AddToViewport();
 	}
 
 	WaitingScreenWidget = CreateWidget<UWaitingScreenWidget>(this, WaitingScreenWidgetClass);
@@ -240,6 +250,8 @@ void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)
 	}
 
 	MyChara->ToggleFlashlight();
+
+	HudSurvivorWidget->ToggleFlashlight();
 }
 
 void AMyPlayerController::InteractStart(const FInputActionValue& Value)
@@ -300,6 +312,8 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 		CanTriggerSpecial = false;
 
 		GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StartAbility(MyMonsterData);
+		
+		HudMonsterWidget->StartSkillCooldown(MyMonsterData->MonsterSpecialCooldown);
 
 		GetWorld()->GetTimerManager().SetTimer(
 			ResetSpecialHandle,
@@ -307,12 +321,7 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 			&AMyPlayerController::ResetSpecial,
 			MyMonsterData->MonsterSpecialCooldown,
 			false);
-
-
-		if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
-		{
-			BaseAbility->StartAbility(MyMonsterData);
-		}
+		
 	}
 }
 
@@ -320,10 +329,7 @@ void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
 
-	if (auto BaseAbility = Cast<UBaseAbilityComponent>(GetPawn()))
-	{
-		BaseAbility->StopAbility();
-	}
+	GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StopAbility();
 }
 
 void AMyPlayerController::OnContinueButtonClicked()

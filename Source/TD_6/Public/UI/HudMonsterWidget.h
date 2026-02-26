@@ -31,8 +31,6 @@ public:
 	bool IsScreamReady() const;
 
 protected:
-	virtual void NativeConstruct() override;
-	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<URadialProgressBarImage> SkillRadialBar;
 
