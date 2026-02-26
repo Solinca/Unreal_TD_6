@@ -5,6 +5,10 @@
 #include "Interface/Interactable.h"
 #include "PlayerObjective.generated.h"
 
+
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UCLASS()
 class TD_6_API APlayerObjective : public AActor, public IInteractable
 {
@@ -21,8 +25,14 @@ private:
 	UFUNCTION()
 	void DisplayObjectiveProgression();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void ToggleEffects(const bool bShouldActivate);
+	
+
 protected:
 	APlayerObjective();
+
+	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -30,6 +40,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ObjectiveGoal = 60;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<UNiagaraSystem> Vfx;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UNiagaraComponent> NiagaraComponent = nullptr;
 
 public:
 	virtual bool InteractWith() override;
