@@ -45,7 +45,10 @@ void AMyCharacter::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 
-	PostProcess->Settings = DefaultPostProcess;
+	if (IsLocallyControlled())
+	{
+		PostProcess->Settings = DefaultPostProcess;
+	}
 
 	MyBLGS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld()));
 
