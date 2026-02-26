@@ -1,15 +1,27 @@
 #include "Player/PlayerObjective.h"
 #include "Global/MyBaseLevelGameState.h"
+#include "Global/MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Components/WidgetComponent.h"
+#include "UI/ProgressBarWidget.h"
 
 APlayerObjective::APlayerObjective()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+
+	Mesh->SetupAttachment(RootComponent);
+
+	ProgressBar = CreateDefaultSubobject<UWidgetComponent>("Progress Bar");
+
+	ProgressBar->SetupAttachment(Mesh);
 }
 
 void APlayerObjective::BeginPlay()
@@ -18,17 +30,10 @@ void APlayerObjective::BeginPlay()
 
 	if (!NiagaraComponent)
 	{
-		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			Vfx,
-			RootComponent,
-			NAME_None,
-			FVector(30, 0, 40), 
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset, 
-			false,
-			false
-		);
+		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(Vfx, RootComponent, NAME_None, FVector(30, 0, 40), FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, false, false);
 	}
+
+	Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgressBarTextVisibility(Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER);
 }
 
 void APlayerObjective::Tick(float DeltaTime)
@@ -52,11 +57,16 @@ void APlayerObjective::Tick(float DeltaTime)
 
 		DisplayObjectiveProgression();
 	}
+
+	if (APlayerCameraManager* CamManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0))
+	{
+		ProgressBar->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(ProgressBar->GetComponentLocation(), CamManager->GetCameraLocation()));
+	}
 }
 
 void APlayerObjective::DisplayObjectiveProgression()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(ObjectiveProgression));
+	Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgress(ObjectiveProgression / ObjectiveGoal);
 }
 
 void APlayerObjective::ToggleEffects_Implementation(const bool bShouldActivate)
@@ -69,6 +79,7 @@ void APlayerObjective::ToggleEffects_Implementation(const bool bShouldActivate)
 	if (!bShouldActivate)
 	{
 		NiagaraComponent->Deactivate();
+
 		return;
 	}
 

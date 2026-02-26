@@ -73,6 +73,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	FPostProcessSettings NightVisionPostProcess;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UWidgetComponent> ProgressBar = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float InteractRange = 200.f;
 

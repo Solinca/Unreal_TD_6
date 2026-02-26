@@ -5,10 +5,6 @@
 #include "Interface/Interactable.h"
 #include "PlayerObjective.generated.h"
 
-
-class UNiagaraSystem;
-class UNiagaraComponent;
-
 UCLASS()
 class TD_6_API APlayerObjective : public AActor, public IInteractable
 {
@@ -27,7 +23,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void ToggleEffects(const bool bShouldActivate);
-	
 
 protected:
 	APlayerObjective();
@@ -38,14 +33,20 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
-	float ObjectiveGoal = 60;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> Mesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UWidgetComponent> ProgressBar = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UNiagaraComponent> NiagaraComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
-	TObjectPtr<UNiagaraSystem> Vfx;
-	
-	UPROPERTY(Transient)
-	TObjectPtr<UNiagaraComponent> NiagaraComponent = nullptr;
+	TObjectPtr<class UNiagaraSystem> Vfx = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
+	float ObjectiveGoal = 60;
 
 public:
 	virtual bool InteractWith() override;

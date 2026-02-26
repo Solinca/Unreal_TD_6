@@ -2,13 +2,17 @@
 #include "Player/MyPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Global/MyBaseLevelGameState.h"
+#include "Global/MyGameInstance.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Interface/Interactable.h"
+#include "UI/ProgressBarWidget.h"
 
 AMyCharacter::AMyCharacter()
 {
@@ -29,6 +33,10 @@ AMyCharacter::AMyCharacter()
 	PostProcess = CreateDefaultSubobject<UPostProcessComponent>("Post Process");
 
 	PostProcess->SetupAttachment(Camera);
+
+	ProgressBar = CreateDefaultSubobject<UWidgetComponent>("Progress Bar");
+
+	ProgressBar->SetupAttachment(GetCapsuleComponent());
 }
 
 void AMyCharacter::BeginPlay()
@@ -40,6 +48,13 @@ void AMyCharacter::BeginPlay()
 	PostProcess->Settings = DefaultPostProcess;
 
 	MyBLGS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld()));
+
+	ProgressBar->SetVisibility(false, true);
+
+	if (UProgressBarWidget* ProgressBarWidget = Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject()))
+	{
+		ProgressBarWidget->SetProgressBarTextVisibility(!IsLocallyControlled());
+	}
 }
 
 void AMyCharacter::Tick(float DeltaTime)
@@ -59,11 +74,16 @@ void AMyCharacter::Tick(float DeltaTime)
 
 		DisplayResurrectProgression();
 	}
+
+	if (APlayerCameraManager* CamManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0))
+	{
+		ProgressBar->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(ProgressBar->GetComponentLocation(), CamManager->GetCameraLocation()));
+	}
 }
 
 void AMyCharacter::DisplayResurrectProgression()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(ResurrectProgression));
+	Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgress(ResurrectProgression / ResurrectDuration);
 }
 
 bool AMyCharacter::InteractWith()
@@ -193,6 +213,8 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 	GetMesh()->SetCollisionProfileName(IsDead ? "Ragdoll" : "CharacterMesh");
 
 	GetCapsuleComponent()->SetCollisionEnabled(IsDead ? ECollisionEnabled::QueryOnly : ECollisionEnabled::QueryAndPhysics);
+
+	ProgressBar->SetVisibility(IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
 
 	if (!IsDead)
 	{
