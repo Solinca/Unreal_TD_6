@@ -38,9 +38,14 @@ void APlayerObjective::DisplayObjectiveProgression()
 
 bool APlayerObjective::InteractWith()
 {
-	PlayerInteractingWithCount++;
+	if (!IsCompleted)
+	{
+		PlayerInteractingWithCount++;
 
-	return !IsCompleted;
+		return true;
+	}
+
+	return false;
 }
 
 void APlayerObjective::StopInteractWith()

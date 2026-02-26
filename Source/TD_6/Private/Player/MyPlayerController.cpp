@@ -348,6 +348,11 @@ void AMyPlayerController::KillPlayer_Implementation()
 	Cast<AMyCharacter>(GetPawn())->KillPlayer();
 }
 
+void AMyPlayerController::ResurrectPlayer_Implementation()
+{
+	Cast<AMyCharacter>(GetPawn())->ResurrectPlayer();
+}
+
 void AMyPlayerController::DestroySessionOnClient_Implementation()
 {
 	GetGameInstance()->GetSubsystem<UOnlineSessionSubsystem>()->DestroySession();

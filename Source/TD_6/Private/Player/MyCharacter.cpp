@@ -38,6 +38,49 @@ void AMyCharacter::BeginPlay()
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 
 	PostProcess->Settings = DefaultPostProcess;
+
+	MyBLGS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld()));
+}
+
+void AMyCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (HasAuthority() && !IsResurrectionComplete && MyBLGS && MyBLGS->CanBeResurrected(GetController()) && PlayerInteractingWithCount > 0)
+	{
+		ResurrectProgression += DeltaTime * PlayerInteractingWithCount;
+
+		if (ResurrectProgression >= ResurrectDuration)
+		{
+			MyBLGS->ResurrectPlayer(GetController());
+
+			IsResurrectionComplete = true;
+		}
+
+		DisplayResurrectProgression();
+	}
+}
+
+void AMyCharacter::DisplayResurrectProgression()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(ResurrectProgression));
+}
+
+bool AMyCharacter::InteractWith()
+{
+	if (MyBLGS && MyBLGS->CanBeResurrected(GetController()))
+	{
+		PlayerInteractingWithCount++;
+
+		return true;
+	}
+
+	return false;
+}
+
+void AMyCharacter::StopInteractWith()
+{
+	PlayerInteractingWithCount--;
 }
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -86,6 +129,8 @@ void AMyCharacter::InteractWithSurroundingActor_Implementation()
 
     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+
     TArray<AActor*> OutActors;
 
     TArray<AActor*> ActorsToIgnore;
@@ -116,6 +161,8 @@ void AMyCharacter::StopInteractingWithActor_Implementation()
 	if (IInteractable* InteractableActor = Cast<IInteractable>(InteractingActor))
 	{
 		InteractableActor->StopInteractWith();
+
+		InteractableActor = nullptr;
 	}
 }
 
@@ -123,25 +170,37 @@ void AMyCharacter::KillPlayer()
 {
 	IsDead = true;
 
-	OnPlayerDeath();
+	OnPlayerDeathStatusChanged();
+
+	StopInteractingWithActor();
+
+	IsFlashlightOn = false;
+
+	SetFlashlightVisibility();
 }
 
-void AMyCharacter::OnPlayerDeath()
+void AMyCharacter::ResurrectPlayer()
 {
-	if (IsDead)
+	IsDead = false;
+
+	OnPlayerDeathStatusChanged();
+}
+
+void AMyCharacter::OnPlayerDeathStatusChanged()
+{
+	GetMesh()->SetSimulatePhysics(IsDead);
+
+	GetMesh()->SetCollisionProfileName(IsDead ? "Ragdoll" : "CharacterMesh");
+
+	GetCapsuleComponent()->SetCollisionEnabled(IsDead ? ECollisionEnabled::QueryOnly : ECollisionEnabled::QueryAndPhysics);
+
+	if (!IsDead)
 	{
-		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 
-		GetMesh()->SetCollisionProfileName("Ragdoll");
+		GetMesh()->SetRelativeLocation(FVector(0, 0, -90.f));
 
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-		if (HasAuthority())
-		{
-			IsFlashlightOn = false;
-
-			SetFlashlightVisibility();
-		}
+		GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
 	}
 }
 
@@ -152,4 +211,6 @@ void AMyCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyCharacter, IsFlashlightOn);
 
 	DOREPLIFETIME(AMyCharacter, IsDead);
+
+	DOREPLIFETIME(AMyCharacter, ResurrectProgression);
 }

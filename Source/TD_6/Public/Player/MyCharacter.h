@@ -2,19 +2,28 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/Interactable.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
-class TD_6_API AMyCharacter : public ACharacter
+class TD_6_API AMyCharacter : public ACharacter, public IInteractable
 {
 	GENERATED_BODY()
 
 private:
+	TObjectPtr<class AMyBaseLevelGameState> MyBLGS = nullptr;
+
 	TObjectPtr<AActor> InteractingActor = nullptr;
 
 	FTimerHandle AttackHandle;
 
+	int PlayerInteractingWithCount = 0;
+
 	bool IsAttacking = false;
+
+	bool IsResurrectionComplete = false;
+
+	void ResetAttacking();
 
 	UPROPERTY(ReplicatedUsing = SetFlashlightVisibility)
 	bool IsFlashlightOn = false;
@@ -22,18 +31,24 @@ private:
 	UFUNCTION()
 	void SetFlashlightVisibility();
 
-	UPROPERTY(ReplicatedUsing = OnPlayerDeath)
+	UPROPERTY(ReplicatedUsing = OnPlayerDeathStatusChanged)
 	bool IsDead = false;
 
 	UFUNCTION()
-	void OnPlayerDeath();
+	void OnPlayerDeathStatusChanged();
 
-	void ResetAttacking();
+	UPROPERTY(ReplicatedUsing = DisplayResurrectProgression)
+	float ResurrectProgression = 0;
+
+	UFUNCTION()
+	void DisplayResurrectProgression();
 
 protected:
 	AMyCharacter();
 
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -64,6 +79,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float AttackAnimationTime = 1.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
+	float ResurrectDuration = 5;
+
 public:
 	UFUNCTION(Server, Reliable)
 	void ToggleFlashlight();
@@ -81,7 +99,13 @@ public:
 
 	void KillPlayer();
 
+	void ResurrectPlayer();
+
 	bool IsPlayerDead() { return IsDead; };
 
 	UCameraComponent* GetCameraComponent() const { return Camera; }
+
+	virtual bool InteractWith() override;
+
+	virtual void StopInteractWith() override;
 };

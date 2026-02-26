@@ -224,12 +224,17 @@ void AMyBaseLevelGameState::KillPlayer(AController* Controller)
 
 bool AMyBaseLevelGameState::CanBeResurrected(AController* Controller)
 {
-	return SurvivorStateList[Controller] == ESurvivorState::DOWN;
+	return SurvivorStateList.Contains(Controller) && SurvivorStateList[Controller] == ESurvivorState::DOWN;
 }
 
 void AMyBaseLevelGameState::ResurrectPlayer(AController* Controller)
 {
 	SurvivorStateList[Controller] = ESurvivorState::LAST_LIFE;
+
+	if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
+	{
+		MyPC->ResurrectPlayer();
+	}
 }
 
 void AMyBaseLevelGameState::DestroyGame_Implementation()

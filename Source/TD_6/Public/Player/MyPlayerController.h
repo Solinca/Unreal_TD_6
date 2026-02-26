@@ -177,6 +177,9 @@ public:
 	void KillPlayer();
 
 	UFUNCTION(Server, Reliable)
+	void ResurrectPlayer();
+
+	UFUNCTION(Server, Reliable)
 	void DisplayResultScreenServer(FVector TargetPosition);
 
 	UFUNCTION(Client, Reliable)
