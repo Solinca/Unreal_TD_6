@@ -43,6 +43,8 @@ private:
 	UFUNCTION()
 	void DisplayResurrectProgression();
 
+	void StopCollidingWithCamera();
+
 protected:
 	AMyCharacter();
 

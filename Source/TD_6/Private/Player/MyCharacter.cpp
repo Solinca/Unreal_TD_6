@@ -58,6 +58,15 @@ void AMyCharacter::BeginPlay()
 	{
 		ProgressBarWidget->SetProgressBarTextVisibility(!IsLocallyControlled());
 	}
+
+	StopCollidingWithCamera();
+}
+
+void AMyCharacter::StopCollidingWithCamera()
+{
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void AMyCharacter::Tick(float DeltaTime)
@@ -215,7 +224,9 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 
 	GetMesh()->SetCollisionProfileName(IsDead ? "Ragdoll" : "CharacterMesh");
 
-	GetCapsuleComponent()->SetCollisionEnabled(IsDead ? ECollisionEnabled::QueryOnly : ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionProfileName(IsDead ? "Ragdoll" : "Pawn");
+
+	StopCollidingWithCamera();
 
 	ProgressBar->SetVisibility(IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
 
