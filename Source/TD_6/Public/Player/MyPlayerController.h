@@ -34,6 +34,12 @@ private:
 	TObjectPtr<class UWaitingScreenWidget> WaitingScreenWidget = nullptr;
 
 	TObjectPtr<class UMonsterDataAsset> MyMonsterData;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<class UHudSurvivorWidget> HudSurvivorWidget{ nullptr };
+	
+	UPROPERTY(Transient)
+	TObjectPtr<class UHudMonsterWidget> HudMonsterWidget{ nullptr };
 
 	FCustomPlayerData CustomPlayerData;
 
@@ -109,6 +115,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WaitingScreenWidgetClass = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HudSurvivorClass = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HudMonsterClass = nullptr;
+	
 
 #if WITH_EDITOR
 	UFUNCTION(BlueprintInternalUseOnly)
