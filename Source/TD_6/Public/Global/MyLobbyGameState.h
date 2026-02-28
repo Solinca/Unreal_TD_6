@@ -23,8 +23,6 @@ private:
 	UPROPERTY(ReplicatedUsing = DisplayEveryPlayerInLobby)
 	TArray<FCustomPlayerData> PlayerDataList;
 
-	TMap<FUniqueNetIdRepl, FCustomPlayerData> ServerPlayerDataList;
-
 	UFUNCTION()
 	void DisplayEveryPlayerInLobby();
 

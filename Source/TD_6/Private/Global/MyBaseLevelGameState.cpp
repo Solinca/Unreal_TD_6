@@ -30,6 +30,26 @@ void AMyBaseLevelGameState::RemovePlayer(AController* Controller)
 	if (Controller->IsLocalController())
 	{
 		DestroyGame();
+
+		return;
+	}
+
+	FUniqueNetIdRepl PlayerID = Controller->GetPlayerState<APlayerState>()->GetUniqueId();
+
+	FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(PlayerID);
+
+	if (PlayerData.CurrentTeam == ETeam::MONSTER)
+	{
+		CurrentNumberOfMonsterPlayer--;
+	}
+
+	GetGameInstance<UMyGameInstance>()->RemovePlayerFromServerList(PlayerID);
+
+	CheckIfGameCanStart();
+
+	if (SurvivorStateList.Contains(Controller))
+	{
+		SurvivorStateList.Remove(Controller);
 	}
 }
 
@@ -37,8 +57,15 @@ void AMyBaseLevelGameState::PlayerHasLoaded_Implementation()
 {
 	CurrentLoadedPlayer++;
 
-	if (CurrentLoadedPlayer >= GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers())
+	CheckIfGameCanStart();
+}
+
+void AMyBaseLevelGameState::CheckIfGameCanStart()
+{
+	if (!HasGameAlreadyStarted && CurrentLoadedPlayer >= GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers())
 	{
+		HasGameAlreadyStarted = true;
+
 		SetupPlayerObjectives();
 
 		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
@@ -50,6 +77,31 @@ void AMyBaseLevelGameState::PlayerHasLoaded_Implementation()
 		}
 
 		GetWorld()->GetTimerManager().SetTimer(GameStartCountdownHandle, this, &AMyBaseLevelGameState::CountdownTimer, 1.f, true);
+	}
+}
+
+void AMyBaseLevelGameState::CheckVictoryCondition()
+{
+	int AlivePlayerCount = 0;
+
+	for (TTuple<AController*, ESurvivorState> SurvivorState : SurvivorStateList)
+	{
+		if (SurvivorState.Value == ESurvivorState::ALIVE || SurvivorState.Value == ESurvivorState::LAST_LIFE)
+		{
+			AlivePlayerCount++;
+		}
+	}
+
+	if (AlivePlayerCount == 0)
+	{
+		TriggerResultScreen(ETeam::MONSTER);
+	}
+	else
+	{
+		if (CurrentNumberOfMonsterPlayer <= 0)
+		{
+			TriggerResultScreen(ETeam::PLAYER);
+		}
 	}
 }
 
@@ -99,14 +151,14 @@ void AMyBaseLevelGameState::CountdownTimer()
 {
 	TimeToWaitBeforeGameStart--;
 
+	DisplayCountdownToClients();
+
 	if (TimeToWaitBeforeGameStart <= 0)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(GameStartCountdownHandle);
 
 		GetWorld()->GetTimerManager().SetTimer(GameGlobalTimerHandle, this, &AMyBaseLevelGameState::CountdownGlobalTimer, 1.f, true);
 	}
-
-	DisplayCountdownToClients();
 }
 
 void AMyBaseLevelGameState::DisplayCountdownToClients()
@@ -121,6 +173,8 @@ void AMyBaseLevelGameState::CountdownGlobalTimer()
 {
 	GlobalGameTimer--;
 
+	DisplayTimerToClients();
+
 	if (GlobalGameTimer <= 0)
 	{
 		if (CurrentNumberOfCompletedPlayerObjective >= GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers() - CurrentNumberOfMonsterPlayer)
@@ -132,8 +186,10 @@ void AMyBaseLevelGameState::CountdownGlobalTimer()
 			TriggerResultScreen(ETeam::MONSTER);
 		}
 	}
-
-	DisplayTimerToClients();
+	else
+	{
+		CheckVictoryCondition();
+	}
 }
 
 void AMyBaseLevelGameState::DisplayTimerToClients()
@@ -206,20 +262,7 @@ void AMyBaseLevelGameState::KillPlayer(AController* Controller)
 		}
 	}
 
-	int AlivePlayerCount = 0;
-
-	for (TTuple<AController*, ESurvivorState> SurvivorState : SurvivorStateList)
-	{
-		if (SurvivorState.Value == ESurvivorState::ALIVE || SurvivorState.Value == ESurvivorState::LAST_LIFE)
-		{
-			AlivePlayerCount++;
-		}
-	}
-
-	if (AlivePlayerCount == 0)
-	{
-		TriggerResultScreen(ETeam::MONSTER);
-	}
+	CheckVictoryCondition();
 }
 
 bool AMyBaseLevelGameState::CanBeResurrected(AController* Controller)

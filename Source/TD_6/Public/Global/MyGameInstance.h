@@ -73,7 +73,11 @@ public:
 
 	FCustomPlayerData GetCustomPlayerData() { return CustomPlayerData; };
 
-	void SetServerPlayerDataList(TMap<FUniqueNetIdRepl, FCustomPlayerData> DataList) { ServerPlayerDataList = DataList; };
+	void SetServerPlayerData(FCustomPlayerData PlayerData) { ServerPlayerDataList[PlayerData.CustomPlayerID] = PlayerData; };
+
+	void AddPlayerToServerList(FCustomPlayerData PlayerData) { ServerPlayerDataList.Add(PlayerData.CustomPlayerID, PlayerData); };
+
+	void RemovePlayerFromServerList(FUniqueNetIdRepl PlayerID) { ServerPlayerDataList.Remove(PlayerID); };
 
 	FCustomPlayerData RetrieveServerPlayerData(FUniqueNetIdRepl ID) { return ServerPlayerDataList[ID]; };
 

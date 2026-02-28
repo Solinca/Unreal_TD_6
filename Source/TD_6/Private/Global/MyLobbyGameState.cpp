@@ -42,7 +42,7 @@ void AMyLobbyGameState::RegisterPlayerData(const FCustomPlayerData& CustomPlayer
 {
 	PlayerDataList.Add(CustomPlayerData);
 
-	ServerPlayerDataList.Add(CustomPlayerData.CustomPlayerID, CustomPlayerData);
+	GetGameInstance<UMyGameInstance>()->AddPlayerToServerList(CustomPlayerData);
 
 	DisplayEveryPlayerInLobby();
 }
@@ -56,13 +56,15 @@ void AMyLobbyGameState::RemovePlayerData(AController* Controller)
 		return;
 	}
 
+	FUniqueNetIdRepl PlayerID = Controller->GetPlayerState<APlayerState>()->GetUniqueId();
+
+	GetGameInstance<UMyGameInstance>()->RemovePlayerFromServerList(PlayerID);
+
 	for (FCustomPlayerData Data : PlayerDataList)
 	{
-		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
+		if (Data.CustomPlayerID == PlayerID)
 		{
 			PlayerDataList.Remove(Data);
-
-			ServerPlayerDataList.Remove(Data.CustomPlayerID);
 
 			break;
 		}
@@ -100,20 +102,20 @@ void AMyLobbyGameState::StartLobbyIfReady_Implementation()
 		}
 	}
 
-	GetGameInstance<UMyGameInstance>()->SetServerPlayerDataList(ServerPlayerDataList);
-
 	Cast<AMyLobbyGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetCurrentSessionStatusToLaunched();
 }
 
 void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Controller, ETeam NewTeam)
 {
+	FUniqueNetIdRepl PlayerID = Controller->GetPlayerState<APlayerState>()->GetUniqueId();
+
 	for (FCustomPlayerData& Data : PlayerDataList)
 	{
-		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId())
+		if (Data.CustomPlayerID == PlayerID)
 		{
 			Data.CurrentTeam = NewTeam;
 
-			ServerPlayerDataList[Data.CustomPlayerID].CurrentTeam = NewTeam;
+			GetGameInstance<UMyGameInstance>()->SetServerPlayerData(Data);
 
 			if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(Controller))
 			{
@@ -129,13 +131,15 @@ void AMyLobbyGameState::ChangePlayerCurrentTeam_Implementation(AController* Cont
 
 void AMyLobbyGameState::ChangePlayerMonsterType_Implementation(AController* Controller, EMonsterType MonsterType)
 {
+	FUniqueNetIdRepl PlayerID = Controller->GetPlayerState<APlayerState>()->GetUniqueId();
+
 	for (FCustomPlayerData& Data : PlayerDataList)
 	{
-		if (Data.CustomPlayerID == Controller->GetPlayerState<APlayerState>()->GetUniqueId() && Data.CurrentTeam == ETeam::MONSTER)
+		if (Data.CustomPlayerID == PlayerID && Data.CurrentTeam == ETeam::MONSTER)
 		{
 			Data.MonsterType = MonsterType;
 
-			ServerPlayerDataList[Data.CustomPlayerID].MonsterType = MonsterType;
+			GetGameInstance<UMyGameInstance>()->SetServerPlayerData(Data);
 
 			if (AMyLobbyPlayerController* MyLPC = Cast<AMyLobbyPlayerController>(Controller))
 			{

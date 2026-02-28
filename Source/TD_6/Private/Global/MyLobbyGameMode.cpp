@@ -71,7 +71,7 @@ void AMyLobbyGameMode::Logout(AController* Controller)
 {
 	Super::Logout(Controller);
 
-	if (!GetWorld() || GetWorld()->bIsTearingDown)
+	if (!GetWorld() || GetWorld()->bIsTearingDown || !GetWorld()->NextURL.IsEmpty())
 	{
 		return;
 	}

@@ -36,6 +36,8 @@ private:
 
 	int CurrentNumberOfCompletedPlayerObjective = 0;
 
+	bool HasGameAlreadyStarted = false;
+
 	void CountdownTimer();
 
 	UPROPERTY(ReplicatedUsing = DisplayCountdownToClients)
@@ -55,6 +57,10 @@ private:
 	void SetupPlayerObjectives();
 
 	void TriggerResultScreen(ETeam WinningTeam);
+
+	void CheckIfGameCanStart();
+
+	void CheckVictoryCondition();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
