@@ -3,5 +3,18 @@
 
 void UGlobalTimerWidget::SetGlobalTimer(int GlobalTimer)
 {
-	GlobalTimerText->SetText(FText::Format(FText::FromString("{0}:{1}"), GlobalTimer / 60, GlobalTimer % 60));
+	FString CompiledGlobalTimer;
+
+	CompiledGlobalTimer = FString::FromInt(GlobalTimer / 60) + ":";
+
+	int Seconds = GlobalTimer % 60;
+
+	if (Seconds < 10)
+	{
+		CompiledGlobalTimer += "0";
+	}
+
+	CompiledGlobalTimer += FString::FromInt(Seconds);
+
+	GlobalTimerText->SetText(FText::FromString(CompiledGlobalTimer));
 }
