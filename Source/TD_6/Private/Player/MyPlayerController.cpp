@@ -6,12 +6,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/PauseMenuWidget.h"
 #include "UI/WaitingScreenWidget.h"
+#include "UI/GlobalTimerWidget.h"
+#include "UI/HudMonsterWidget.h"
+#include "UI/HudSurvivorWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
 #include "Player/Capacity/BaseAbilityComponent.h"
-#include "UI/HudMonsterWidget.h"
-#include "UI/HudSurvivorWidget.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -87,6 +88,12 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, UMo
 	WaitingScreenWidget = CreateWidget<UWaitingScreenWidget>(this, WaitingScreenWidgetClass);
 
 	WaitingScreenWidget->AddToViewport();
+
+	GlobalTimerWidget = CreateWidget<UGlobalTimerWidget>(this, GlobalTimerWidgetClass);
+
+	GlobalTimerWidget->AddToViewport();
+
+	GlobalTimerWidget->SetVisibility(ESlateVisibility::Hidden);
 
 	FTimerHandle WaitingScreenHandle;
 
@@ -321,7 +328,6 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 			&AMyPlayerController::ResetSpecial,
 			MyMonsterData->MonsterSpecialCooldown,
 			false);
-		
 	}
 }
 
@@ -389,12 +395,14 @@ void AMyPlayerController::DisplayCountdown_Implementation(int Countdown)
 		}
 
 		WaitingScreenWidget->PlayCountdownTextPopupAnimation();
+
+		GlobalTimerWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
-void AMyPlayerController::DisplayGlobalTimer_Implementation(int Countdown)
+void AMyPlayerController::DisplayGlobalTimer_Implementation(int GlobalTimer)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::FromInt(Countdown));
+	GlobalTimerWidget->SetGlobalTimer(GlobalTimer);
 }
 
 void AMyPlayerController::DisplayResultScreenServer_Implementation(FVector TargetPosition)

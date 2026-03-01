@@ -33,6 +33,8 @@ private:
 
 	TObjectPtr<class UWaitingScreenWidget> WaitingScreenWidget = nullptr;
 
+	TObjectPtr<class UGlobalTimerWidget> GlobalTimerWidget = nullptr;
+
 	TObjectPtr<class UMonsterDataAsset> MyMonsterData;
 	
 	UPROPERTY(Transient)
@@ -121,6 +123,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HudMonsterClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> GlobalTimerWidgetClass = nullptr;
 	
 
 #if WITH_EDITOR
@@ -181,7 +186,7 @@ public:
 	void DisplayCountdown(int Countdown);
 
 	UFUNCTION(Client, Reliable)
-	void DisplayGlobalTimer(int Countdown);
+	void DisplayGlobalTimer(int GlobalTimer);
 
 	UFUNCTION(Client, Reliable)
 	void DestroySessionOnClient();
