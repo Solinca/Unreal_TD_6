@@ -233,7 +233,7 @@ void UOnlineSessionSubsystem::CustomJoinSession(int32 SessionIndex)
 			{
 				OnJoinSessionFailed.Broadcast("Session doesn't exist anymore \n or has already launched :(");
 			}
-		}, 3, false);
+		}, 10, false);
 	}
 	else
 	{
