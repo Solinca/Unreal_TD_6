@@ -96,12 +96,9 @@ void AMyBaseLevelGameState::CheckVictoryCondition()
 	{
 		TriggerResultScreen(ETeam::MONSTER);
 	}
-	else
+	else if (CurrentNumberOfMonsterPlayer <= 0)
 	{
-		if (CurrentNumberOfMonsterPlayer <= 0)
-		{
-			TriggerResultScreen(ETeam::PLAYER);
-		}
+		TriggerResultScreen(ETeam::PLAYER);
 	}
 }
 
@@ -210,26 +207,30 @@ void AMyBaseLevelGameState::TriggerResultScreen(ETeam WinningTeam)
 
 		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
 		{
-			FVector PlayerPosition = FVector::Zero();
+			ATargetPoint* PlayerTargetPoint = nullptr;
 
 			if (PlayerData.CurrentTeam == WinningTeam)
 			{
 				if (!WinningTargetPointList.IsEmpty())
 				{
-					PlayerPosition = WinningTargetPointList.Pop()->GetActorLocation();
+					PlayerTargetPoint = WinningTargetPointList[0];
+
+					WinningTargetPointList.RemoveAt(0);
 				}
 			}
 			else
 			{
 				if (!LoosingTargetPointList.IsEmpty())
 				{
-					PlayerPosition = LoosingTargetPointList.Pop()->GetActorLocation();
+					PlayerTargetPoint = LoosingTargetPointList[0];
+
+					LoosingTargetPointList.RemoveAt(0);
 				}
 			}
 
-			MyPC->DisplayResultScreenServer(PlayerPosition);
+			MyPC->SetupResultScreenServer(PlayerTargetPoint->GetActorLocation(), PlayerTargetPoint->GetActorRotation());
 
-			MyPC->DisplayResultScreenClient(WinningTeam);
+			MyPC->SetupResultScreenClient(WinningTeam);
 		}
 	}
 
@@ -238,7 +239,7 @@ void AMyBaseLevelGameState::TriggerResultScreen(ETeam WinningTeam)
 	GetWorld()->GetTimerManager().SetTimer(TestLevel, [this]
 	{
 		GetWorld()->ServerTravel("/Game/Levels/LobbyManagement?Listen");
-	}, 2, false);
+	}, 10, false);
 }
 
 void AMyBaseLevelGameState::KillPlayer(AController* Controller)

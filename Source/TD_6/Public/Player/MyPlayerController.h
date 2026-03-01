@@ -49,9 +49,15 @@ private:
 
 	FTimerHandle ResetSpecialHandle;
 
+	FTimerHandle ResultScreenTransitionHandle;
+
 	FInputModeGameOnly GameOnly;
 
 	FInputModeUIOnly UIOnly;
+
+	FVector ResultScreenTargetPosition;
+
+	FRotator ResultScreenTargetRotation;
 
 	float DefaultMaxSpeed;
 
@@ -62,6 +68,8 @@ private:
 	bool CanTriggerSpecial = true;
 
 	bool IsInteracting = false;
+
+	bool IsWinning = false;
 
 	void OnWaitingComplete();
 
@@ -88,6 +96,11 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void SetIsSprintingOnServer(bool IsSprinting);
+
+	void DisplayResultScreen();
+
+	UFUNCTION(Server, Reliable)
+	void AskToTeleportPlayerToResultScreen();
 
 protected:
 	AMyPlayerController();
@@ -198,8 +211,8 @@ public:
 	void ResurrectPlayer();
 
 	UFUNCTION(Server, Reliable)
-	void DisplayResultScreenServer(FVector TargetPosition);
+	void SetupResultScreenServer(FVector TargetPosition, FRotator TargetRotation);
 
 	UFUNCTION(Client, Reliable)
-	void DisplayResultScreenClient(ETeam WinningTeam);
+	void SetupResultScreenClient(ETeam WinningTeam);
 };

@@ -115,6 +115,15 @@ void AMyCharacter::StopInteractWith()
 	PlayerInteractingWithCount--;
 }
 
+void AMyCharacter::PreparePlayerForEndScreen()
+{
+	ProgressBar->SetVisibility(false, true);
+
+	Flashlight->SetVisibility(false, true);
+
+	IsLoadingEndScreen = true;
+}
+
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (IsAttacking && OtherActor->Tags.Contains("PLAYER"))
@@ -228,7 +237,7 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 
 	StopCollidingWithCamera();
 
-	ProgressBar->SetVisibility(IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
+	ProgressBar->SetVisibility(!IsLoadingEndScreen && IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
 
 	if (!IsDead)
 	{

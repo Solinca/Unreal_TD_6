@@ -23,6 +23,8 @@ private:
 
 	bool IsResurrectionComplete = false;
 
+	bool IsLoadingEndScreen = false;
+
 	void ResetAttacking();
 
 	UPROPERTY(ReplicatedUsing = SetFlashlightVisibility)
@@ -113,4 +115,6 @@ public:
 	virtual bool InteractWith() override;
 
 	virtual void StopInteractWith() override;
+
+	void PreparePlayerForEndScreen();
 };

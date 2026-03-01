@@ -1,6 +1,7 @@
 #include "Player/MyPlayerController.h"
 #include "Player/MyCharacter.h"
 #include "Global/MyBaseLevelGameState.h"
+#include "Global/BaseLevelWorldSettings.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -13,6 +14,7 @@
 #include "Network/OnlineSessionSubsystem.h"
 #include "Data/MonsterDataAsset.h"
 #include "Player/Capacity/BaseAbilityComponent.h"
+#include "Engine/Light.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -405,12 +407,14 @@ void AMyPlayerController::DisplayGlobalTimer_Implementation(int GlobalTimer)
 	GlobalTimerWidget->SetGlobalTimer(GlobalTimer);
 }
 
-void AMyPlayerController::DisplayResultScreenServer_Implementation(FVector TargetPosition)
+void AMyPlayerController::SetupResultScreenServer_Implementation(FVector TargetPosition, FRotator TargetRotation)
 {
-	Cast<AMyCharacter>(GetPawn())->SetActorLocation(TargetPosition);
+	ResultScreenTargetPosition = TargetPosition;
+
+	ResultScreenTargetRotation = TargetRotation;
 }
 
-void AMyPlayerController::DisplayResultScreenClient_Implementation(ETeam WinningTeam)
+void AMyPlayerController::SetupResultScreenClient_Implementation(ETeam WinningTeam)
 {
 	if (IsPauseMenuOpened)
 	{
@@ -419,5 +423,49 @@ void AMyPlayerController::DisplayResultScreenClient_Implementation(ETeam Winning
 
 	SetInputMode(UIOnly);
 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, WinningTeam == ETeam::MONSTER ? "MONSTER WIN" : "PLAYER WIN");
+	FlushPressedKeys();
+
+	MyChara->PreparePlayerForEndScreen();
+
+	GlobalTimerWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	if (HudSurvivorWidget)
+	{
+		HudSurvivorWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (HudMonsterWidget)
+	{
+		HudMonsterWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	IsWinning = CustomPlayerData.CurrentTeam == WinningTeam;
+
+	ABaseLevelWorldSettings* BLWS = Cast<ABaseLevelWorldSettings>(GetWorld()->GetWorldSettings());
+
+	BLWS->EndScreenLighting->SetLightColor(WinningTeam == ETeam::MONSTER ? BLWS->MonsterWinningColor : BLWS->PlayerWinningColor);
+
+	PlayerCameraManager->StartCameraFade(0, 1, 1, FColor::Black, true, true);
+
+	GetWorld()->GetTimerManager().SetTimer(ResultScreenTransitionHandle, this, &AMyPlayerController::DisplayResultScreen, 1, false);
+}
+
+void AMyPlayerController::DisplayResultScreen()
+{
+	ABaseLevelWorldSettings* BLWS = Cast<ABaseLevelWorldSettings>(GetWorld()->GetWorldSettings());
+
+	SetViewTarget(BLWS->EndScreenCamera);
+
+	PlayerCameraManager->StartCameraFade(1, 0, 0.2f, FColor::Black, true, true);
+
+	AskToTeleportPlayerToResultScreen();
+
+	// Play song depending on IsWinning and GetInstance GetTeam ?
+}
+
+void AMyPlayerController::AskToTeleportPlayerToResultScreen_Implementation()
+{
+	ClientSetLocation(ResultScreenTargetPosition, ResultScreenTargetRotation);
+
+	Cast<AMyCharacter>(GetPawn())->SetActorLocationAndRotation(ResultScreenTargetPosition, ResultScreenTargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
 }
