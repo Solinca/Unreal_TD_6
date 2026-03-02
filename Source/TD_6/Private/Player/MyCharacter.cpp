@@ -119,7 +119,10 @@ void AMyCharacter::PreparePlayerForEndScreen()
 {
 	ProgressBar->SetVisibility(false, true);
 
-	Flashlight->SetVisibility(false, true);
+	if (IsFlashlightOn)
+	{
+		ToggleFlashlight();
+	}
 
 	IsLoadingEndScreen = true;
 }
