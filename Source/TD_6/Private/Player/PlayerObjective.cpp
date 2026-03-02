@@ -67,6 +67,11 @@ void APlayerObjective::Tick(float DeltaTime)
 void APlayerObjective::DisplayObjectiveProgression()
 {
 	Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgress(ObjectiveProgression / ObjectiveGoal);
+
+	if (ObjectiveProgression >= ObjectiveGoal)
+	{
+		Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgressBarTextVisibility(false);
+	}
 }
 
 void APlayerObjective::ToggleEffects_Implementation(const bool bShouldActivate)
