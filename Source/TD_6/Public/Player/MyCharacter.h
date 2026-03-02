@@ -33,6 +33,9 @@ private:
 	UFUNCTION()
 	void SetFlashlightVisibility();
 
+	UFUNCTION(Server, Reliable)
+	void DisableFlashlight();
+
 	UPROPERTY(ReplicatedUsing = OnPlayerDeathStatusChanged)
 	bool IsDead = false;
 

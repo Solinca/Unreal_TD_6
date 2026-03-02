@@ -119,10 +119,7 @@ void AMyCharacter::PreparePlayerForEndScreen()
 {
 	ProgressBar->SetVisibility(false, true);
 
-	if (IsFlashlightOn)
-	{
-		ToggleFlashlight();
-	}
+	DisableFlashlight();
 
 	IsLoadingEndScreen = true;
 }
@@ -165,6 +162,13 @@ void AMyCharacter::ToggleFlashlight_Implementation()
 void AMyCharacter::SetFlashlightVisibility()
 {
 	Flashlight->SetVisibility(IsFlashlightOn, true);
+}
+
+void AMyCharacter::DisableFlashlight_Implementation()
+{
+	IsFlashlightOn = false;
+
+	SetFlashlightVisibility();
 }
 
 void AMyCharacter::InteractWithSurroundingActor_Implementation()
@@ -218,9 +222,7 @@ void AMyCharacter::KillPlayer()
 
 	StopInteractingWithActor();
 
-	IsFlashlightOn = false;
-
-	SetFlashlightVisibility();
+	DisableFlashlight();
 }
 
 void AMyCharacter::ResurrectPlayer()
