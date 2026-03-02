@@ -348,6 +348,61 @@ void AMyPlayerController::ResetSpecial()
 	GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StopAbility();
 }
 
+void AMyPlayerController::TriggerScream(const FInputActionValue& Value)
+{
+	AskToTriggerScream();
+}
+
+void AMyPlayerController::AskToTriggerScream_Implementation()
+{
+	if (!CanTriggerScream || !MyMonsterData)
+	{
+		return;
+	}
+
+	if (!MyMonsterData->ScreamSound)
+	{
+		return;
+	}
+
+	CanTriggerScream = false;
+
+	const float Roll = FMath::FRand();
+	const bool bIsMonsterCry = Roll < MyMonsterData->MonsterCryChance;
+
+	USoundBase* SoundToPlay = bIsMonsterCry && MyMonsterData->MonsterRevealCrySound
+		? MyMonsterData->MonsterRevealCrySound
+		: MyMonsterData->ScreamSound;
+
+	if (UBaseAbilityComponent* AbilityComp = GetPawn()->FindComponentByClass<UBaseAbilityComponent>())
+	{
+		AbilityComp->MulticastPlayScreamWithSound(SoundToPlay);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(
+		ResetScreamHandle,
+		this,
+		&AMyPlayerController::ResetScream,
+		MyMonsterData->ScreamCooldown,
+		false
+	);
+
+	Client_StartScreamCooldown(MyMonsterData->ScreamCooldown);
+}
+
+void AMyPlayerController::ResetScream()
+{
+	CanTriggerScream = true;
+}
+
+void AMyPlayerController::Client_StartScreamCooldown_Implementation(float Cooldown)
+{
+	if (HudMonsterWidget)
+	{
+		HudMonsterWidget->StartScreamCooldown(Cooldown);
+	}
+}
+
 void AMyPlayerController::OnContinueButtonClicked()
 {
 	ToggleMenu(FInputActionValue{});

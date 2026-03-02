@@ -49,4 +49,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "MonsterType == EMonsterType::PREDATOR"))
 	float PredatorHuntDuration = 5.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream")
+	USoundBase* ScreamSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream")
+	USoundBase* MonsterRevealCrySound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream")
+	USoundAttenuation* ScreamAttenuation = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream",
+		meta = (ClampMin = "1.0", ClampMax = "60.0"))
+	float ScreamCooldown = 15.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream",
+		meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MonsterCryChance = 0.1f;
 };
