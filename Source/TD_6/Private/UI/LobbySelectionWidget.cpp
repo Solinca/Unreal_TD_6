@@ -31,6 +31,8 @@ void ULobbySelectionWidget::OnRefreshButtonClickedEvent()
 	LobbyContainer->ClearChildren();
 
 	RefreshButton->SetIsEnabled(false);
+
+	JoinButton->SetIsEnabled(false);
 }
 
 void ULobbySelectionWidget::SetLobbyList(const TArray<FCustomSessionInfo>& SessionResults)

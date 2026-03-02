@@ -38,7 +38,7 @@ void UHudMonsterWidget::CancelScreamCooldown()
 	}
 }
 
-bool UHudMonsterWidget::IsScreamReady() const
+bool UHudMonsterWidget::IsScreamReady() const 
 {
 	return ScreamRadialBar ? ScreamRadialBar->IsReady() : true;
 }
