@@ -117,11 +117,16 @@ void AMyCharacter::StopInteractWith()
 
 void AMyCharacter::PreparePlayerForEndScreen()
 {
-	ProgressBar->SetVisibility(false, true);
+	ForceDisableProgressBarOnAllClients();
 
 	DisableFlashlight();
+}
 
-	IsLoadingEndScreen = true;
+void AMyCharacter::ForceDisableProgressBarOnAllClients_Implementation()
+{
+	HasToForceDisableProgressBar = true;
+
+	ProgressBar->SetVisibility(false, true);
 }
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -159,16 +164,16 @@ void AMyCharacter::ToggleFlashlight_Implementation()
 	SetFlashlightVisibility();
 }
 
-void AMyCharacter::SetFlashlightVisibility()
-{
-	Flashlight->SetVisibility(IsFlashlightOn, true);
-}
-
-void AMyCharacter::DisableFlashlight_Implementation()
+void AMyCharacter::DisableFlashlight()
 {
 	IsFlashlightOn = false;
 
 	SetFlashlightVisibility();
+}
+
+void AMyCharacter::SetFlashlightVisibility()
+{
+	Flashlight->SetVisibility(IsFlashlightOn, true);
 }
 
 void AMyCharacter::InteractWithSurroundingActor_Implementation()
@@ -242,7 +247,7 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 
 	StopCollidingWithCamera();
 
-	ProgressBar->SetVisibility(!IsLoadingEndScreen && IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
+	ProgressBar->SetVisibility(!HasToForceDisableProgressBar && IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
 
 	if (!IsDead)
 	{

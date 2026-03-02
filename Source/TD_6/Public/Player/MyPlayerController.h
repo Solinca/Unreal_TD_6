@@ -111,6 +111,9 @@ private:
 
 	void ResetScream();
 
+	UFUNCTION(Client, Reliable)
+	void ForceClientRotation(FVector TargetPosition, FRotator TargetRotation);
+
 protected:
 	AMyPlayerController();
 

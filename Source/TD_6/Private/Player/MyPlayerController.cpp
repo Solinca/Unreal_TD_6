@@ -475,6 +475,8 @@ void AMyPlayerController::SetupResultScreenServer_Implementation(FVector TargetP
 	ResultScreenTargetPosition = TargetPosition;
 
 	ResultScreenTargetRotation = TargetRotation;
+
+	Cast<AMyCharacter>(GetPawn())->PreparePlayerForEndScreen();
 }
 
 void AMyPlayerController::SetupResultScreenClient_Implementation(ETeam WinningTeam)
@@ -488,7 +490,7 @@ void AMyPlayerController::SetupResultScreenClient_Implementation(ETeam WinningTe
 
 	FlushPressedKeys();
 
-	MyChara->PreparePlayerForEndScreen();
+	MyChara->GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	GlobalTimerWidget->SetVisibility(ESlateVisibility::Hidden);
 
@@ -528,7 +530,16 @@ void AMyPlayerController::DisplayResultScreen()
 
 void AMyPlayerController::AskToTeleportPlayerToResultScreen_Implementation()
 {
-	ClientSetLocation(ResultScreenTargetPosition, ResultScreenTargetRotation);
-
 	Cast<AMyCharacter>(GetPawn())->SetActorLocationAndRotation(ResultScreenTargetPosition, ResultScreenTargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
+
+	SetControlRotation(ResultScreenTargetRotation);
+
+	ForceClientRotation(ResultScreenTargetPosition, ResultScreenTargetRotation);
+}
+
+void AMyPlayerController::ForceClientRotation_Implementation(FVector TargetPosition, FRotator TargetRotation)
+{
+	MyChara->SetActorLocationAndRotation(TargetPosition, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
+
+	SetControlRotation(TargetRotation);
 }

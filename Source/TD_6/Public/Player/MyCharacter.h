@@ -23,7 +23,7 @@ private:
 
 	bool IsResurrectionComplete = false;
 
-	bool IsLoadingEndScreen = false;
+	bool HasToForceDisableProgressBar = false;
 
 	void ResetAttacking();
 
@@ -33,8 +33,10 @@ private:
 	UFUNCTION()
 	void SetFlashlightVisibility();
 
-	UFUNCTION(Server, Reliable)
 	void DisableFlashlight();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ForceDisableProgressBarOnAllClients();
 
 	UPROPERTY(ReplicatedUsing = OnPlayerDeathStatusChanged)
 	bool IsDead = false;
