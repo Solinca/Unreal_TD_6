@@ -27,15 +27,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UImage> FlashlightIcon;
 
-	/** Optional: glow/halo behind the icon when enabled */
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
 	TObjectPtr<UImage> FlashlightGlowEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerHUD|Appearance")
-	FLinearColor EnabledColor = FLinearColor(1.f, 0.9f, 0.5f, 1.f); // Warm yellow
+	FLinearColor EnabledColor = FLinearColor(1.f, 0.9f, 0.5f, 1.f);
 
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerHUD|Appearance")
-	FLinearColor DisabledColor = FLinearColor(0.25f, 0.25f, 0.25f, 0.5f); // Dim grey
+	FLinearColor DisabledColor = FLinearColor(0.25f, 0.25f, 0.25f, 0.5f);
 
 private:
 	bool bIsFlashlightOn = false;

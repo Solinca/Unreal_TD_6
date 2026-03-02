@@ -28,7 +28,7 @@ AMyCharacter::AMyCharacter()
 
 	Flashlight = CreateDefaultSubobject<USpotLightComponent>("Flashlight");
 
-	Flashlight->SetupAttachment(RootComponent);
+	Flashlight->SetupAttachment(GetMesh(), "clavicle_r");
 
 	PostProcess = CreateDefaultSubobject<UPostProcessComponent>("Post Process");
 
