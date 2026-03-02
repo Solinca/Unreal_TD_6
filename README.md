@@ -26,7 +26,9 @@ Player Work On Objective: https://pixabay.com/sound-effects/film-special-effects
 
 Player Footstep:  https://pixabay.com/sound-effects/film-special-effects-st1-footstep-sfx-323053/
 
-Monster Hook: https://pixabay.com/sound-effects/film-special-effects-chains-48217/
+Butcher Hook: https://pixabay.com/sound-effects/film-special-effects-chains-48217/
+
+Butcher Trigger: https://pixabay.com/sound-effects/horror-clown-come-here-487802/
 
 Predator Trigger: https://pixabay.com/sound-effects/horror-monster-growl-382706/
 
