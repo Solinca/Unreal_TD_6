@@ -50,6 +50,8 @@ private:
 	FTimerHandle ResetSpecialHandle;
 
 	FTimerHandle ResultScreenTransitionHandle;
+	
+	FTimerHandle ResetScreamHandle;
 
 	FInputModeGameOnly GameOnly;
 
@@ -66,6 +68,8 @@ private:
 	bool CanAttack = true;
 
 	bool CanTriggerSpecial = true;
+	
+	bool CanTriggerScream = true;
 
 	bool IsInteracting = false;
 
@@ -101,6 +105,11 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void AskToTeleportPlayerToResultScreen();
+
+	UFUNCTION(Server, Reliable)
+	void AskToTriggerScream();
+
+	void ResetScream();
 
 protected:
 	AMyPlayerController();
@@ -185,6 +194,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void TriggerSpecial(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void TriggerScream(const FInputActionValue& Value);
+
 public:
 	UFUNCTION(Server, Reliable)
 	void SetupServer(FCustomPlayerData Data, class UMonsterDataAsset* MonsterData);
@@ -218,4 +230,7 @@ public:
 	
 	UFUNCTION(Client, Reliable)
 	void Client_StartSkillCooldown(float Cooldown);
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartScreamCooldown(float Cooldown);
 };

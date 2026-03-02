@@ -32,4 +32,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void StopAbility();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayScreamWithSound(USoundBase* Sound);
 };

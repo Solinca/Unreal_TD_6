@@ -3,6 +3,7 @@
 #include "Player/MyCharacter.h"
 #include "Player/MyPlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 UBaseAbilityComponent::UBaseAbilityComponent()
 {
@@ -33,4 +34,35 @@ void UBaseAbilityComponent::StartAbility_Implementation(class UMonsterDataAsset*
 void UBaseAbilityComponent::StopAbility_Implementation()
 {
 	DeactivateAbility();
+}
+
+void UBaseAbilityComponent::MulticastPlayScreamWithSound_Implementation(USoundBase* Sound)
+{
+	if (!Sound)
+	{
+		return;
+	}
+
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return;
+	}
+
+	USoundAttenuation* Attenuation = nullptr;
+	if (MonsterDataAsset.IsValid())
+	{
+		Attenuation = MonsterDataAsset->ScreamAttenuation;
+	}
+
+	UGameplayStatics::PlaySoundAtLocation(
+		this,
+		Sound,
+		Owner->GetActorLocation(),
+		Owner->GetActorRotation(),
+		1.0f,
+		1.0f,
+		0.0f,
+		Attenuation
+	);
 }
