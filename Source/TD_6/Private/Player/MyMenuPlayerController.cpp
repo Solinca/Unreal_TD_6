@@ -128,6 +128,8 @@ void AMyMenuPlayerController::OnJoinLobbyButtonClicked()
 void AMyMenuPlayerController::OnRefreshLobbyButtonClicked()
 {
 	OnlineSessionSubsystem->FindSession(10, true);
+
+	CurrentlySelectedLobbyID = -1;
 }
 
 void AMyMenuPlayerController::OnLobbySelected(int LobbyID)
