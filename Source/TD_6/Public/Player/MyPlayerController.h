@@ -215,4 +215,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void SetupResultScreenClient(ETeam WinningTeam);
+	
+	UFUNCTION(Client, Reliable)
+	void Client_StartSkillCooldown(float Cooldown);
 };

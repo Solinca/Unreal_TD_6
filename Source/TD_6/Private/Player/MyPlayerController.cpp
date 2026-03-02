@@ -314,6 +314,14 @@ void AMyPlayerController::TriggerSpecial(const FInputActionValue& Value)
 	AskToTriggerSpecial();
 }
 
+void AMyPlayerController::Client_StartSkillCooldown_Implementation(float Cooldown)
+{
+	if (HudMonsterWidget)
+	{
+		HudMonsterWidget->StartSkillCooldown(Cooldown);
+	}
+}
+
 void AMyPlayerController::AskToTriggerSpecial_Implementation()
 {
 	if (CanTriggerSpecial && MyMonsterData)
@@ -321,8 +329,6 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 		CanTriggerSpecial = false;
 
 		GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StartAbility(MyMonsterData);
-		
-		HudMonsterWidget->StartSkillCooldown(MyMonsterData->MonsterSpecialCooldown);
 
 		GetWorld()->GetTimerManager().SetTimer(
 			ResetSpecialHandle,
@@ -330,6 +336,8 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 			&AMyPlayerController::ResetSpecial,
 			MyMonsterData->MonsterSpecialCooldown,
 			false);
+
+		Client_StartSkillCooldown(MyMonsterData->MonsterSpecialCooldown);
 	}
 }
 
