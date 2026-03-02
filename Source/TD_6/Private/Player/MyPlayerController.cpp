@@ -198,8 +198,6 @@ void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 {
 	IsPauseMenuOpened = !IsPauseMenuOpened;
 
-	InteractStop(Value);
-
 	if (IsPauseMenuOpened)
 	{
 		SetInputMode(UIOnly);
@@ -208,6 +206,8 @@ void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)
 	{
 		SetInputMode(GameOnly);
 	}
+
+	FlushPressedKeys();
 
 	if (!PauseWidget)
 	{
