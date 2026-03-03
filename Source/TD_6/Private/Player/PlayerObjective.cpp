@@ -7,6 +7,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/AudioComponent.h"
 #include "UI/ProgressBarWidget.h"
 
 APlayerObjective::APlayerObjective()
@@ -76,28 +77,30 @@ void APlayerObjective::DisplayObjectiveProgression()
 
 void APlayerObjective::ToggleEffects_Implementation(const bool bShouldActivate)
 {
-	if (!Vfx)
+	if (bShouldActivate)
 	{
-		return;
-	}
+		OnGoingAudioComponent = UGameplayStatics::SpawnSoundAttached(SFX, GetRootComponent());
 
-	if (!bShouldActivate)
+		NiagaraComponent->Activate(true);
+	}
+	else
 	{
+		OnGoingAudioComponent->Stop();
+
 		NiagaraComponent->Deactivate();
-
-		return;
 	}
-
-	NiagaraComponent->Activate(true);
 }
 
 bool APlayerObjective::InteractWith()
 {
 	if (!IsCompleted)
 	{
+		if (PlayerInteractingWithCount == 0)
+		{
+			ToggleEffects(true);
+		}
+
 		PlayerInteractingWithCount++;
-		
-		ToggleEffects(PlayerInteractingWithCount > 0);
 
 		return true;
 	}

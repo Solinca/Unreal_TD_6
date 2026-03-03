@@ -11,6 +11,8 @@ class TD_6_API APlayerObjective : public AActor, public IInteractable
 	GENERATED_BODY()
 
 private:
+	TObjectPtr<class UAudioComponent> OnGoingAudioComponent = nullptr;
+
 	bool IsCompleted = false;
 
 	int PlayerInteractingWithCount = 0;
@@ -44,6 +46,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	TObjectPtr<class UNiagaraSystem> Vfx = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<class USoundBase> SFX = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ObjectiveGoal = 60;
