@@ -2,6 +2,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
+#include "Global/MyBaseLevelGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/MyCharacter.h"
 #include "Player/Capacity/HookAbilityComponent.h"
@@ -271,44 +273,29 @@ void AHookProjectile::Traveling(float DeltaTime)
 	QueryParams.AddIgnoredActor(this);
 	QueryParams.AddIgnoredActor(GetOwner());
 
-	FHitResult WallHit;
-	if (GetWorld()->LineTraceSingleByChannel(WallHit, PrevPos, NewPos, ECC_Visibility, QueryParams))
-	{
-		FlightTime = PreviousTime + DeltaTime * WallHit.Time;
-		MulticastOnHookMiss();
-		StartReturning();
-		return;
-	}
-
-	FHitResult CharacterHit;
+	FHitResult Hit;
 	if (GetWorld()->SweepSingleByChannel(
-		CharacterHit, PrevPos, NewPos, FQuat::Identity,
-		ECC_Pawn, FCollisionShape::MakeSphere(CollisionRadius), QueryParams))
+		Hit, PrevPos, NewPos, FQuat::Identity,
+		ECC_Visibility, FCollisionShape::MakeSphere(CollisionRadius), QueryParams))
 	{
-		AMyCharacter* HitCharacter = Cast<AMyCharacter>(CharacterHit.GetActor());
+		FlightTime = PreviousTime + DeltaTime * Hit.Time;
 
-		if (HitCharacter && HitCharacter != GetOwner() && HitCharacter->Tags.Contains("PLAYER"))
+		AMyCharacter* HitCharacter = Cast<AMyCharacter>(Hit.GetActor());
+		if (HitCharacter && HitCharacter->Tags.Contains("PLAYER"))
 		{
-			FCollisionQueryParams WallCheckParams;
-			WallCheckParams.AddIgnoredActor(this);
-			WallCheckParams.AddIgnoredActor(GetOwner());
-			WallCheckParams.AddIgnoredActor(HitCharacter);
-
-			const FVector OwnerLoc = CachedOwnerCharacter.IsValid()
-				? CachedOwnerCharacter->GetActorLocation()
-				: LaunchOrigin;
-
-			FHitResult WallCheck;
-			if (!GetWorld()->LineTraceSingleByChannel(
-				WallCheck, OwnerLoc, HitCharacter->GetActorLocation(),
-				ECC_Visibility, WallCheckParams))
+			MulticastOnHookHit();
+			if (AMyBaseLevelGameState* GS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld())))
 			{
-				FlightTime = PreviousTime + DeltaTime * CharacterHit.Time;
-				MulticastOnHookHit();
-				StartReturning();
-				return;
+				GS->KillPlayer(HitCharacter->GetController());
 			}
 		}
+		else
+		{
+			MulticastOnHookMiss();
+		}
+
+		StartReturning();
+		return;
 	}
 
 	if (DistFromOrigin >= MaxDistance)

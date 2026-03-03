@@ -98,7 +98,6 @@ protected:
 	TWeakObjectPtr<AMyCharacter> CachedOwnerCharacter;
 
 private:
-
 	void Traveling(float DeltaTime);
 	void Returning(float DeltaTime);
 	void ClientSimulate(float DeltaTime);
