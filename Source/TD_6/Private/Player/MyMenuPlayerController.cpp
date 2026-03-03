@@ -80,6 +80,8 @@ void AMyMenuPlayerController::BeginPlay()
 
 	LobbyJoinErrorPopupWidget->OnOkButtonClicked.AddDynamic(this, &AMyMenuPlayerController::OnOkButtonClicked);
 
+	UGameplayStatics::SpawnSound2D(GetWorld(), RainMusic);
+
 	SetShowMouseCursor(true);
 
 	SetInputMode(UIOnly);

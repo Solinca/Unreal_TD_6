@@ -36,6 +36,8 @@ private:
 	TObjectPtr<class UGlobalTimerWidget> GlobalTimerWidget = nullptr;
 
 	TObjectPtr<class UMonsterDataAsset> MyMonsterData;
+
+	TObjectPtr<UAudioComponent> BaseAmbianceAudioComponent;
 	
 	UPROPERTY(Transient)
 	TObjectPtr<class UHudSurvivorWidget> HudSurvivorWidget{ nullptr };
@@ -151,6 +153,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> GlobalTimerWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> BaseAmbianceMusic = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> VictoryMusic = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> DefeatMusic = nullptr;
 	
 
 #if WITH_EDITOR

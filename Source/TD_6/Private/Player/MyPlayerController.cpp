@@ -15,6 +15,7 @@
 #include "Data/MonsterDataAsset.h"
 #include "Player/Capacity/BaseAbilityComponent.h"
 #include "Engine/Light.h"
+#include "Components/AudioComponent.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -440,6 +441,8 @@ void AMyPlayerController::DestroySessionOnClient_Implementation()
 void AMyPlayerController::ToggleWaitingScreenOff_Implementation()
 {
 	WaitingScreenWidget->PlayWaitingScreenFadeOutAnimation();
+
+	BaseAmbianceAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), BaseAmbianceMusic);
 }
 
 void AMyPlayerController::DisplayCountdown_Implementation(int Countdown)
@@ -510,7 +513,9 @@ void AMyPlayerController::SetupResultScreenClient_Implementation(ETeam WinningTe
 
 	BLWS->EndScreenLighting->SetLightColor(WinningTeam == ETeam::MONSTER ? BLWS->MonsterWinningColor : BLWS->PlayerWinningColor);
 
-	PlayerCameraManager->StartCameraFade(0, 1, 1, FColor::Black, true, true);
+	PlayerCameraManager->StartCameraFade(0, 1, 1, FColor::Black, false, true);
+
+	BaseAmbianceAudioComponent->FadeOut(1, 0);
 
 	GetWorld()->GetTimerManager().SetTimer(ResultScreenTransitionHandle, this, &AMyPlayerController::DisplayResultScreen, 1, false);
 }
@@ -521,11 +526,11 @@ void AMyPlayerController::DisplayResultScreen()
 
 	SetViewTarget(BLWS->EndScreenCamera);
 
-	PlayerCameraManager->StartCameraFade(1, 0, 0.2f, FColor::Black, true, true);
+	PlayerCameraManager->StartCameraFade(1, 0, 0.2f, FColor::Black, false, true);
 
 	AskToTeleportPlayerToResultScreen();
 
-	// Play song depending on IsWinning and GetInstance GetTeam ?
+	UGameplayStatics::PlaySound2D(GetWorld(), IsWinning ? VictoryMusic : DefeatMusic);
 }
 
 void AMyPlayerController::AskToTeleportPlayerToResultScreen_Implementation()

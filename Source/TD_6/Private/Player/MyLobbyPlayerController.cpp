@@ -19,6 +19,8 @@ void AMyLobbyPlayerController::BeginPlay()
 		CurrentPlayerID = GetGameInstance<UMyGameInstance>()->GetCustomPlayerData().CustomPlayerID;
 
 		RegisterPlayerDataToGameState(GetGameInstance<UMyGameInstance>()->GetCustomPlayerData());
+
+		UGameplayStatics::SpawnSound2D(GetWorld(), RainMusic);
 	}
 }
 
