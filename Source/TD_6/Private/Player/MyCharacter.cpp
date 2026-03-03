@@ -366,7 +366,7 @@ void AMyCharacter::SetCharacterHighlight_Implementation(ACharacter* Character, b
 	}
 }
 
-void AMyCharacter::PlayAbilitySFX_Implementation(USoundBase* AbilitySFX, bool IsGlobal)
+void AMyCharacter::PlayAbilitySFX_Implementation(USoundBase* AbilitySFX, bool IsGlobal, bool HasToSaveReference)
 {
 	if (IsGlobal)
 	{
@@ -374,7 +374,14 @@ void AMyCharacter::PlayAbilitySFX_Implementation(USoundBase* AbilitySFX, bool Is
 	}
 	else
 	{
-		OnGoingAbilityAudioComponent = UGameplayStatics::SpawnSoundAttached(AbilitySFX, GetRootComponent(), FName(""), GetActorLocation(), EAttachLocation::KeepRelativeOffset);
+		if (HasToSaveReference)
+		{
+			OnGoingAbilityAudioComponent = UGameplayStatics::SpawnSoundAttached(AbilitySFX, GetRootComponent());
+		}
+		else
+		{
+			UGameplayStatics::SpawnSoundAttached(AbilitySFX, GetRootComponent());
+		}
 	}
 }
 

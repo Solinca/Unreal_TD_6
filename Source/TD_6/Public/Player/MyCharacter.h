@@ -181,7 +181,7 @@ public:
 	void SetCharacterHighlight(ACharacter* Character, bool bHighlight);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void PlayAbilitySFX(USoundBase* AbilitySFX, bool IsGlobal);
+	void PlayAbilitySFX(USoundBase* AbilitySFX, bool IsGlobal, bool HasToSaveReference);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void StopAbilitySFX();

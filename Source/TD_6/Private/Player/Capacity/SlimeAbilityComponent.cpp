@@ -23,7 +23,7 @@ void USlimeAbilityComponent::ActivateAbility()
 
 	MyChara->SetPlayerMovementSpeedServerSide(false, false, TransformationSlowSpeed);
 
-	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false);
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false, true);
 
 	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 

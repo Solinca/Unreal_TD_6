@@ -13,7 +13,7 @@ void UInvisibilityComponent::ActivateAbility()
 
 	MyChara = Cast<AMyCharacter>(GetOwner());
 
-	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false);
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false, false);
 
 	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, this, &UInvisibilityComponent::UpdateDissolve, DissolveRate, true);
 
@@ -24,7 +24,7 @@ void UInvisibilityComponent::DeactivateAbility()
 {
 	bIsFadingOut = false;
 
-	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityTriggerSound, false);
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityTriggerSound, false, false);
 
 	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, this, &UInvisibilityComponent::UpdateDissolve, DissolveRate, true);
 }
