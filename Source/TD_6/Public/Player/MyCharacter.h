@@ -122,4 +122,7 @@ public:
 	virtual void StopInteractWith() override;
 
 	void PreparePlayerForEndScreen();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetIsAttacking() const { return IsAttacking; }
 };
