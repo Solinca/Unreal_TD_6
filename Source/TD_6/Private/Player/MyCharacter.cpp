@@ -45,7 +45,7 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetMesh()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnHit);
 
 	if (IsLocallyControlled())
 	{
