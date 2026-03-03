@@ -142,6 +142,8 @@ void AMyCharacter::PreparePlayerForEndScreen()
 	ForceDisableProgressBarOnAllClients();
 
 	DisableFlashlight();
+
+	GetWorld()->GetTimerManager().ClearTimer(ScreamHandle);
 }
 
 void AMyCharacter::ForceDisableProgressBarOnAllClients_Implementation()
