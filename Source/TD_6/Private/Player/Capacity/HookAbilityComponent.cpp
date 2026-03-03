@@ -24,7 +24,7 @@ void UHookAbilityComponent::ActivateAbility()
 		return;
 	}
 
-	if (ActiveProjectile.IsValid())
+	if (ActiveProjectile)
 	{
 		ActiveProjectile->ForceCleanup();
 		ActiveProjectile = nullptr;
@@ -51,20 +51,11 @@ void UHookAbilityComponent::ActivateAbility()
 		ActiveProjectile = Projectile;
 		Projectile->InitHook(
 			this,
-			CachedMyCharacter->GetCameraComponent()->GetForwardVector(),
+			Cast<AMyCharacter>(GetOwner())->GetCameraComponent()->GetForwardVector(),
 			MonsterDataAsset->HookMaxDistance,
 			MonsterDataAsset->HookSpeed,
 			MonsterDataAsset->HookReelingTime
 		);
-	}
-}
-
-void UHookAbilityComponent::DeactivateAbility()
-{
-	if (ActiveProjectile.IsValid())
-	{
-		ActiveProjectile->ForceCleanup();
-		ActiveProjectile = nullptr;
 	}
 }
 
