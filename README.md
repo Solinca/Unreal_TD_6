@@ -14,6 +14,8 @@ Ambiance: https://pixabay.com/sound-effects/horror-son-ambiance-film-1-253767/
 
 Rain: https://pixabay.com/sound-effects/nature-gentle-rain-07-437321/
 
+Thunder: https://pixabay.com/sound-effects/nature-thunder-sound-375727/
+
 Player Down: https://pixabay.com/sound-effects/people-young-man-being-hurt-95628/
 
 Player Dead: https://pixabay.com/sound-effects/people-man-screaming-417689/
