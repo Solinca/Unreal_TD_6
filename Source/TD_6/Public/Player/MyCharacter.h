@@ -17,6 +17,8 @@ private:
 
 	FTimerHandle AttackHandle;
 
+	FTimerHandle ScreamHandle;
+
 	int PlayerInteractingWithCount = 0;
 
 	bool IsAttacking = false;
@@ -51,6 +53,11 @@ private:
 	void DisplayResurrectProgression();
 
 	void StopCollidingWithCamera();
+
+	void PlayerScreamRandomizer();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void TriggerPlayerScreamOnAllClient();
 
 protected:
 	AMyCharacter();
@@ -93,6 +100,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ResurrectDuration = 5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> PlayerHurtSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> PlayerDeathSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<USoundBase> PlayerHelpScream = nullptr;
 
 public:
 	UFUNCTION(Server, Reliable)

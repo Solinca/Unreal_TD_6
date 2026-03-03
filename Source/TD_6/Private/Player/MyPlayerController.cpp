@@ -236,8 +236,6 @@ void AMyPlayerController::CrouchStart(const FInputActionValue& Value)
 	}
 
 	MyChara->Crouch();
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch Start");
 }
 
 void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
@@ -248,8 +246,6 @@ void AMyPlayerController::CrouchEnd(const FInputActionValue& Value)
 	}
 
 	MyChara->UnCrouch();
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Crouch End");
 }
 
 void AMyPlayerController::ToggleFlashlight(const FInputActionValue& Value)

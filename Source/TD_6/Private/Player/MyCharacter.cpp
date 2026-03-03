@@ -228,11 +228,30 @@ void AMyCharacter::KillPlayer()
 	StopInteractingWithActor();
 
 	DisableFlashlight();
+
+	if (MyBLGS->CanBeResurrected(GetController()))
+	{
+		GetWorld()->GetTimerManager().SetTimer(ScreamHandle, this, &AMyCharacter::PlayerScreamRandomizer, (FMath::Rand() % 5) + 3, false);
+	}
+}
+
+void AMyCharacter::PlayerScreamRandomizer()
+{
+	TriggerPlayerScreamOnAllClient();
+
+	GetWorld()->GetTimerManager().SetTimer(ScreamHandle, this, &AMyCharacter::PlayerScreamRandomizer, (FMath::Rand() % 5) + 3, false);
+}
+
+void AMyCharacter::TriggerPlayerScreamOnAllClient_Implementation()
+{
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), PlayerHelpScream, GetActorLocation());
 }
 
 void AMyCharacter::ResurrectPlayer()
 {
 	IsDead = false;
+
+	GetWorld()->GetTimerManager().ClearTimer(ScreamHandle);
 
 	OnPlayerDeathStatusChanged();
 }
@@ -248,6 +267,11 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 	StopCollidingWithCamera();
 
 	ProgressBar->SetVisibility(!HasToForceDisableProgressBar && IsDead && ResurrectProgression < ResurrectDuration && Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER, true);
+
+	if (IsDead)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ResurrectProgression < ResurrectDuration ? PlayerHurtSound : PlayerDeathSound, GetActorLocation());
+	}
 
 	if (!IsDead)
 	{
