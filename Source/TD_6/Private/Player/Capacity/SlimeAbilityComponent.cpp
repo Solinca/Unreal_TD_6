@@ -1,7 +1,6 @@
 #include "Player/Capacity/SlimeAbilityComponent.h"
 #include "Data/MonsterDataAsset.h"
 #include "Player/MyCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
 
 USlimeAbilityComponent::USlimeAbilityComponent()
 {
@@ -23,6 +22,8 @@ void USlimeAbilityComponent::ActivateAbility()
 	CurrentLerpTime = 0.f;
 
 	MyChara->SetPlayerMovementSpeedServerSide(false, false, TransformationSlowSpeed);
+
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false);
 
 	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 
@@ -56,6 +57,8 @@ void USlimeAbilityComponent::OnTransformationComplete()
 void USlimeAbilityComponent::OnRevertTransformationComplete()
 {
 	bIsTransforming = false;
+
+	MyChara->StopAbilitySFX();
 
 	MyChara->SetPlayerMovementSpeedServerSide(true, false, 0);
 }

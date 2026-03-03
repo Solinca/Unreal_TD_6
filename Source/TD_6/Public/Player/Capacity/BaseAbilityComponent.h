@@ -27,6 +27,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void StopAbility();
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayScreamWithSound(USoundBase* Sound);
 };

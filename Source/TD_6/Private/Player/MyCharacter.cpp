@@ -8,6 +8,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
@@ -363,6 +364,23 @@ void AMyCharacter::SetCharacterHighlight_Implementation(ACharacter* Character, b
 
 		MeshComp->SetCustomDepthStencilValue(1);
 	}
+}
+
+void AMyCharacter::PlayAbilitySFX_Implementation(USoundBase* AbilitySFX, bool IsGlobal)
+{
+	if (IsGlobal)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), AbilitySFX);
+	}
+	else
+	{
+		OnGoingAbilityAudioComponent = UGameplayStatics::SpawnSoundAttached(AbilitySFX, GetRootComponent(), FName(""), GetActorLocation(), EAttachLocation::KeepRelativeOffset);
+	}
+}
+
+void AMyCharacter::StopAbilitySFX_Implementation()
+{
+	OnGoingAbilityAudioComponent->Stop();
 }
 
 void AMyCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

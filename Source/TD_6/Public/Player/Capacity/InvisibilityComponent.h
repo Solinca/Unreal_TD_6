@@ -10,6 +10,8 @@ class TD_6_API UInvisibilityComponent : public UBaseAbilityComponent
 	GENERATED_BODY()
 
 private:
+	TWeakObjectPtr<class AMyCharacter> MyChara = nullptr;
+
 	FTimerHandle DissolveTimerHandle;
 
 	float CurrentDissolveTime = 0.0f;
@@ -18,7 +20,6 @@ private:
 
 	bool bIsFadingOut = false;
 
-	UFUNCTION(NetMulticast, Unreliable)
 	void UpdateDissolve();
 
 protected:

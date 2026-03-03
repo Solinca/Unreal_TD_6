@@ -14,6 +14,8 @@ void UHuntVisionComponent::ActivateAbility()
 
 	MyChara->ChangePostProcess(false);
 
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityTriggerSound, true);
+
 	GetWorld()->GetTimerManager().SetTimer(ScanTimerHandle, this, &UHuntVisionComponent::UpdateHuntVision, ScanInterval, true);
 
 	GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->PredatorHuntDuration, false);

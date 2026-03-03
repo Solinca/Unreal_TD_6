@@ -64,7 +64,7 @@ private:
 	UFUNCTION()
 	void OnRep_CurrentState();
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHookFinished();
 
 protected:

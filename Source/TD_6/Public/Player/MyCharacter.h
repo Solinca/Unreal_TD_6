@@ -17,6 +17,8 @@ private:
 
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
 
+	TObjectPtr<class UAudioComponent> OnGoingAbilityAudioComponent = nullptr;
+
 	FTimerHandle AttackHandle;
 
 	FTimerHandle ScreamHandle;
@@ -177,4 +179,10 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void SetCharacterHighlight(ACharacter* Character, bool bHighlight);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayAbilitySFX(USoundBase* AbilitySFX, bool IsGlobal);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void StopAbilitySFX();
 };

@@ -11,6 +11,10 @@ void UInvisibilityComponent::ActivateAbility()
 {
 	bIsFadingOut = true;
 
+	MyChara = Cast<AMyCharacter>(GetOwner());
+
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false);
+
 	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, this, &UInvisibilityComponent::UpdateDissolve, DissolveRate, true);
 
 	GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->GhostInvisibilityDuration, false);
@@ -20,16 +24,18 @@ void UInvisibilityComponent::DeactivateAbility()
 {
 	bIsFadingOut = false;
 
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityTriggerSound, false);
+
 	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, this, &UInvisibilityComponent::UpdateDissolve, DissolveRate, true);
 }
 
-void UInvisibilityComponent::UpdateDissolve_Implementation()
+void UInvisibilityComponent::UpdateDissolve()
 {
 	CurrentDissolveTime += DissolveRate * (bIsFadingOut ? 1 : -1);
 
 	CurrentDissolveTime = FMath::Clamp(CurrentDissolveTime, 0, DissolveDuration);
 
-	Cast<AMyCharacter>(GetOwner())->ChangePlayerMaterial(DissolveParamName, FMath::Lerp(DissolveMinValue, DissolveMaxValue, CurrentDissolveTime / DissolveDuration));
+	MyChara->ChangePlayerMaterial(DissolveParamName, FMath::Lerp(DissolveMinValue, DissolveMaxValue, CurrentDissolveTime / DissolveDuration));
 
 	if ((bIsFadingOut && CurrentDissolveTime == DissolveDuration) || (!bIsFadingOut && CurrentDissolveTime == 0))
 	{
