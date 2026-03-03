@@ -11,7 +11,14 @@ class TD_6_API UTrapAbilityComponent : public UBaseAbilityComponent
 {
 	GENERATED_BODY()
 
+private:
+	TArray<TWeakObjectPtr<ATrapActor>> SpawnedTraps;
+
+	void RemoveOldestTrapIfNeeded();
+
 protected:
+	UTrapAbilityComponent();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Trap")
 	TSubclassOf<ATrapActor> TrapActorClass = nullptr;
 
@@ -21,14 +28,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Trap")
 	float GroundTraceHeight = 500.f;
 
-	TArray<TWeakObjectPtr<ATrapActor>> SpawnedTraps;
-
 public:
-	UTrapAbilityComponent();
-
 	virtual void ActivateAbility() override;
-	virtual void DeactivateAbility() override {};
 
-private:
-	void RemoveOldestTrapIfNeeded();
+	virtual void DeactivateAbility() override {};
 };

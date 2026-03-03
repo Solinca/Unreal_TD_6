@@ -8,6 +8,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -54,6 +55,10 @@ void AMyCharacter::BeginPlay()
 
 	ProgressBar->SetVisibility(false, true);
 
+	DefaultMaxSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+	InitDynamicMaterials();
+
 	if (UProgressBarWidget* ProgressBarWidget = Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject()))
 	{
 		ProgressBarWidget->SetProgressBarTextVisibility(!IsLocallyControlled());
@@ -67,6 +72,22 @@ void AMyCharacter::StopCollidingWithCamera()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+}
+
+void AMyCharacter::InitDynamicMaterials()
+{
+	if (DynamicMaterials.IsEmpty())
+	{
+		const int32 NumMaterials = GetMesh()->GetNumMaterials();
+
+		for (int32 i = 0; i < NumMaterials; ++i)
+		{
+			if (UMaterialInstanceDynamic* MaterialInstanceDynamic = GetMesh()->CreateDynamicMaterialInstance(i))
+			{
+				DynamicMaterials.Add(MaterialInstanceDynamic);
+			}
+		}
+	}
 }
 
 void AMyCharacter::Tick(float DeltaTime)
@@ -140,7 +161,7 @@ void AMyCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrim
 	}
 }
 
-void AMyCharacter::ChangePostProcess(const bool bIsDefault) const
+void AMyCharacter::ChangePostProcess_Implementation(const bool bIsDefault) const
 {
 	PostProcess->Settings = bIsDefault ? DefaultPostProcess : NightVisionPostProcess;
 }
@@ -280,6 +301,67 @@ void AMyCharacter::OnPlayerDeathStatusChanged()
 		GetMesh()->SetRelativeLocation(FVector(0, 0, -90.f));
 
 		GetMesh()->SetRelativeRotation(FRotator(0, -90.f, 0));
+	}
+}
+
+void AMyCharacter::SnarePlayerServerSide_Implementation()
+{
+	GetCharacterMovement()->DisableMovement();
+
+	SnarePlayerClientSide();
+}
+
+void AMyCharacter::SnarePlayerClientSide_Implementation()
+{
+	GetCharacterMovement()->DisableMovement();
+}
+
+void AMyCharacter::ReleasePlayerServerSide_Implementation()
+{
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	ReleasePlayerClientSide();
+}
+
+void AMyCharacter::ReleasePlayerClientSide_Implementation()
+{
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+}
+
+void AMyCharacter::SetPlayerMovementSpeedServerSide_Implementation(bool IsDefaultSpeed, bool IsSprinting, float NewSpeed)
+{
+	float CalculatedSpeed = IsDefaultSpeed ? DefaultMaxSpeed : (IsSprinting ? DefaultMaxSpeed * PlayerSprintFactor : NewSpeed);
+
+	GetCharacterMovement()->MaxWalkSpeed = CalculatedSpeed;
+
+	SetPlayerMovementSpeedClientSide(CalculatedSpeed);
+}
+
+void AMyCharacter::SetPlayerMovementSpeedClientSide_Implementation(float NewSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+}
+
+void AMyCharacter::ChangeCharacterScale_Implementation(FVector NewScale)
+{
+	GetMesh()->SetRelativeScale3D(NewScale);
+}
+
+void AMyCharacter::ChangePlayerMaterial_Implementation(FName DissolveParamName, float Value)
+{
+	for (UMaterialInstanceDynamic* DynamicMaterial : DynamicMaterials)
+	{
+		DynamicMaterial->SetScalarParameterValue(DissolveParamName, Value);
+	}
+}
+
+void AMyCharacter::SetCharacterHighlight_Implementation(ACharacter* Character, bool bHighlight)
+{
+	if (USkeletalMeshComponent* MeshComp = Character->GetMesh())
+	{
+		MeshComp->SetRenderCustomDepth(bHighlight);
+
+		MeshComp->SetCustomDepthStencilValue(1);
 	}
 }
 

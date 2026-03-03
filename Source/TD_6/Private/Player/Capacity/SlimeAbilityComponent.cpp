@@ -1,5 +1,4 @@
 #include "Player/Capacity/SlimeAbilityComponent.h"
-
 #include "Data/MonsterDataAsset.h"
 #include "Player/MyCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -7,156 +6,74 @@
 USlimeAbilityComponent::USlimeAbilityComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	bAutoActivate = false;
-}
-
-void USlimeAbilityComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (CachedMyCharacter.IsValid() && CachedMyCharacter->GetCharacterMovement())
-	{
-		DefaultMaxSpeed = CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed;
-		OriginalScale = CachedMyCharacter->GetMesh()->GetRelativeScale3D();
-	}
 }
 
 void USlimeAbilityComponent::ActivateAbility()
 {
-	if (!CachedMyCharacter.IsValid() || !CachedMyCharacter->GetCharacterMovement())
-	{
-		return;
-	}
+	MyChara = Cast<AMyCharacter>(GetOwner());
 
-	if (MonsterDataAsset.IsValid())
-	{
-		SlimeSprintSpeed = MonsterDataAsset->SlimeSprintSpeed;
-	}
+	OriginalScale = MyChara->GetMesh()->GetRelativeScale3D();
+
+	SlimeSprintSpeed = MonsterDataAsset->SlimeSprintSpeed;
 
 	bIsTransforming = true;
+
 	bIsFlattening = true;
+
 	CurrentLerpTime = 0.f;
 
-	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = TransformationSlowSpeed;
+	MyChara->SetPlayerMovementSpeedServerSide(false, false, TransformationSlowSpeed);
 
-	SetMovementSpeedServerSide(TransformationSlowSpeed);
+	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 
-	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	GetWorld()->GetTimerManager().SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnTransformationComplete, TransformationDuration, false);
 
-	TimerManager.SetTimer(
-		ScaleLerpTimerHandle,
-		this,
-		&USlimeAbilityComponent::UpdateScaleLerp,
-		ScaleLerpRate,
-		true
-	);
-
-	TimerManager.SetTimer(
-		TransformTimerHandle,
-		this,
-		&USlimeAbilityComponent::OnTransformationComplete,
-		TransformationDuration,
-		false
-	);
-
-	if (GetOwner() && GetOwner()->HasAuthority() && MonsterDataAsset.IsValid())
-	{
-		TimerManager.SetTimer(
-			AbilityTimer,
-			this,
-			&UBaseAbilityComponent::StopAbility,
-			MonsterDataAsset->SlimeTransformationDuration + TransformationDuration,
-			false
-		);
-	}
-}
-
-void USlimeAbilityComponent::OnTransformationComplete()
-{
-	if (!CachedMyCharacter.IsValid() || !CachedMyCharacter->GetCharacterMovement())
-	{
-		return;
-	}
-
-	bIsTransforming = false;
-
-	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = SlimeSprintSpeed;
-
-	SetMovementSpeedServerSide(SlimeSprintSpeed);
+	GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->SlimeTransformationDuration + TransformationDuration, false);
 }
 
 void USlimeAbilityComponent::DeactivateAbility()
 {
-	if (!CachedMyCharacter.IsValid() || !CachedMyCharacter->GetCharacterMovement())
-	{
-		return;
-	}
-
 	bIsTransforming = true;
+
 	bIsFlattening = false;
+
 	CurrentLerpTime = 0.f;
 
-	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = TransformationSlowSpeed;
+	MyChara->SetPlayerMovementSpeedServerSide(false, false, TransformationSlowSpeed);
 
-	SetMovementSpeedServerSide(TransformationSlowSpeed);
+	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 
-	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	GetWorld()->GetTimerManager().SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnRevertTransformationComplete, TransformationDuration, false);
+}
 
-	TimerManager.SetTimer(
-		ScaleLerpTimerHandle,
-		this,
-		&USlimeAbilityComponent::UpdateScaleLerp,
-		ScaleLerpRate,
-		true
-	);
+void USlimeAbilityComponent::OnTransformationComplete()
+{
+	bIsTransforming = false;
 
-	TimerManager.SetTimer(
-		TransformTimerHandle,
-		this,
-		&USlimeAbilityComponent::OnRevertTransformationComplete,
-		TransformationDuration,
-		false
-	);
+	MyChara->SetPlayerMovementSpeedServerSide(false, false, SlimeSprintSpeed);
 }
 
 void USlimeAbilityComponent::OnRevertTransformationComplete()
 {
-	if (!CachedMyCharacter.IsValid() || !CachedMyCharacter->GetCharacterMovement())
-	{
-		return;
-	}
-
 	bIsTransforming = false;
 
-	CachedMyCharacter->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
-
-	SetMovementSpeedServerSide(DefaultMaxSpeed);
+	MyChara->SetPlayerMovementSpeedServerSide(true, false, 0);
 }
 
 void USlimeAbilityComponent::UpdateScaleLerp()
 {
-	if (!CachedMyCharacter.IsValid() || !CachedMyCharacter->GetMesh())
-	{
-		return;
-	}
-
 	CurrentLerpTime += ScaleLerpRate;
+
 	CurrentLerpTime = FMath::Clamp(CurrentLerpTime, 0.f, TransformationDuration);
 
 	const float Alpha = CurrentLerpTime / TransformationDuration;
-
 	
 	const FVector NewScale = bIsFlattening ? FMath::Lerp(OriginalScale, FlattenedScale, Alpha) : FMath::Lerp(FlattenedScale, OriginalScale, Alpha);
 
-	CachedMyCharacter->GetMesh()->SetRelativeScale3D(NewScale);
+	MyChara->ChangeCharacterScale(NewScale);
 
 	if (CurrentLerpTime >= TransformationDuration)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ScaleLerpTimerHandle);
 	}
-}
-
-void USlimeAbilityComponent::SetMovementSpeedServerSide_Implementation(float MovementSpeed)
-{
-	Cast<AMyCharacter>(GetOwner())->GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 }

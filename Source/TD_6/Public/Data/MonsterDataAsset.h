@@ -66,4 +66,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Scream",
 		meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float MonsterCryChance = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	USoundBase* AbilityTriggerSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	USoundBase* AbilityOnGoingSound = nullptr;
 };

@@ -1,8 +1,6 @@
 #include "Player/Capacity/TrapActor.h"
-
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -12,16 +10,23 @@
 ATrapActor::ATrapActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
 	bReplicates = true;
 
 	TriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TriggerSphere"));
+
 	TriggerSphere->SetSphereRadius(TriggerRadius);
+
 	TriggerSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+
 	TriggerSphere->SetGenerateOverlapEvents(true);
+
 	SetRootComponent(TriggerSphere);
 
 	TrapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TrapMesh"));
+
 	TrapMesh->SetupAttachment(TriggerSphere);
+
 	TrapMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -29,33 +34,21 @@ void ATrapActor::InitTrap(float InSnareTime)
 {
 	SnareTime = InSnareTime;
 
-	if (HasAuthority())
-	{
-		TriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &ATrapActor::OnTriggerOverlap);
-	}
+	MulticastOnTrapPlaced();
+
+	TriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &ATrapActor::OnTriggerOverlap);
 }
 
-void ATrapActor::OnTriggerOverlap(
-	UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
+void ATrapActor::MulticastOnTrapPlaced_Implementation()
 {
-	if (!HasAuthority() || bIsTriggered)
-	{
-		return;
-	}
+	UGameplayStatics::PlaySoundAtLocation(this, TrapPlacedSound, GetActorLocation());
+}
 
+void ATrapActor::OnTriggerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
 	AMyCharacter* OtherCharacter = Cast<AMyCharacter>(OtherActor);
 
-	if (!OtherCharacter)
-	{
-		return;
-	}
-
-	if (OtherActor->Tags.Contains("MONSTER"))
+	if (bIsTriggered || !OtherCharacter || OtherActor->Tags.Contains("MONSTER"))
 	{
 		return;
 	}
@@ -67,52 +60,28 @@ void ATrapActor::OnTriggerOverlap(
 
 void ATrapActor::SnarePlayer(AMyCharacter* TargetCharacter)
 {
-	if (!TargetCharacter || !TargetCharacter->GetCharacterMovement())
-	{
-		return;
-	}
-
 	SnaredCharacter = TargetCharacter;
 
-	TargetCharacter->GetCharacterMovement()->DisableMovement();
+	TargetCharacter->SnarePlayerServerSide();
 
 	MulticastOnTrapTriggered(TargetCharacter);
 
-	GetWorld()->GetTimerManager().SetTimer(
-		SnareTimerHandle,
-		this,
-		&ATrapActor::ReleasePlayer,
-		SnareTime,
-		false
-	);
+	GetWorld()->GetTimerManager().SetTimer(SnareTimerHandle, this, &ATrapActor::ReleasePlayer, SnareTime, false);
 }
 
 void ATrapActor::MulticastOnTrapTriggered_Implementation(AMyCharacter* TargetCharacter)
 {
-	if (TrapTriggeredSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, TrapTriggeredSound, GetActorLocation());
-	}
+	UGameplayStatics::PlaySoundAtLocation(this, TrapTriggeredSound, GetActorLocation());
 
-	if (TrapMesh)
-	{
-		TrapMesh->SetVisibility(false);
-	}
+	TrapMesh->SetVisibility(false);
 }
 
 void ATrapActor::ReleasePlayer()
 {
-	if (SnaredCharacter.IsValid() && SnaredCharacter->GetCharacterMovement())
+	if (SnaredCharacter.IsValid())
 	{
-		SnaredCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		SnaredCharacter->ReleasePlayerServerSide();
 	}
 
-	MulticastOnPlayerReleased();
-
 	Destroy();
-}
-
-void ATrapActor::MulticastOnPlayerReleased_Implementation()
-{
-	// VFX / SFX player is free
 }

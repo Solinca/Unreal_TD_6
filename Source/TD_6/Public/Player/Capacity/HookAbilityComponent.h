@@ -11,20 +11,22 @@ class TD_6_API UHookAbilityComponent : public UBaseAbilityComponent
 {
 	GENERATED_BODY()
 
+private:
+	TObjectPtr<AHookProjectile> ActiveProjectile = nullptr;
+
 protected:
+	UHookAbilityComponent();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Hook")
 	TSubclassOf<AHookProjectile> HookProjectileClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hook")
 	FVector SpawnOffset = FVector(0.f, 0.f, 50.f);
 
-	TWeakObjectPtr<AHookProjectile> ActiveProjectile = nullptr;
-
 public:
-	UHookAbilityComponent();
-
 	virtual void ActivateAbility() override;
-	virtual void DeactivateAbility() override;
+
+	virtual void DeactivateAbility() override {};
 
 	void OnHookFinished();
 };

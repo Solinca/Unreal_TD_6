@@ -12,20 +12,16 @@ class TD_6_API UHuntVisionComponent : public UBaseAbilityComponent
 private:
 	FTimerHandle ScanTimerHandle;
 
-	TWeakObjectPtr<class UCameraComponent> CachedCamera = nullptr;
+	TWeakObjectPtr<class AMyCharacter> MyChara = nullptr;
 
-	TArray<TWeakObjectPtr<class ACharacter>> HighlightedCharacters;
+	TArray<class ACharacter*> HighlightedCharacters;
 
 	void UpdateHuntVision();
-
-	void SetCharacterHighlight(class ACharacter* Character, bool bHighlight);
 
 	void ClearAllHighlights();
 
 protected:
 	UHuntVisionComponent();
-
-	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ScanInterval = 0.05f;

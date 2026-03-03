@@ -159,40 +159,17 @@ void AMyPlayerController::Jump(const FInputActionValue& Value)
 
 void AMyPlayerController::SprintStart(const FInputActionValue& Value)
 {
-	if (!HasAuthority())
-	{
-		DefaultMaxSpeed = MyChara->GetCharacterMovement()->MaxWalkSpeed;
-
-		MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
-	}
-
 	SetIsSprintingOnServer(true);
 }
 
 void AMyPlayerController::SprintEnd(const FInputActionValue& Value)
 {
-	if (!HasAuthority())
-	{
-		MyChara->GetCharacterMovement()->MaxWalkSpeed = DefaultMaxSpeed;
-	}
-
 	SetIsSprintingOnServer(false);
 }
 
 void AMyPlayerController::SetIsSprintingOnServer_Implementation(bool IsSprinting)
 {
-	UCharacterMovementComponent* CMC = Cast<AMyCharacter>(GetPawn())->GetCharacterMovement();
-
-	if (IsSprinting)
-	{
-		DefaultMaxSpeed = CMC->MaxWalkSpeed;
-
-		CMC->MaxWalkSpeed = DefaultMaxSpeed * PlayerSprintFactor;
-	}
-	else
-	{
-		CMC->MaxWalkSpeed = DefaultMaxSpeed;
-	}
+	Cast<AMyCharacter>(GetPawn())->SetPlayerMovementSpeedServerSide(!IsSprinting, IsSprinting, 0);
 }
 
 void AMyPlayerController::ToggleMenu(const FInputActionValue& Value)

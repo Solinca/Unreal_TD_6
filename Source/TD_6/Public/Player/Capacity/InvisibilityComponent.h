@@ -10,9 +10,6 @@ class TD_6_API UInvisibilityComponent : public UBaseAbilityComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
-
 	FTimerHandle DissolveTimerHandle;
 
 	float CurrentDissolveTime = 0.0f;
@@ -21,14 +18,11 @@ private:
 
 	bool bIsFadingOut = false;
 
-	void InitDynamicMaterials();
-
+	UFUNCTION(NetMulticast, Unreliable)
 	void UpdateDissolve();
 
 protected:
 	UInvisibilityComponent();
-
-	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Visual Effects")
 	FName DissolveParamName = "Dissolve";

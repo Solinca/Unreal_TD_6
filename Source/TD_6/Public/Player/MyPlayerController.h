@@ -63,8 +63,6 @@ private:
 
 	FRotator ResultScreenTargetRotation;
 
-	float DefaultMaxSpeed;
-
 	bool IsPauseMenuOpened = false;
 
 	bool CanAttack = true;
@@ -135,9 +133,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
 	float CameraSensitivity = 50.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Settings")
-	float PlayerSprintFactor = 2.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> PauseWidgetClass = nullptr;

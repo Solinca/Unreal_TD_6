@@ -12,25 +12,19 @@ class TD_6_API UBaseAbilityComponent : public UActorComponent
 protected:
 	UBaseAbilityComponent();
 
-	virtual void BeginPlay() override;
-
-	TWeakObjectPtr<class AMyCharacter> CachedMyCharacter = nullptr;
-
-	TWeakObjectPtr<class AMyPlayerController> CachedMyPlayerController = nullptr;
+	TWeakObjectPtr<class UMonsterDataAsset> MonsterDataAsset;
 
 	FTimerHandle AbilityTimer;
-
-	TWeakObjectPtr<class UMonsterDataAsset> MonsterDataAsset;
 
 	virtual void ActivateAbility() PURE_VIRTUAL(UBaseAbilityComponent::ActivateAbility, );
 
 	virtual void DeactivateAbility() PURE_VIRTUAL(UBaseAbilityComponent::DeactivateAbility, );
 
 public:
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void StartAbility(class UMonsterDataAsset* InData);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void StopAbility();
 
 	UFUNCTION(NetMulticast, Unreliable)

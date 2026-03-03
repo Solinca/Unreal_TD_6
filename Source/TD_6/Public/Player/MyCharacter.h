@@ -15,9 +15,13 @@ private:
 
 	TObjectPtr<AActor> InteractingActor = nullptr;
 
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
+
 	FTimerHandle AttackHandle;
 
 	FTimerHandle ScreamHandle;
+
+	float DefaultMaxSpeed = 0.f;
 
 	int PlayerInteractingWithCount = 0;
 
@@ -58,6 +62,8 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void TriggerPlayerScreamOnAllClient();
+
+	void InitDynamicMaterials();
 
 protected:
 	AMyCharacter();
@@ -101,6 +107,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ResurrectDuration = 5;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
+	float PlayerSprintFactor = 2.f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<USoundBase> PlayerHurtSound = nullptr;
 
@@ -120,7 +129,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void StopInteractingWithActor();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Client, Reliable)
 	void ChangePostProcess(const bool bIsDefault = true) const;
 
 	void SetIsAttacking();
@@ -141,4 +150,31 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetIsAttacking() const { return IsAttacking; }
+
+	UFUNCTION(Server, Reliable)
+	void SnarePlayerServerSide();
+
+	UFUNCTION(Client, Reliable)
+	void SnarePlayerClientSide();
+
+	UFUNCTION(Server, Reliable)
+	void ReleasePlayerServerSide();
+
+	UFUNCTION(Client, Reliable)
+	void ReleasePlayerClientSide();
+
+	UFUNCTION(Server, Reliable)
+	void SetPlayerMovementSpeedServerSide(bool IsDefaultSpeed, bool IsSprinting, float NewSpeed);
+
+	UFUNCTION(Client, Reliable)
+	void SetPlayerMovementSpeedClientSide(float NewSpeed);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ChangeCharacterScale(FVector NewScale);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ChangePlayerMaterial(FName DissolveParamName, float Value);
+
+	UFUNCTION(Client, Reliable)
+	void SetCharacterHighlight(ACharacter* Character, bool bHighlight);
 };
