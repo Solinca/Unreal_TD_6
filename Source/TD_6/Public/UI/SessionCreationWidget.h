@@ -20,6 +20,12 @@ private:
 	UFUNCTION()
 	void OnBackButtonClickedEvent();
 
+	UFUNCTION()
+	void OnMaxMonstersValueChanged(float Value);
+
+	UFUNCTION()
+	void OnMaxPlayersValueChanged(float Value);
+
 protected:
 	virtual void NativeConstruct() override;
 

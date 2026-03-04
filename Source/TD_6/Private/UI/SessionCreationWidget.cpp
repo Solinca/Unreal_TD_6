@@ -13,6 +13,10 @@ void USessionCreationWidget::NativeConstruct()
 	
 	BackButton->OnClicked.AddDynamic(this, &USessionCreationWidget::OnBackButtonClickedEvent);
 
+	MaxPlayersSpinBox->OnValueChanged.AddDynamic(this, &USessionCreationWidget::OnMaxPlayersValueChanged);
+
+	MaxMonstersSpinBox->OnValueChanged.AddDynamic(this, &USessionCreationWidget::OnMaxMonstersValueChanged);
+
 	MaxPlayersSpinBox->SetMinValue(2);
 
 	MaxPlayersSpinBox->SetMinSliderValue(2);
@@ -59,6 +63,22 @@ void USessionCreationWidget::OnCreateButtonClickedEvent()
 void USessionCreationWidget::OnBackButtonClickedEvent()
 {
 	OnSessionCreationCancelled.Broadcast();
+}
+
+void USessionCreationWidget::OnMaxMonstersValueChanged(float Value)
+{
+	if (MaxPlayersSpinBox->Value <= Value)
+	{
+		MaxPlayersSpinBox->SetValue(Value + 1);
+	}
+}
+
+void USessionCreationWidget::OnMaxPlayersValueChanged(float Value)
+{
+	if (Value <= MaxMonstersSpinBox->Value)
+	{
+		MaxMonstersSpinBox->SetValue(Value - 1);
+	}
 }
 
 void USessionCreationWidget::ResetToDefaults() const
