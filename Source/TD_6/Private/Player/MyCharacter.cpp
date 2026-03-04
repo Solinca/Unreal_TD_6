@@ -239,7 +239,7 @@ void AMyCharacter::StopInteractingWithActor_Implementation()
 	{
 		InteractableActor->StopInteractWith();
 
-		InteractableActor = nullptr;
+		InteractingActor = nullptr;
 	}
 }
 

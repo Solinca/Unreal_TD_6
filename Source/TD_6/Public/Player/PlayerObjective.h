@@ -11,6 +11,7 @@ class TD_6_API APlayerObjective : public AActor, public IInteractable
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TObjectPtr<class UAudioComponent> OnGoingAudioComponent = nullptr;
 
 	bool IsCompleted = false;
