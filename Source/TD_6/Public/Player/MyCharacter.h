@@ -111,7 +111,7 @@ protected:
 	float AttackAnimationTime = 2.5f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
-	float ResurrectDuration = 5;
+	float ResurrectDuration = 3;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float PlayerSprintFactor = 2.f;

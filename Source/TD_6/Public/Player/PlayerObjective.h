@@ -52,7 +52,7 @@ protected:
 	TObjectPtr<class USoundBase> SFX = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
-	float ObjectiveGoal = 60;
+	float ObjectiveGoal = 30;
 
 public:
 	virtual bool InteractWith() override;
