@@ -30,6 +30,8 @@ void USlimeAbilityComponent::ActivateAbility()
 	GetWorld()->GetTimerManager().SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnTransformationComplete, TransformationDuration, false);
 
 	GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->SlimeTransformationDuration + TransformationDuration, false);
+
+	MyChara->ChangePostProcess(false);
 }
 
 void USlimeAbilityComponent::DeactivateAbility()
@@ -59,6 +61,8 @@ void USlimeAbilityComponent::OnRevertTransformationComplete()
 	bIsTransforming = false;
 
 	MyChara->StopAbilitySFX();
+	
+	MyChara->ChangePostProcess();
 
 	MyChara->SetPlayerMovementSpeedServerSide(true, false, 0);
 }

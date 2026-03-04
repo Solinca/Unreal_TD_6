@@ -107,8 +107,6 @@ void AHookProjectile::Traveling(float DeltaTime)
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	
-	// ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
-	
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 	
 	TArray<AActor*> OutActors;
@@ -191,13 +189,16 @@ void AHookProjectile::MulticastStartAbility_Implementation()
 	BeamNiagara->SetVariableVec3(BeamStartParamName, GetOwner()->GetActorLocation());
 }
 
-void AHookProjectile::MulticastUpdateAbility_Implementation(const FVector& TargetPosition,const float DeltaTime)
+void AHookProjectile::MulticastUpdateAbility_Implementation(const FVector& TargetPosition, const float DeltaTime)
 {
 	BeamNiagara->SetVariableVec3(BeamEndParamName, TargetPosition);
 
 	HookMesh->SetWorldLocation(TargetPosition);
-	
-	SetActorRotation(GetActorRotation() + FRotator(360 * DeltaTime, 0, 0));
+
+	if (DeltaTime > 0.f)
+	{
+		HookMesh->AddWorldRotation(FRotator(720.f * DeltaTime, 0.f, 0.f));
+	}
 }
 
 void AHookProjectile::MulticastOnHookHit_Implementation()
