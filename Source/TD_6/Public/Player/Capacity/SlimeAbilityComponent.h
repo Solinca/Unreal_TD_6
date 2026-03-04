@@ -36,10 +36,10 @@ protected:
 	USlimeAbilityComponent();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Slime|Transformation")
-	float TransformationDuration = 2.f;
+	float TransformationDuration = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Slime|Transformation")
-	float TransformationSlowSpeed = 50.f;
+	float TransformationSlowSpeed = 100.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Slime|Transformation")
 	FVector FlattenedScale = FVector(1.5f, 1.5f, 0.3f);

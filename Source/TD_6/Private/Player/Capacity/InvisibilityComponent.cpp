@@ -13,7 +13,7 @@ void UInvisibilityComponent::ActivateAbility()
 
 	MyChara = Cast<AMyCharacter>(GetOwner());
 
-	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false, false);
+	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityTriggerSound, false, false);
 
 	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, this, &UInvisibilityComponent::UpdateDissolve, DissolveRate, true);
 

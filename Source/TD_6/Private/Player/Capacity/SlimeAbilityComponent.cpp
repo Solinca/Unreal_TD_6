@@ -25,11 +25,13 @@ void USlimeAbilityComponent::ActivateAbility()
 
 	MyChara->PlayAbilitySFX(MonsterDataAsset->AbilityOnGoingSound, false, true);
 
-	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 
-	GetWorld()->GetTimerManager().SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnTransformationComplete, TransformationDuration, false);
+	TimerManager.SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 
-	GetWorld()->GetTimerManager().SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->SlimeTransformationDuration + TransformationDuration, false);
+	TimerManager.SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnTransformationComplete, TransformationDuration, false);
+
+	TimerManager.SetTimer(AbilityTimer, this, &UBaseAbilityComponent::StopAbility, MonsterDataAsset->SlimeTransformationDuration + TransformationDuration, false);
 
 	MyChara->ChangePostProcess(false);
 }
@@ -47,6 +49,8 @@ void USlimeAbilityComponent::DeactivateAbility()
 	GetWorld()->GetTimerManager().SetTimer(ScaleLerpTimerHandle, this, &USlimeAbilityComponent::UpdateScaleLerp, ScaleLerpRate, true);
 
 	GetWorld()->GetTimerManager().SetTimer(TransformTimerHandle, this, &USlimeAbilityComponent::OnRevertTransformationComplete, TransformationDuration, false);
+	
+	GetWorld()->GetTimerManager().ClearTimer(AbilityTimer);
 }
 
 void USlimeAbilityComponent::OnTransformationComplete()
@@ -54,6 +58,8 @@ void USlimeAbilityComponent::OnTransformationComplete()
 	bIsTransforming = false;
 
 	MyChara->SetPlayerMovementSpeedServerSide(false, false, SlimeSprintSpeed);
+
+	GetWorld()->GetTimerManager().ClearTimer(TransformTimerHandle);
 }
 
 void USlimeAbilityComponent::OnRevertTransformationComplete()
@@ -65,6 +71,8 @@ void USlimeAbilityComponent::OnRevertTransformationComplete()
 	MyChara->ChangePostProcess();
 
 	MyChara->SetPlayerMovementSpeedServerSide(true, false, 0);
+	
+	GetWorld()->GetTimerManager().ClearTimer(TransformTimerHandle);
 }
 
 void USlimeAbilityComponent::UpdateScaleLerp()

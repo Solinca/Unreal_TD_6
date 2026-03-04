@@ -318,8 +318,6 @@ void AMyPlayerController::AskToTriggerSpecial_Implementation()
 void AMyPlayerController::ResetSpecial()
 {
 	CanTriggerSpecial = true;
-
-	GetPawn()->FindComponentByClass<UBaseAbilityComponent>()->StopAbility();
 }
 
 void AMyPlayerController::TriggerScream(const FInputActionValue& Value)
