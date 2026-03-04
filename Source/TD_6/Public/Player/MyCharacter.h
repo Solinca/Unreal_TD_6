@@ -27,7 +27,11 @@ private:
 
 	int PlayerInteractingWithCount = 0;
 
+	UPROPERTY(Replicated)
 	bool IsAttacking = false;
+	
+	UPROPERTY(Replicated)
+	bool IsInteracting = false;
 
 	bool IsResurrectionComplete = false;
 
@@ -104,7 +108,7 @@ protected:
 	float InteractRange = 200.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
-	float AttackAnimationTime = 1.f;
+	float AttackAnimationTime = 2.5f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	float ResurrectDuration = 5;
@@ -152,6 +156,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetIsAttacking() const { return IsAttacking; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetIsInteracting() const { return IsInteracting; }
 
 	UFUNCTION(Server, Reliable)
 	void SnarePlayerServerSide();

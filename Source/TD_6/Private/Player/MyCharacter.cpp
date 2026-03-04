@@ -155,7 +155,7 @@ void AMyCharacter::ForceDisableProgressBarOnAllClients_Implementation()
 
 void AMyCharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (IsAttacking && OtherActor->Tags.Contains("PLAYER"))
+	if (HasAuthority() && IsAttacking && OtherActor->Tags.Contains("PLAYER"))
 	{
 		if (AMyCharacter* OtherChara = Cast<AMyCharacter>(OtherActor))
 		{
@@ -226,6 +226,8 @@ void AMyCharacter::InteractWithSurroundingActor_Implementation()
 				{
 					InteractingActor = OverlappedActor;
 
+					IsInteracting = true;
+
 					return;
 				}
 			}
@@ -241,6 +243,8 @@ void AMyCharacter::StopInteractingWithActor_Implementation()
 
 		InteractingActor = nullptr;
 	}
+	
+	IsInteracting = false;
 }
 
 void AMyCharacter::KillPlayer()
@@ -401,4 +405,8 @@ void AMyCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyCharacter, IsDead);
 
 	DOREPLIFETIME(AMyCharacter, ResurrectProgression);
+	
+	DOREPLIFETIME(AMyCharacter, IsAttacking);
+	
+	DOREPLIFETIME(AMyCharacter, IsInteracting);
 }

@@ -242,7 +242,4 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartScreamCooldown(float Cooldown);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool GetIsInteracting() const { return IsInteracting; }
 };
