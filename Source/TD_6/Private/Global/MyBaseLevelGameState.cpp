@@ -288,10 +288,10 @@ void AMyBaseLevelGameState::KillPlayer(AController* Controller)
 		MyPC->KillPlayer();
 	}
 
+	FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(Controller->GetPlayerState<APlayerState>()->GetUniqueId());
+
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(It->Get()->GetPlayerState<APlayerState>()->GetUniqueId());
-		
 		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
 		{
 			const FString Message = FString::Printf(
