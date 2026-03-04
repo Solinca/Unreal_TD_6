@@ -34,6 +34,8 @@ private:
 	TObjectPtr<class UWaitingScreenWidget> WaitingScreenWidget = nullptr;
 
 	TObjectPtr<class UGlobalTimerWidget> GlobalTimerWidget = nullptr;
+	
+	TObjectPtr<class UPopUpWidget> PopUpWidget = nullptr;
 
 	TObjectPtr<class UMonsterDataAsset> MyMonsterData;
 
@@ -148,6 +150,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> GlobalTimerWidgetClass = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PopUpWidgetClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<USoundBase> BaseAmbianceMusic = nullptr;
@@ -242,4 +247,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartScreamCooldown(float Cooldown);
+
+	UFUNCTION(Client, Reliable)
+	void Client_SpawnPopUp(const FText& InText);
 };

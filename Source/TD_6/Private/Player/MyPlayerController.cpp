@@ -16,6 +16,7 @@
 #include "Player/Capacity/BaseAbilityComponent.h"
 #include "Engine/Light.h"
 #include "Components/AudioComponent.h"
+#include "UI/PopUpWidget.h"
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -323,6 +324,20 @@ void AMyPlayerController::ResetSpecial()
 void AMyPlayerController::TriggerScream(const FInputActionValue& Value)
 {
 	AskToTriggerScream();
+}
+
+void AMyPlayerController::Client_SpawnPopUp_Implementation(const FText& InText)
+{
+	if (PopUpWidget)
+	{
+		PopUpWidget->RemoveFromParent();
+	}
+	
+	PopUpWidget = CreateWidget<UPopUpWidget>(this, PopUpWidgetClass);
+	
+	PopUpWidget->SetupText(InText);
+
+	PopUpWidget->AddToViewport();
 }
 
 void AMyPlayerController::AskToTriggerScream_Implementation()

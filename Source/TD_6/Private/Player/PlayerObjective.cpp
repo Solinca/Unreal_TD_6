@@ -8,6 +8,7 @@
 #include "NiagaraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "UI/ProgressBarWidget.h"
 
 APlayerObjective::APlayerObjective()
@@ -23,6 +24,10 @@ APlayerObjective::APlayerObjective()
 	ProgressBar = CreateDefaultSubobject<UWidgetComponent>("Progress Bar");
 
 	ProgressBar->SetupAttachment(Mesh);
+
+	PointLight = CreateDefaultSubobject<UPointLightComponent>("PointLight");
+
+	PointLight->SetupAttachment(Mesh);
 }
 
 void APlayerObjective::BeginPlay()
@@ -33,6 +38,8 @@ void APlayerObjective::BeginPlay()
 	{
 		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(Vfx, RootComponent, NAME_None, FVector(30, 0, 40), FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, false, false);
 	}
+	
+	PointLight->SetVisibility(false);
 
 	Cast<UProgressBarWidget>(ProgressBar->GetUserWidgetObject())->SetProgressBarTextVisibility(Cast<UMyGameInstance>(GetGameInstance())->GetCustomPlayerData().CurrentTeam == ETeam::PLAYER);
 }
@@ -82,12 +89,16 @@ void APlayerObjective::ToggleEffects_Implementation(const bool bShouldActivate)
 		OnGoingAudioComponent = UGameplayStatics::SpawnSoundAttached(SFX, GetRootComponent());
 
 		NiagaraComponent->Activate(true);
+
+		PointLight->SetVisibility(true);
 	}
 	else
 	{
 		OnGoingAudioComponent->Stop();
 
 		NiagaraComponent->Deactivate();
+		
+		PointLight->SetVisibility(false);
 	}
 }
 

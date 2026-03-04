@@ -5,6 +5,8 @@
 #include "Interface/Interactable.h"
 #include "PlayerObjective.generated.h"
 
+class UPointLightComponent;
+
 UCLASS()
 class TD_6_API APlayerObjective : public AActor, public IInteractable
 {
@@ -38,6 +40,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Mesh = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UPointLightComponent> PointLight = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UWidgetComponent> ProgressBar = nullptr;

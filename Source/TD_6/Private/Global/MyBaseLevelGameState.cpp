@@ -51,6 +51,22 @@ void AMyBaseLevelGameState::RemovePlayer(AController* Controller)
 	{
 		SurvivorStateList.Remove(Controller);
 	}
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (*It == Controller)
+		{
+			continue;
+		}
+		
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
+		{
+			const FString Message = FString::Printf(TEXT("%s has disconnected"), *PlayerData.CustomPlayerName);
+			
+			MyPC->Client_SpawnPopUp(FText::FromString(Message));
+		}
+	}
+	
 }
 
 void AMyBaseLevelGameState::PlayerHasLoaded_Implementation()
@@ -137,6 +153,20 @@ void AMyBaseLevelGameState::SetupPlayerObjectives()
 void AMyBaseLevelGameState::RegisterPlayerObjectiveCompleted()
 {
 	CurrentNumberOfCompletedPlayerObjective++;
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
+		{
+			const FString Message = FString::Printf(
+				TEXT("%d/%d objectives completed to trigger instant win!\nSurvivors needs at least %d more objectives to win\nat the end of the countdown"),
+				CurrentNumberOfCompletedPlayerObjective,
+				GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers(),
+				GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers() - CurrentNumberOfMonsterPlayer - CurrentNumberOfCompletedPlayerObjective);
+			
+			MyPC->Client_SpawnPopUp(FText::FromString(Message));
+		}
+	}
 
 	if (CurrentNumberOfCompletedPlayerObjective == GetGameInstance<UMyGameInstance>()->GetNumberOfPlayers())
 	{
@@ -247,19 +277,30 @@ void AMyBaseLevelGameState::KillPlayer(AController* Controller)
 	if (SurvivorStateList[Controller] == ESurvivorState::ALIVE)
 	{
 		SurvivorStateList[Controller] = ESurvivorState::DOWN;
-
-		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
-		{
-			MyPC->KillPlayer();
-		}
 	}
 	else if (SurvivorStateList[Controller] == ESurvivorState::LAST_LIFE)
 	{
 		SurvivorStateList[Controller] = ESurvivorState::DEAD;
+	}
+	
+	if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
+	{
+		MyPC->KillPlayer();
+	}
 
-		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(Controller))
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		FCustomPlayerData PlayerData = GetGameInstance<UMyGameInstance>()->RetrieveServerPlayerData(It->Get()->GetPlayerState<APlayerState>()->GetUniqueId());
+		
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(It->Get()))
 		{
-			MyPC->KillPlayer();
+			const FString Message = FString::Printf(
+				TEXT("%s is %s"),
+				*PlayerData.CustomPlayerName,
+				SurvivorStateList[Controller] == ESurvivorState::DOWN ? TEXT(" down, help him!") : TEXT(" dead! :'(")
+				);
+			
+			MyPC->Client_SpawnPopUp(FText::FromString(Message));
 		}
 	}
 
