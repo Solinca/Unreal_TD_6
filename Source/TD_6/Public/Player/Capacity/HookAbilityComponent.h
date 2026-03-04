@@ -29,6 +29,4 @@ public:
 	virtual void ActivateAbility() override;
 
 	virtual void DeactivateAbility() override {};
-
-	void OnHookFinished();
 };

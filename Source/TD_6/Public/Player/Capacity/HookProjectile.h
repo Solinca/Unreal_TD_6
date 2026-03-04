@@ -7,7 +7,6 @@
 UENUM(BlueprintType)
 enum class EHookState : uint8
 {
-	Idle,
 	Traveling,
 	Returning,
 	Finished
@@ -19,63 +18,45 @@ class AHookProjectile : public AActor
 	GENERATED_BODY()
 
 private:
-	TWeakObjectPtr<class UHookAbilityComponent> OwningAbility;
+	EHookState CurrentState = EHookState::Traveling;
 
-	TWeakObjectPtr<class AMyCharacter> CachedOwnerCharacter;
-
-	float LocalFlightTime = 0.f;
-
-	float LocalReturnAlpha = 1.f;
-
-	float MaxDistance = 0.f;
-
-	float HookSpeed = 0.f;
-
-	float CurrentSpinAngle = 0.f;
-
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentState)
-	EHookState CurrentState = EHookState::Idle;
-
-	UPROPERTY(Replicated)
 	FVector LaunchOrigin = FVector::ZeroVector;
 
-	UPROPERTY(Replicated)
 	FVector LaunchVelocity = FVector::ZeroVector;
 
-	UPROPERTY(Replicated)
-	float FlightTime = 0.f;
-
-	UPROPERTY(Replicated)
 	FVector ReturnStartLocation = FVector::ZeroVector;
 
-	UPROPERTY(Replicated)
-	float ReturnAlpha = 1.f;
+	FHitResult Hit;
 
-	UPROPERTY(Replicated)
-	float ReelingTime = 0.f;
+	float MaxDistance = 0;
+
+	float FlightTime = 0;
+
+	float ReelingTime = 0;
+
+	float ReturnAlpha = 1;
+
+	FVector ComputeBallisticPosition(float DeltaTime);
+
+	FVector ComputeBallisticVelocity(float DeltaTime);
+
+	FVector GetHookTipLocation();
 
 	void Traveling(float DeltaTime);
 
 	void Returning(float DeltaTime);
 
-	void ClientSimulate(float DeltaTime);
-
 	void StartReturning();
 
 	void FinishHook();
 
-	FVector ComputeBallisticPosition(float T) const;
+	void UpdateHookPosition(float DeltaTime);
 
-	FVector ComputeBallisticVelocity(float T) const;
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStartAbility();
 
-	void UpdateHookPosition();
-
-	void UpdateBeam();
-
-	void EnsureBeamActive();
-
-	UFUNCTION()
-	void OnRep_CurrentState();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastUpdateAbility(FVector TargetPosition);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHookHit();
@@ -83,15 +64,10 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHookMiss();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnHookFinished();
-
 protected:
 	AHookProjectile();
 
 	virtual void Tick(float DeltaTime) override;
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class USphereComponent> CollisionSphere;
@@ -112,21 +88,11 @@ protected:
 	FName BeamEndParamName = TEXT("BeamEnd");
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
-	float CollisionRadius = 10.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
-	float SpinSpeed = 1080.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
-	FRotator MeshRotationOffset = FRotator::ZeroRotator;
+	float CollisionRadius = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
 	float HookGravity = 490.f;
 
 public:
-	void InitHook(class UHookAbilityComponent* InAbility, const FVector& InLaunchDirection, float InMaxDistance, float InHookSpeed, float InReelingTime);
-
-	void ForceCleanup();
-
-	FVector GetHookTipLocation() const;
+	void InitHook(const FVector& InLaunchDirection, float InMaxDistance, float InHookSpeed, float InReelingTime);
 };
