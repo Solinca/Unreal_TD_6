@@ -20,10 +20,13 @@ class TD_6_API AMyBaseLevelGameState : public AGameState
 	GENERATED_BODY()
 
 private:
-	TMap<class AController*, ESurvivorState> SurvivorStateList;
+	UPROPERTY(Transient)
+	TMap<class AController*, TEnumAsByte<ESurvivorState>> SurvivorStateList;
 
+	UPROPERTY(Transient)
 	TArray<class ATargetPoint*> WinningTargetPointList;
 
+	UPROPERTY(Transient)
 	TArray<class ATargetPoint*> LoosingTargetPointList;
 
 	FTimerHandle GameStartCountdownHandle;

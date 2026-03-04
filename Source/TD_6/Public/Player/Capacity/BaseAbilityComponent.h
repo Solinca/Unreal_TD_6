@@ -12,6 +12,7 @@ class TD_6_API UBaseAbilityComponent : public UActorComponent
 protected:
 	UBaseAbilityComponent();
 
+	UPROPERTY(Transient)
 	TWeakObjectPtr<class UMonsterDataAsset> MonsterDataAsset;
 
 	FTimerHandle AbilityTimer;

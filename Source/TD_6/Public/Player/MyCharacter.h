@@ -11,12 +11,16 @@ class TD_6_API AMyCharacter : public ACharacter, public IInteractable
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TObjectPtr<class AMyBaseLevelGameState> MyBLGS = nullptr;
 
+	UPROPERTY(Transient)
 	TObjectPtr<AActor> InteractingActor = nullptr;
 
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
 
+	UPROPERTY(Transient)
 	TObjectPtr<class UAudioComponent> OnGoingAbilityAudioComponent = nullptr;
 
 	FTimerHandle AttackHandle;

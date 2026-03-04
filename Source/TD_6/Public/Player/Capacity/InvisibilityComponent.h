@@ -10,6 +10,7 @@ class TD_6_API UInvisibilityComponent : public UBaseAbilityComponent
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TWeakObjectPtr<class AMyCharacter> MyChara = nullptr;
 
 	FTimerHandle DissolveTimerHandle;

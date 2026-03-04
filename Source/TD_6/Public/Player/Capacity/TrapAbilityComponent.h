@@ -12,6 +12,7 @@ class TD_6_API UTrapAbilityComponent : public UBaseAbilityComponent
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<ATrapActor>> SpawnedTraps;
 
 	void RemoveOldestTrapIfNeeded();

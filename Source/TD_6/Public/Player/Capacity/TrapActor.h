@@ -10,6 +10,7 @@ class TD_6_API ATrapActor : public AActor
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TWeakObjectPtr<class AMyCharacter> SnaredCharacter = nullptr;
 
 	FTimerHandle SnareTimerHandle;

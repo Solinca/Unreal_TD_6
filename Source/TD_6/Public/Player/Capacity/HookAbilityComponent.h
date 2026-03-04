@@ -12,8 +12,10 @@ class TD_6_API UHookAbilityComponent : public UBaseAbilityComponent
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(Transient)
 	TWeakObjectPtr<class AMyCharacter> MyChara = nullptr;
 
+	UPROPERTY(Transient)
 	TObjectPtr<AHookProjectile> ActiveProjectile = nullptr;
 
 protected:

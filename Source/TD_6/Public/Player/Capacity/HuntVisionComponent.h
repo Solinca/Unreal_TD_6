@@ -12,8 +12,10 @@ class TD_6_API UHuntVisionComponent : public UBaseAbilityComponent
 private:
 	FTimerHandle ScanTimerHandle;
 
+	UPROPERTY(Transient)
 	TWeakObjectPtr<class AMyCharacter> MyChara = nullptr;
 
+	UPROPERTY(Transient)
 	TArray<class ACharacter*> HighlightedCharacters;
 
 	void UpdateHuntVision();
