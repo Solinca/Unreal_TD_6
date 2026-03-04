@@ -27,7 +27,7 @@ void UHookAbilityComponent::ActivateAbility()
 
 	const FVector LaunchDirection = MyChara->GetCameraComponent()->GetForwardVector();
 	
-	const FRotator LaunchRotation = LaunchDirection.Rotation() + FRotator(0,0,-90);
+	const FRotator LaunchRotation = LaunchDirection.Rotation();
 
 	if (AHookProjectile* Projectile = GetWorld()->SpawnActor<AHookProjectile>(HookProjectileClass, MyChara->GetActorLocation(), LaunchRotation, SpawnParams))
 	{

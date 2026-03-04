@@ -197,7 +197,7 @@ void AHookProjectile::MulticastUpdateAbility_Implementation(const FVector& Targe
 
 	if (DeltaTime > 0.f)
 	{
-		HookMesh->AddWorldRotation(FRotator(720.f * DeltaTime, 0.f, 0.f));
+		HookMesh->AddLocalRotation(FRotator(0.f, 0.f, -720.f * DeltaTime));
 	}
 }
 
