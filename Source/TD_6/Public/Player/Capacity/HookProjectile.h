@@ -56,7 +56,7 @@ private:
 	void MulticastStartAbility();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastUpdateAbility(FVector TargetPosition);
+	void MulticastUpdateAbility(const FVector& TargetPosition, const float DeltaTime);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHookHit();

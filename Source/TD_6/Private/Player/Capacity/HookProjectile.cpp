@@ -12,6 +12,8 @@ AHookProjectile::AHookProjectile()
 
 	bReplicates = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	
 	HookMesh = CreateDefaultSubobject<UStaticMeshComponent>("HookMesh");
 
 	HookMesh->SetupAttachment(RootComponent);
@@ -27,7 +29,7 @@ void AHookProjectile::InitHook(const FVector& InLaunchDirection, float InMaxDist
 
 	ReelingTime = InReelingTime;
 
-	LaunchOrigin = GetOwner()->GetActorLocation();
+	LaunchOrigin = GetOwner()->GetActorLocation() + FVector(0, 0, 70);
 
 	LaunchVelocity = InLaunchDirection.GetSafeNormal() * InHookSpeed;
 
@@ -59,7 +61,7 @@ void AHookProjectile::Tick(float DeltaTime)
 
 void AHookProjectile::UpdateHookPosition(float DeltaTime)
 {
-	MulticastUpdateAbility(GetHookTipLocation());
+	MulticastUpdateAbility(GetHookTipLocation(), CurrentState == EHookState::Traveling ? DeltaTime : 0.f);
 }
 
 FVector AHookProjectile::ComputeBallisticPosition(float DeltaTime)
@@ -101,14 +103,30 @@ void AHookProjectile::Traveling(float DeltaTime)
 
 	QueryParams.AddIgnoredActor(GetOwner());
 
-	if (GetWorld()->SweepSingleByChannel(Hit, PrevPos, NewPos, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(CollisionRadius), QueryParams))
-	{
-		AMyCharacter* HitCharacter = Cast<AMyCharacter>(Hit.GetActor());
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	
+	// ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+	
+	TArray<AActor*> OutActors;
+	
+	TArray<AActor*> ActorsToIgnore;
+	
+	ActorsToIgnore.Add(this);
+	
+	ActorsToIgnore.Add(GetOwner());
+
+	if (UKismetSystemLibrary::SphereOverlapActors(GetWorld(), HookMesh->GetComponentLocation(), 10.f, ObjectTypes, nullptr, ActorsToIgnore, OutActors))
+	{
+		AMyCharacter* HitCharacter = Cast<AMyCharacter>(OutActors[0]);
+		
 		if (HitCharacter && HitCharacter->Tags.Contains("PLAYER"))
 		{
 			MulticastOnHookHit();
-
+	
 			if (AMyBaseLevelGameState* GS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld())))
 			{
 				GS->KillPlayer(HitCharacter->GetController());
@@ -118,9 +136,9 @@ void AHookProjectile::Traveling(float DeltaTime)
 		{
 			MulticastOnHookMiss();
 		}
-
+	
 		StartReturning();
-
+	
 		return;
 	}
 
@@ -173,11 +191,13 @@ void AHookProjectile::MulticastStartAbility_Implementation()
 	BeamNiagara->SetVariableVec3(BeamStartParamName, GetOwner()->GetActorLocation());
 }
 
-void AHookProjectile::MulticastUpdateAbility_Implementation(FVector TargetPosition)
+void AHookProjectile::MulticastUpdateAbility_Implementation(const FVector& TargetPosition,const float DeltaTime)
 {
 	BeamNiagara->SetVariableVec3(BeamEndParamName, TargetPosition);
 
 	HookMesh->SetWorldLocation(TargetPosition);
+	
+	SetActorRotation(GetActorRotation() + FRotator(360 * DeltaTime, 0, 0));
 }
 
 void AHookProjectile::MulticastOnHookHit_Implementation()

@@ -25,7 +25,7 @@ void UHookAbilityComponent::ActivateAbility()
 
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	if (AHookProjectile* Projectile = GetWorld()->SpawnActor<AHookProjectile>(HookProjectileClass, MyChara->GetActorLocation(), MyChara->GetActorRotation(), SpawnParams))
+	if (AHookProjectile* Projectile = GetWorld()->SpawnActor<AHookProjectile>(HookProjectileClass, MyChara->GetActorLocation(), FRotator::ZeroRotator, SpawnParams))
 	{
 		Projectile->InitHook(Cast<AMyCharacter>(GetOwner())->GetCameraComponent()->GetForwardVector(), MonsterDataAsset->HookMaxDistance, MonsterDataAsset->HookSpeed, MonsterDataAsset->HookReelingTime);
 	}

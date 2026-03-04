@@ -17,9 +17,9 @@ void USessionCreationWidget::NativeConstruct()
 
 	MaxPlayersSpinBox->SetMinSliderValue(2);
 
-	MaxPlayersSpinBox->SetMaxValue(10);
+	MaxPlayersSpinBox->SetMaxValue(25);
 
-	MaxPlayersSpinBox->SetMaxSliderValue(10);
+	MaxPlayersSpinBox->SetMaxSliderValue(25);
 
 	MaxPlayersSpinBox->SetDelta(1);
 
@@ -27,9 +27,9 @@ void USessionCreationWidget::NativeConstruct()
 
 	MaxMonstersSpinBox->SetMinSliderValue(1);
 
-	MaxMonstersSpinBox->SetMaxValue(3);
+	MaxMonstersSpinBox->SetMaxValue(5);
 
-	MaxMonstersSpinBox->SetMaxSliderValue(3);
+	MaxMonstersSpinBox->SetMaxSliderValue(5);
 
 	MaxMonstersSpinBox->SetDelta(1);
 
