@@ -99,6 +99,12 @@ void AMyPlayerController::SetupClient_Implementation(FCustomPlayerData Data, UMo
 
 	GlobalTimerWidget->SetVisibility(ESlateVisibility::Hidden);
 
+	PopUpWidget = CreateWidget<UPopUpWidget>(this, PopUpWidgetClass);
+
+	PopUpWidget->AddToViewport();
+
+	PopUpWidget->SetVisibility(ESlateVisibility::Hidden);
+
 	FTimerHandle WaitingScreenHandle;
 
 	GetWorld()->GetTimerManager().SetTimer(WaitingScreenHandle, this, &AMyPlayerController::OnWaitingComplete, WaitingTime, false);
@@ -328,16 +334,9 @@ void AMyPlayerController::TriggerScream(const FInputActionValue& Value)
 
 void AMyPlayerController::Client_SpawnPopUp_Implementation(const FText& InText)
 {
-	if (PopUpWidget)
-	{
-		PopUpWidget->RemoveFromParent();
-	}
-	
-	PopUpWidget = CreateWidget<UPopUpWidget>(this, PopUpWidgetClass);
-	
-	PopUpWidget->SetupText(InText);
+	PopUpWidget->SetVisibility(ESlateVisibility::Visible);
 
-	PopUpWidget->AddToViewport();
+	PopUpWidget->SetupText(InText);
 }
 
 void AMyPlayerController::AskToTriggerScream_Implementation()

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,8 +11,11 @@ class TD_6_API UPopUpWidget : public UUserWidget
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> TextPopUp;
+	TObjectPtr<class UTextBlock> PopUpMessageText = nullptr;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	TObjectPtr<class UWidgetAnimation> FadePopup = nullptr;
 
 public:
-	void SetupText(const FText& InText) const;
+	void SetupText(const FText& Message);
 };

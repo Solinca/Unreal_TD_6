@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "UI/PopUpWidget.h"
 #include "Components/TextBlock.h"
+#include "Animation/WidgetAnimation.h"
 
-void UPopUpWidget::SetupText(const FText& InText) const
+void UPopUpWidget::SetupText(const FText& Message)
 {
-	TextPopUp->SetText(InText);
+	PopUpMessageText->SetText(Message);
+
+	PlayAnimation(FadePopup);
 }
