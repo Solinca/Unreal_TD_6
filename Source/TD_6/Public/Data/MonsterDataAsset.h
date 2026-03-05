@@ -24,9 +24,6 @@ public:
 	float MonsterSpecialCooldown = 2.f;
 
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "MonsterType == EMonsterType::BUTCHER"))
-	float HookMaxDistance = 100.f;
-
-	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "MonsterType == EMonsterType::BUTCHER"))
 	float HookSpeed = 100.f;
 
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "MonsterType == EMonsterType::BUTCHER"))

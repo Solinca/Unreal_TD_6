@@ -31,6 +31,6 @@ void UHookAbilityComponent::ActivateAbility()
 
 	if (AHookProjectile* Projectile = GetWorld()->SpawnActor<AHookProjectile>(HookProjectileClass, MyChara->GetActorLocation(), LaunchRotation, SpawnParams))
 	{
-		Projectile->InitHook(LaunchDirection, MonsterDataAsset->HookMaxDistance, MonsterDataAsset->HookSpeed, MonsterDataAsset->HookReelingTime);
+		Projectile->InitHook(LaunchDirection, MonsterDataAsset->HookSpeed, MonsterDataAsset->HookReelingTime);
 	}
 }
