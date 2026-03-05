@@ -3,6 +3,7 @@
 #include "NiagaraComponent.h"
 #include "Global/MyBaseLevelGameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
 
 AHookProjectile::AHookProjectile()
 {
@@ -10,11 +11,13 @@ AHookProjectile::AHookProjectile()
 
 	bReplicates = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	SphereCollision = CreateDefaultSubobject<USphereComponent>("Sphere Collision");
+
+	SphereCollision->SetupAttachment(RootComponent);
 
 	HookMesh = CreateDefaultSubobject<UStaticMeshComponent>("HookMesh");
 
-	HookMesh->SetupAttachment(RootComponent);
+	HookMesh->SetupAttachment(SphereCollision);
 
 	BeamNiagara = CreateDefaultSubobject<UNiagaraComponent>("BeamNiagara");
 
@@ -31,13 +34,7 @@ void AHookProjectile::InitHook(const FVector& InLaunchDirection, float InHookSpe
 
 	Cast<AMyCharacter>(GetOwner())->SnarePlayerServerSide();
 
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
-
-	ActorsToIgnore.Add(this);
-
-	ActorsToIgnore.Add(GetOwner());
+	SphereCollision->OnComponentHit.AddDynamic(this, &AHookProjectile::OnHit);
 
 	MulticastStartAbility();
 }
@@ -51,19 +48,63 @@ void AHookProjectile::Tick(float DeltaTime)
 		return;
 	}
 
+	SetActorLocation(GetHookLocation(), true);
+
+	MulticastUpdateAbility(GetHookLocation(), CurrentState == EHookState::Traveling ? DeltaTime : 0);
+
 	if (CurrentState == EHookState::Traveling)
 	{
-		Traveling(DeltaTime);
+		FlightTime += DeltaTime;
+
+		if (FlightTime >= 1)
+		{
+			ReturnStartLocation = GetHookLocation();
+
+			CurrentState = EHookState::Returning;
+		}
+
+		HookMesh->AddLocalRotation(FRotator(0, 0, -720 * DeltaTime));
 	}
 	else if (CurrentState == EHookState::Returning)
 	{
-		Returning(DeltaTime);
-	}
+		ReturnAlpha -= DeltaTime / ReelingTime;
 
-	MulticastUpdateAbility(GetHookTipLocation(), CurrentState == EHookState::Traveling ? DeltaTime : 0);
+		if (ReturnAlpha <= 0)
+		{
+			CurrentState = EHookState::Finished;
+
+			Cast<AMyCharacter>(GetOwner())->StopAbilitySFX();
+
+			Cast<AMyCharacter>(GetOwner())->ReleasePlayerServerSide();
+
+			Destroy();
+		}
+	}
 }
 
-FVector AHookProjectile::GetHookTipLocation()
+void AHookProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor == this || OtherActor == GetOwner() || CurrentState != EHookState::Traveling)
+	{
+		return;
+	}
+
+	AMyCharacter* HitCharacter = Cast<AMyCharacter>(OtherActor);
+
+	if (HitCharacter && HitCharacter->Tags.Contains("PLAYER"))
+	{
+		if (AMyBaseLevelGameState* GS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld())))
+		{
+			GS->KillPlayer(HitCharacter->GetController());
+		}
+	}
+
+	ReturnStartLocation = GetHookLocation();
+
+	CurrentState = EHookState::Returning;
+}
+
+FVector AHookProjectile::GetHookLocation()
 {
 	if (CurrentState == EHookState::Traveling)
 	{
@@ -71,63 +112,6 @@ FVector AHookProjectile::GetHookTipLocation()
 	}
 
 	return FMath::Lerp(LaunchOrigin, ReturnStartLocation, ReturnAlpha);
-}
-
-void AHookProjectile::Traveling(float DeltaTime)
-{
-	FlightTime += DeltaTime;
-
-	TArray<AActor*> OutActors;
-
-	if (UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetHookTipLocation(), CollisionRadius, ObjectTypes, nullptr, ActorsToIgnore, OutActors))
-	{
-		AMyCharacter* HitCharacter = Cast<AMyCharacter>(OutActors[0]);
-		
-		if (HitCharacter && HitCharacter->Tags.Contains("PLAYER"))
-		{
-			if (AMyBaseLevelGameState* GS = Cast<AMyBaseLevelGameState>(UGameplayStatics::GetGameState(GetWorld())))
-			{
-				GS->KillPlayer(HitCharacter->GetController());
-			}
-		}
-	
-		StartReturning();
-	
-		return;
-	}
-
-	if (FlightTime >= 1)
-	{
-		StartReturning();
-	}
-}
-
-void AHookProjectile::StartReturning()
-{
-	ReturnStartLocation = GetHookTipLocation();
-
-	CurrentState = EHookState::Returning;
-}
-
-void AHookProjectile::Returning(float DeltaTime)
-{
-	ReturnAlpha -= DeltaTime / ReelingTime;
-
-	if (ReturnAlpha <= 0)
-	{
-		FinishHook();
-	}
-}
-
-void AHookProjectile::FinishHook()
-{
-	CurrentState = EHookState::Finished;
-
-	Cast<AMyCharacter>(GetOwner())->StopAbilitySFX();
-
-	Cast<AMyCharacter>(GetOwner())->ReleasePlayerServerSide();
-
-	Destroy();
 }
 
 void AHookProjectile::MulticastStartAbility_Implementation()
@@ -143,7 +127,7 @@ void AHookProjectile::MulticastUpdateAbility_Implementation(const FVector& Targe
 {
 	BeamNiagara->SetVariableVec3(BeamEndParamName, TargetPosition);
 
-	HookMesh->SetWorldLocation(TargetPosition);
+	SetActorLocation(TargetPosition);
 
 	if (DeltaTime > 0)
 	{

@@ -18,11 +18,6 @@ class AHookProjectile : public AActor
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(Transient)
-	TArray<AActor*> ActorsToIgnore;
-
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-
 	EHookState CurrentState = EHookState::Traveling;
 
 	FVector LaunchOrigin = FVector::ZeroVector;
@@ -37,15 +32,7 @@ private:
 
 	float ReturnAlpha = 1;
 
-	FVector GetHookTipLocation();
-
-	void Traveling(float DeltaTime);
-
-	void Returning(float DeltaTime);
-
-	void StartReturning();
-
-	void FinishHook();
+	FVector GetHookLocation();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartAbility();
@@ -58,8 +45,14 @@ protected:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UStaticMeshComponent> HookMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class USphereComponent> SphereCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UNiagaraComponent> BeamNiagara;
@@ -72,9 +65,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hook|VFX")
 	FName BeamEndParamName = TEXT("BeamEnd");
-
-	UPROPERTY(EditDefaultsOnly, Category = "Hook|Config")
-	float CollisionRadius = 10.f;
 
 public:
 	void InitHook(const FVector& InLaunchDirection, float InHookSpeed, float InReelingTime);
